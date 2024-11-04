@@ -18,7 +18,7 @@ In this project, we aim to develop a foundational backtesting framework using Ru
 
 ## **Objective and Key Features**
 
-In general, our objective is to design and build a new rust-based backtesting framework, assisting users to test their own trading strategies on corresponding dataset. It should also offer a basic visualization tool for a descriptive and comparable view on return and risk of their promoted strategies. An example output would be like the following figure (produced with Python).  
+In general, our objective is to design and build a new rust-based backtesting framework, assisting users to test their own trading strategies on specific  dataset. The framework should also include a basic analytic and visualization tool for a descriptive and comparable view on return and risk of their promoted strategies. An example output is shown in the following figure (produced using Python).  
 
 ![Alt text][image1]  
 Fig 1, Sample backtesting result plot.
