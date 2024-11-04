@@ -6,9 +6,8 @@ use std::cell::RefCell;
 #[derive(Debug, Hash, Eq, PartialEq, Clone)]
 enum EventType {
     MarketData,
-    Signal,
-    Strategy,
-    Portfolio,
+    OrderPlace,
+    OrderComplete
 }
 
 // Define a trait for handling events
@@ -71,18 +70,18 @@ impl EventHandler for Strategy {
     }
 }
 
-struct OrderHandler;
+struct MockExchange;
 
-impl EventHandler for OrderHandler {
+impl EventHandler for MockExchange {
     fn handle_event(&self, event: &Event) {
         println!("OrderHandler handling event: {:?}", event.event_type);
         // Implement specific logic for handling order events
     }
 }
 
-struct PortfolioHandler;
+struct ProtfolioManager;
 
-impl EventHandler for PortfolioHandler {
+impl EventHandler for ProtfolioManager {
     fn handle_event(&self, event: &Event) {
         println!("PortfolioHandler handling event: {:?}", event.event_type);
         // Implement specific logic for handling portfolio events
@@ -93,12 +92,19 @@ fn main() {
     let mut event_manager = EventManager::new();
 
     // Register different handlers for different event types
-    event_manager.subscribe(EventType::Strategy, Rc::new(RefCell::new(Strategy)));
-    event_manager.subscribe(EventType::Portfolio, Rc::new(RefCell::new(PortfolioHandler)));
-    event_manager.subscribe(EventType::Signal, Rc::new(RefCell::new(OrderHandler)));
+    event_manager.subscribe(EventType::MarketData, Rc::new(RefCell::new(Strategy)));
+    event_manager.subscribe(EventType::MarketData, Rc::new(RefCell::new(MockExchange)));
+    event_manager.subscribe(EventType::OrderPlace, Rc::new(RefCell::new(ProtfolioManager)));
+    event_manager.subscribe(EventType::OrderPlace, Rc::new(RefCell::new(MockExchange)));
+    event_manager.subscribe(EventType::OrderComplete, Rc::new(RefCell::new(MockExchange)));
+
 
     // Push events to the event manager
     event_manager.push_event(Event { event_type: EventType::MarketData });
+    event_manager.push_event(Event { event_type: EventType::MarketData });
+    event_manager.push_event(Event { event_type: EventType::MarketData });
+    event_manager.push_event(Event { event_type: EventType::OrderPlace });
+    event_manager.push_event(Event { event_type: EventType::OrderComplete });
 
     // Process events
     event_manager.process_events();
