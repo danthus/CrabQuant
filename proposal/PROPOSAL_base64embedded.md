@@ -46,14 +46,14 @@ Our team has completed our initial event-driven architecture design as demonstra
 
 The workload of the project is then divided into the following components, by how each is naturally decoupled with others in the architecture. Their corresponding features are also listed in the table.
 
-    | Component            | Features           |
-    |----------------------|--------------------|
-    | EventManager         | A                  |
-    | MockExchange         | B, C               |
-    | SampleStrategyModule | D, E               |
-    | PortfolioManager     |                    |
-    | MarketDataFeeder     |                    |
-    | AnalyticEngine       | F, G, H            |
+| Component            | Features           |
+|----------------------|--------------------|
+| EventManager         | A                  |
+| MockExchange         | B, C               |
+| SampleStrategyModule | D, E               |
+| PortfolioManager     |                    |
+| MarketDataFeeder     |                    |
+| AnalyticEngine       | F, G, H            |
 
 At the time of writing this report, our team already found proper and authentic datasets for backtesting and revised the framework multiple times in detail. What is left to finish is the coding and testing parts. To finish the these parts in one month, team members would divide the coding and testing workloads by modules as following:  
 Member A: EventManager and MockExchange  
