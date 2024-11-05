@@ -54,9 +54,9 @@ The workload of the project is then divided into the following components, by ho
 | AnalyticEngine       | F, G, H            |
 
 At the time of writing this report, our team already found proper and authentic datasets for backtesting and revised the framework multiple times in detail. What is left to finish is the coding and testing parts. To finish the these parts in one month, team members would divide the coding and testing workloads by modules as following:  
-Member A: EventManager and MockExchange  
-Member B: PortfolioManager, SampleStrategyModule, and MarketDataFeeder  
-Member C: AnalyticEngine, Visualization
+&nbsp;&nbsp;&nbsp;&nbsp;Member A: EventManager and MockExchange  
+&nbsp;&nbsp;&nbsp;&nbsp;Member B: PortfolioManager, SampleStrategyModule, and MarketDataFeeder  
+&nbsp;&nbsp;&nbsp;&nbsp;Member C: AnalyticEngine, Visualization
 
 For each finished module, the corresponding member will also run unit tests on it individually. In this way, the unit tests can be more specific to each module and straight-forward compared to complex tests involving multiple modules. Then, the tested module will be integrated into the framework. Due to the decoupling nature of the framework, the integration will be efficient and time consumption will be minimal.  
 Our team will also arrange weekly in-person meetings to check members’ progress, discuss current problems and make sure the team is on the right track.  
