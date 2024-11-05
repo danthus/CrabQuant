@@ -1,6 +1,4 @@
-# **Performant Software Systems with Rust**
-
-## **ECE 1724**
+# **ECE 1724 Performant Software Systems with Rust**
 
 ## **Project Proposal**
 
