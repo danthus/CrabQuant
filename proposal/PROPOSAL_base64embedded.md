@@ -26,14 +26,14 @@ Specifically, the primary objective of the project is modularity. While Rust off
 
 Some of the key features of our backtesting framework include the following:
 
->A. Event-driven architecture.  
->B. Future data prevention.  
->C. Customizable fees and slippage settings.  
->D. Flexible time frame selection, from ticks to daily bars.  
->E. Customizable backtest time window.  
->F. Visual output/report of backtesting results, and comparison to baseline.  
->G. Assessment on return and risk on strategy.  
->H. Detailed logging.
+&nbsp;&nbsp;&nbsp;&nbsp;A. Event-driven architecture.  
+&nbsp;&nbsp;&nbsp;&nbsp;B. Future data prevention.  
+&nbsp;&nbsp;&nbsp;&nbsp;C. Customizable fees and slippage settings.  
+&nbsp;&nbsp;&nbsp;&nbsp;D. Flexible time frame selection, from ticks to daily bars.  
+&nbsp;&nbsp;&nbsp;&nbsp;E. Customizable backtest time window.  
+&nbsp;&nbsp;&nbsp;&nbsp;F. Visual output/report of backtesting results, and comparison to baseline.  
+&nbsp;&nbsp;&nbsp;&nbsp;G. Assessment on return and risk on strategy.  
+&nbsp;&nbsp;&nbsp;&nbsp;H. Detailed logging.
 
 ## **Tentative Plan**
 
