@@ -1,153 +1,149 @@
-use std::collections::{HashMap, VecDeque};
-use std::rc::Rc;
-use std::cell::RefCell;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+use crossbeam::channel::{unbounded, Receiver, Sender};
+use std::thread;
 
-// Define an enum for different event types
 #[derive(Debug, Hash, Eq, PartialEq, Clone)]
 enum Event {
     MarketData,
     OrderPlace,
-    OrderComplete
+    OrderComplete,
 }
 
-// Define a trait for handling events
-trait EventHandler {
-    fn handle_event(&self, event: &Event);
+trait EventHandler: Send + Sync {
+    fn handle_event(&self, event: &Event, event_sender: &Sender<Event>);
 }
 
-
-// Define an EventManager struct that manages events and handlers
 struct EventManager {
-    subscriber_book: HashMap<Event, Vec<Rc<RefCell<dyn EventHandler>>>>,
-    event_queue: VecDeque<Event>,
+    subscriber_book: HashMap<Event, Vec<Arc<dyn EventHandler>>>,
+    event_sender: Sender<Event>,
+    event_receiver: Receiver<Event>,
 }
 
 impl EventManager {
     fn new() -> Self {
+        let (event_sender, event_receiver) = unbounded();
         EventManager {
             subscriber_book: HashMap::new(),
-            event_queue: VecDeque::new(),
+            event_sender,
+            event_receiver,
         }
     }
 
-    // Subscribe a handler for a specific event type
-    fn subscribe(&mut self, event_type: Event, handler: Rc<RefCell<dyn EventHandler>>) {
-        self.subscriber_book.entry(event_type).or_insert(Vec::new()).push(handler);
+    fn subscribe(&mut self, event_type: Event, handler: Arc<dyn EventHandler>) {
+        self.subscriber_book
+            .entry(event_type)
+            .or_insert_with(Vec::new)
+            .push(handler);
     }
 
-    // Add an event to the queue
-    fn push_event(&mut self, event: Event) {
-        self.event_queue.push_back(event);
+    fn push_event(&self, event: Event) {
+        self.event_sender.send(event).unwrap();
     }
 
-    // Process events by dispatching them to the registered handlers
-    fn process_events(&mut self) {
-        while let Some(event) = self.event_queue.pop_front() {
-            if let Some(handlers) = self.subscriber_book.get(&event) {
+    // Now `process_events` takes self by Arc<Mutex<Self>> for independent thread handling
+    fn process_events(event_manager: Arc<Mutex<Self>>) {
+        loop {
+            let event = {
+                // Temporarily unlock `event_receiver` to receive an event
+                let em = event_manager.lock().unwrap();
+                em.event_receiver.recv().unwrap()
+            };
+
+            let handlers = {
+                let em = event_manager.lock().unwrap();
+                em.subscriber_book.get(&event).cloned()
+            };
+
+            if let Some(handlers) = handlers {
                 for handler in handlers {
-                    handler.borrow().handle_event(&event);
+                    let event_sender = event_manager.lock().unwrap().event_sender.clone();
+                    let event = event.clone();
+
+                    // Spawn a new thread for each handler to process the event concurrently
+                    thread::spawn(move || {
+                        handler.handle_event(&event, &event_sender);
+                    });
                 }
             }
         }
     }
-}
 
-// Implementing example modules that implement EventHandler trait
-
-struct MarketDataFeeder {
-    event_manager: Rc<RefCell<EventManager>>,
-}
-
-impl MarketDataFeeder {
-    fn new(event_manager: Rc<RefCell<EventManager>>) -> Self {
-        MarketDataFeeder { event_manager }
-    }
-
-    // Method to push a MarketData event
-    fn push_event(&self) {
-        let event = Event::MarketData ;
-        self.event_manager.borrow_mut().push_event(event);
+    fn get_event_sender(&self) -> Sender<Event> {
+        self.event_sender.clone()
     }
 }
 
-struct Strategy{
-    event_manager: Rc<RefCell<EventManager>>,
-}
-
-impl Strategy {
-    fn new(event_manager: Rc<RefCell<EventManager>>) -> Self {
-        Strategy { event_manager }
-    }
-
-    // Method to push a OrderPlace event
-    fn push_event(&self) {
-        let event = Event::OrderPlace ;
-        self.event_manager.borrow_mut().push_event(event);
-    }
-}
+struct Strategy;
 
 impl EventHandler for Strategy {
-    fn handle_event(&self, event: &Event) {
-        println!("Strategy handling event: {:?}, publish a new OrderPlace", event);
-        // Implement specific logic for handling strategy events
-        // self.push_event();
+    fn handle_event(&self, event: &Event, event_sender: &Sender<Event>) {
+        println!("Strategy handling event: {:?}, sending OrderPlace", event);
+        event_sender.send(Event::OrderPlace).unwrap();
     }
 }
 
-struct MockExchange {
-    event_manager: Rc<RefCell<EventManager>>,
-}
-
-impl MockExchange {
-    fn new(event_manager: Rc<RefCell<EventManager>>) -> Self {
-        MockExchange { event_manager }
-    }
-
-    // Push an OrderComplete event
-    fn push_event(&self) {
-        let event = Event::OrderComplete;
-        self.event_manager.borrow_mut().push_event(event);
-    }
-}
+struct MockExchange;
 
 impl EventHandler for MockExchange {
-    fn handle_event(&self, event: &Event) {
-        println!("OrderHandler handling event: {:?}, publishing OrderComplete", event);
-        // Implement specific logic for handling order events
-        // self.push_event();
+    fn handle_event(&self, event: &Event, event_sender: &Sender<Event>) {
+        println!("MockExchange handling event: {:?}, sending OrderComplete", event);
+        event_sender.send(Event::OrderComplete).unwrap();
     }
 }
 
 struct ProtfolioManager;
 
 impl EventHandler for ProtfolioManager {
-    fn handle_event(&self, event: &Event) {
-        println!("PortfolioHandler handling event: {:?}", event);
-        // Implement specific logic for handling portfolio events
+    fn handle_event(&self, event: &Event, _event_sender: &Sender<Event>) {
+        println!("PortfolioManager handling event: {:?}", event);
+    }
+}
+
+// New MarketDataFeeder struct
+struct MarketDataFeeder {
+    event_sender: Sender<Event>,
+}
+
+impl MarketDataFeeder {
+    fn new(event_sender: Sender<Event>) -> Self {
+        MarketDataFeeder { event_sender }
+    }
+
+    fn start(self) {
+        thread::spawn(move || loop {
+            println!("MarketDataFeeder sending MarketData event");
+            self.event_sender.send(Event::MarketData).unwrap();
+            thread::sleep(std::time::Duration::from_millis(500)); // Adjust frequency as needed
+        });
     }
 }
 
 fn main() {
-    let event_manager = Rc::new(RefCell::new(EventManager::new()));
-    let market_data_feeder = MarketDataFeeder::new(Rc::clone(&event_manager));
-    let mock_exchange = MockExchange::new(Rc::clone(&event_manager));
-    let my_strategy = Strategy::new(Rc::clone(&event_manager));
+    let event_manager = Arc::new(Mutex::new(EventManager::new()));
 
-    // Register different handlers for different event types
-    event_manager.borrow_mut().subscribe(Event::MarketData, Rc::new(RefCell::new(Strategy::new(Rc::clone(&event_manager)))));
-    event_manager.borrow_mut().subscribe(Event::MarketData, Rc::new(RefCell::new(MockExchange::new(Rc::clone(&event_manager)))));
-    event_manager.borrow_mut().subscribe(Event::OrderPlace, Rc::new(RefCell::new(ProtfolioManager)));
-    event_manager.borrow_mut().subscribe(Event::OrderPlace, Rc::new(RefCell::new(MockExchange::new(Rc::clone(&event_manager)))));
-    event_manager.borrow_mut().subscribe(Event::OrderComplete, Rc::new(RefCell::new(MockExchange::new(Rc::clone(&event_manager)))));
+    // Acquire a lock to mutate and add subscribers
+    {
+        let mut em = event_manager.lock().unwrap();
+        em.subscribe(Event::MarketData, Arc::new(Strategy));
+        em.subscribe(Event::MarketData, Arc::new(MockExchange));
+        em.subscribe(Event::OrderPlace, Arc::new(MockExchange));
+        em.subscribe(Event::OrderComplete, Arc::new(ProtfolioManager));
+    }
 
+    let event_sender = event_manager.lock().unwrap().get_event_sender();
+    
+    // Start processing events in a separate thread
+    let event_manager_clone = Arc::clone(&event_manager);
+    thread::spawn(move || {
+        EventManager::process_events(event_manager_clone);
+    });
 
-    // Push events to the event manager
-    market_data_feeder.push_event();
-    // market_data_feeder.push_event();
-    // market_data_feeder.push_event();
-    my_strategy.push_event();
-    mock_exchange.push_event();
+    // Initial event
+    event_sender.send(Event::MarketData).unwrap();
 
-    // Process events
-    event_manager.borrow_mut().process_events();
+    let market_data_feeder = MarketDataFeeder::new(event_sender.clone());
+    market_data_feeder.start();
+
+    thread::sleep(std::time::Duration::from_secs(5));
 }
