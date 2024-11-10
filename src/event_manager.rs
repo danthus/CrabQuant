@@ -44,14 +44,11 @@ impl EventManager {
     pub fn process_events(event_manager: Arc<Mutex<Self>>) {
         loop {
             // Check if we should move the mutex guard out the loop
-            let event = {
+            let (event, handlers) = {
                 let em = event_manager.lock().unwrap();
-                em.event_receiver.recv().unwrap()
-            };
-
-            let handlers = {
-                let em = event_manager.lock().unwrap();
-                em.subscriber_book.get(&event).cloned()
+                let event = em.event_receiver.recv().unwrap();
+                let handlers = em.subscriber_book.get(&event).cloned();
+                (event, handlers)
             };
 
             if let Some(handlers) = handlers {
