@@ -1,13 +1,24 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use crossbeam::channel::{unbounded, Receiver, Sender};
+use crate::events::EventType;
+use std::any::Any;
 use std::thread;
 
-#[derive(Debug, Hash, Eq, PartialEq, Clone)]
-pub enum Event {
-    MarketData,
-    OrderPlace,
-    OrderComplete,
+
+#[derive(Debug, Clone)]
+pub struct Event{
+    pub event_type: EventType,
+    pub contents: Arc<dyn Any + Send + Sync>,
+}
+
+impl Event {
+    pub fn new<T: Any + Send + Sync>(event_type: EventType, contents: T) -> Self {
+        Event {
+            event_type,
+            contents: Arc::new(contents),
+        }
+    }
 }
 
 pub trait EventHandler: Send + Sync {
@@ -15,7 +26,7 @@ pub trait EventHandler: Send + Sync {
 }
 
 pub struct EventManager {
-    subscriber_book: HashMap<Event, Vec<Arc<dyn EventHandler>>>,
+    subscriber_book: HashMap<EventType, Vec<Arc<dyn EventHandler>>>,
     event_sender: Sender<Event>,
     event_receiver: Receiver<Event>,
 }
@@ -30,11 +41,12 @@ impl EventManager {
         }
     }
 
-    pub fn subscribe(&mut self, event_type: Event, handler: Arc<dyn EventHandler>) {
+    pub fn subscribe(&mut self, event_type: EventType, handler: Arc<dyn EventHandler>)
+    {
         self.subscriber_book
             .entry(event_type)
             .or_insert_with(Vec::new)
-            .push(handler);
+            .push(handler);    
     }
 
     pub fn push_event(&self, event: Event) {
@@ -43,11 +55,10 @@ impl EventManager {
 
     pub fn process_events(event_manager: Arc<Mutex<Self>>) {
         loop {
-            // Check if we should move the mutex guard out the loop
             let (event, handlers) = {
                 let em = event_manager.lock().unwrap();
                 let event = em.event_receiver.recv().unwrap();
-                let handlers = em.subscriber_book.get(&event).cloned();
+                let handlers = em.subscriber_book.get(&event.event_type).cloned();
                 (event, handlers)
             };
 

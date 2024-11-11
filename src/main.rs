@@ -1,12 +1,15 @@
+mod events;
 mod event_manager;
 mod market_data_feeder;
 mod strategy;
 mod mock_exchange;
 mod portfolio_manager;
 
+use crate::event_manager::EventManager;
+use crate::events::EventType;
+
 use std::sync::{Arc, Mutex};
 use std::thread;
-use event_manager::{Event, EventManager};
 use market_data_feeder::MarketDataFeeder;
 use strategy::Strategy;
 use mock_exchange::MockExchange;
@@ -19,10 +22,10 @@ fn main() {
 
     {
         let mut em = event_manager.lock().unwrap();
-        em.subscribe(Event::MarketData, Arc::new(Strategy));
-        em.subscribe(Event::MarketData, Arc::new(MockExchange));
-        em.subscribe(Event::OrderPlace, Arc::new(MockExchange));
-        em.subscribe(Event::OrderComplete, Arc::new(portfolio_manager));
+        em.subscribe(EventType::MarketData, Arc::new(Strategy));
+        em.subscribe(EventType::MarketData, Arc::new(MockExchange));
+        em.subscribe(EventType::OrderPlace, Arc::new(MockExchange));
+        em.subscribe(EventType::OrderComplete, Arc::new(portfolio_manager));
     }
 
     let event_sender = event_manager.lock().unwrap().get_event_sender();
@@ -31,8 +34,6 @@ fn main() {
     thread::spawn(move || {
         EventManager::process_events(event_manager_clone);
     });
-
-    event_sender.send(Event::MarketData).unwrap();
 
     let market_data_feeder = MarketDataFeeder::new(event_sender.clone());
     market_data_feeder.start();

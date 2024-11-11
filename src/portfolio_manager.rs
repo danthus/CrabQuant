@@ -18,7 +18,7 @@ struct Portfolio{
 
 impl EventHandler for PortfolioManager {
     fn handle_event(&self, event: &Event, _event_sender: &Sender<Event>) {
-        println!("PortfolioManager handling event: {:?}", event);
+        println!("PortfolioManager receiving event: {:?}", event);
     }
 }
 
