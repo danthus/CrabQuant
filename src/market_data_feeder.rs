@@ -27,7 +27,7 @@ impl MarketDataFeeder {
 
             self.event_sender.send(event).unwrap();
 
-            println!("MarketDataFeeder sending MarketData event");
+            println!("MarketDataFeeder sending MarketData event.");
 
             thread::sleep(std::time::Duration::from_millis(500));
         });

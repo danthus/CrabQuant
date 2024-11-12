@@ -18,14 +18,14 @@ use portfolio_manager::PortfolioManager;
 fn main() {
     let event_manager = Arc::new(Mutex::new(EventManager::new()));
     let initial_cash = 1000000.;
-    let portfolio_manager = PortfolioManager::new(initial_cash);
+    let portfolio_manager = Arc::new(Mutex::new(PortfolioManager::new(initial_cash)));
 
     {
         let mut em = event_manager.lock().unwrap();
         em.subscribe(EventType::MarketData, Arc::new(Strategy));
         em.subscribe(EventType::MarketData, Arc::new(MockExchange));
         em.subscribe(EventType::OrderPlace, Arc::new(MockExchange));
-        em.subscribe(EventType::OrderComplete, Arc::new(portfolio_manager));
+        em.subscribe(EventType::OrderComplete, Arc::clone(&portfolio_manager));
     }
 
     let event_sender = event_manager.lock().unwrap().get_event_sender();
