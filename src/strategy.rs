@@ -21,3 +21,9 @@ impl EventHandler for Strategy {
         event_sender.send(event).unwrap();
     }
 }
+
+impl Strategy{
+    pub fn new() -> Self{
+        Strategy{}
+    }
+}

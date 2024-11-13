@@ -1,6 +1,7 @@
 use crate::event_manager::{Event, EventHandler};
 use crossbeam::channel::Sender;
 use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 // use std::collections::VecDeque;
 pub struct PortfolioManager{
@@ -21,6 +22,23 @@ struct Portfolio{
 impl EventHandler for PortfolioManager {
     fn handle_event(&self, event: &Event, _event_sender: &Sender<Event>) {
         println!("PortfolioManager receiving event: {:?}", event);
+    }
+}
+
+pub struct PortfolioManagerWrapper {
+    p_manager: Arc<Mutex<PortfolioManager>>,
+}
+
+impl PortfolioManagerWrapper {
+    pub fn new(p_manager: Arc<Mutex<PortfolioManager>>) -> Self {
+        PortfolioManagerWrapper { p_manager: p_manager }
+    }
+}
+
+impl EventHandler for PortfolioManagerWrapper {
+    fn handle_event(&self, event: &Event, event_sender: &Sender<Event>) {
+        let pm = self.p_manager.lock().unwrap();
+        pm.handle_event(event, event_sender);
     }
 }
 

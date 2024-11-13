@@ -16,3 +16,9 @@ impl EventHandler for MockExchange {
         event_sender.send(event).unwrap();
     }
 }
+
+impl MockExchange {
+    pub fn new() -> Self{
+        MockExchange{}
+    }
+}
