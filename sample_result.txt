@@ -1,0 +1,88 @@
+MarketDataFeeder: Read and Sending: MarketDataEvent { timestamp: "2024-09-30", open: 570.42, close: 573.76, high: 574.38, low: 568.08, volume: 62442720 }
+Strategy: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-09-30", open: 570.42, close: 573.76, high: 574.38, low: 568.08, volume: 62442720 }
+Strategy: Sending OrderPlaceEvent: Event { event_type: TypeOrderPlace, contents: OrderPlace(OrderPlaceEvent { order_id: 1, quantity: 100, price: 573.76 }) }
+MockExchange: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-09-30", open: 570.42, close: 573.76, high: 574.38, low: 568.08, volume: 62442720 }
+MockExchange: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 573.76 }
+MockExchange: sending OrderCompleteEvent: Event { event_type: TypeOrderComplete, contents: OrderComplete(OrderCompleteEvent { order_id: 1, filled_quantity: 100 }) }
+PortfolioManager: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 573.76 }
+PortfolioManager: Received OrderCompleteEvent: OrderCompleteEvent { order_id: 1, filled_quantity: 100 }
+MarketDataFeeder: Read and Sending: MarketDataEvent { timestamp: "2024-10-01", open: 573.4, close: 568.62, high: 574.0622, low: 566.0, volume: 72348202 }
+MockExchange: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-01", open: 573.4, close: 568.62, high: 574.0622, low: 566.0, volume: 72348202 }
+Strategy: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-01", open: 573.4, close: 568.62, high: 574.0622, low: 566.0, volume: 72348202 }
+Strategy: Sending OrderPlaceEvent: Event { event_type: TypeOrderPlace, contents: OrderPlace(OrderPlaceEvent { order_id: 1, quantity: 100, price: 568.62 }) }
+MockExchange: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 568.62 }
+MockExchange: sending OrderCompleteEvent: Event { event_type: TypeOrderComplete, contents: OrderComplete(OrderCompleteEvent { order_id: 1, filled_quantity: 100 }) }
+PortfolioManager: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 568.62 }
+PortfolioManager: Received OrderCompleteEvent: OrderCompleteEvent { order_id: 1, filled_quantity: 100 }
+MarketDataFeeder: Read and Sending: MarketDataEvent { timestamp: "2024-10-02", open: 567.71, close: 568.86, high: 569.9, low: 565.27, volume: 38353837 }
+MockExchange: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-02", open: 567.71, close: 568.86, high: 569.9, low: 565.27, volume: 38353837 }
+Strategy: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-02", open: 567.71, close: 568.86, high: 569.9, low: 565.27, volume: 38353837 }
+Strategy: Sending OrderPlaceEvent: Event { event_type: TypeOrderPlace, contents: OrderPlace(OrderPlaceEvent { order_id: 1, quantity: 100, price: 568.86 }) }
+PortfolioManager: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 568.86 }
+MockExchange: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 568.86 }
+MockExchange: sending OrderCompleteEvent: Event { event_type: TypeOrderComplete, contents: OrderComplete(OrderCompleteEvent { order_id: 1, filled_quantity: 100 }) }
+PortfolioManager: Received OrderCompleteEvent: OrderCompleteEvent { order_id: 1, filled_quantity: 100 }
+MarketDataFeeder: Read and Sending: MarketDataEvent { timestamp: "2024-10-03", open: 567.36, close: 567.82, high: 569.8025, low: 565.49, volume: 40098655 }
+MockExchange: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-03", open: 567.36, close: 567.82, high: 569.8025, low: 565.49, volume: 40098655 }
+Strategy: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-03", open: 567.36, close: 567.82, high: 569.8025, low: 565.49, volume: 40098655 }
+Strategy: Sending OrderPlaceEvent: Event { event_type: TypeOrderPlace, contents: OrderPlace(OrderPlaceEvent { order_id: 1, quantity: 100, price: 567.82 }) }
+MockExchange: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 567.82 }
+MockExchange: sending OrderCompleteEvent: Event { event_type: TypeOrderComplete, contents: OrderComplete(OrderCompleteEvent { order_id: 1, filled_quantity: 100 }) }
+PortfolioManager: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 567.82 }
+PortfolioManager: Received OrderCompleteEvent: OrderCompleteEvent { order_id: 1, filled_quantity: 100 }
+MarketDataFeeder: Read and Sending: MarketDataEvent { timestamp: "2024-10-04", open: 572.35, close: 572.98, high: 573.36, low: 568.1, volume: 42949020 }
+MockExchange: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-04", open: 572.35, close: 572.98, high: 573.36, low: 568.1, volume: 42949020 }
+Strategy: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-04", open: 572.35, close: 572.98, high: 573.36, low: 568.1, volume: 42949020 }
+Strategy: Sending OrderPlaceEvent: Event { event_type: TypeOrderPlace, contents: OrderPlace(OrderPlaceEvent { order_id: 1, quantity: 100, price: 572.98 }) }
+MockExchange: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 572.98 }
+MockExchange: sending OrderCompleteEvent: Event { event_type: TypeOrderComplete, contents: OrderComplete(OrderCompleteEvent { order_id: 1, filled_quantity: 100 }) }
+PortfolioManager: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 572.98 }
+PortfolioManager: Received OrderCompleteEvent: OrderCompleteEvent { order_id: 1, filled_quantity: 100 }
+MarketDataFeeder: Read and Sending: MarketDataEvent { timestamp: "2024-10-07", open: 571.3, close: 567.8, high: 571.9599, low: 566.63, volume: 49791417 }
+MockExchange: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-07", open: 571.3, close: 567.8, high: 571.9599, low: 566.63, volume: 49791417 }
+Strategy: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-07", open: 571.3, close: 567.8, high: 571.9599, low: 566.63, volume: 49791417 }
+Strategy: Sending OrderPlaceEvent: Event { event_type: TypeOrderPlace, contents: OrderPlace(OrderPlaceEvent { order_id: 1, quantity: 100, price: 567.8 }) }
+MockExchange: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 567.8 }
+MockExchange: sending OrderCompleteEvent: Event { event_type: TypeOrderComplete, contents: OrderComplete(OrderCompleteEvent { order_id: 1, filled_quantity: 100 }) }
+PortfolioManager: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 567.8 }
+PortfolioManager: Received OrderCompleteEvent: OrderCompleteEvent { order_id: 1, filled_quantity: 100 }
+MarketDataFeeder: Read and Sending: MarketDataEvent { timestamp: "2024-10-08", open: 570.42, close: 573.17, high: 573.78, low: 569.5299, volume: 37336110 }
+MockExchange: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-08", open: 570.42, close: 573.17, high: 573.78, low: 569.5299, volume: 37336110 }
+Strategy: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-08", open: 570.42, close: 573.17, high: 573.78, low: 569.5299, volume: 37336110 }
+Strategy: Sending OrderPlaceEvent: Event { event_type: TypeOrderPlace, contents: OrderPlace(OrderPlaceEvent { order_id: 1, quantity: 100, price: 573.17 }) }
+MockExchange: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 573.17 }
+MockExchange: sending OrderCompleteEvent: Event { event_type: TypeOrderComplete, contents: OrderComplete(OrderCompleteEvent { order_id: 1, filled_quantity: 100 }) }
+PortfolioManager: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 573.17 }
+PortfolioManager: Received OrderCompleteEvent: OrderCompleteEvent { order_id: 1, filled_quantity: 100 }
+MarketDataFeeder: Read and Sending: MarketDataEvent { timestamp: "2024-10-09", open: 573.16, close: 577.14, high: 577.71, low: 572.55, volume: 37809403 }
+MockExchange: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-09", open: 573.16, close: 577.14, high: 577.71, low: 572.55, volume: 37809403 }
+Strategy: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-09", open: 573.16, close: 577.14, high: 577.71, low: 572.55, volume: 37809403 }
+Strategy: Sending OrderPlaceEvent: Event { event_type: TypeOrderPlace, contents: OrderPlace(OrderPlaceEvent { order_id: 1, quantity: 100, price: 577.14 }) }
+MockExchange: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 577.14 }
+MockExchange: sending OrderCompleteEvent: Event { event_type: TypeOrderComplete, contents: OrderComplete(OrderCompleteEvent { order_id: 1, filled_quantity: 100 }) }
+PortfolioManager: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 577.14 }
+PortfolioManager: Received OrderCompleteEvent: OrderCompleteEvent { order_id: 1, filled_quantity: 100 }
+MarketDataFeeder: Read and Sending: MarketDataEvent { timestamp: "2024-10-10", open: 575.77, close: 576.13, high: 577.58, low: 574.49, volume: 44348254 }
+MockExchange: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-10", open: 575.77, close: 576.13, high: 577.58, low: 574.49, volume: 44348254 }
+Strategy: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-10", open: 575.77, close: 576.13, high: 577.58, low: 574.49, volume: 44348254 }
+Strategy: Sending OrderPlaceEvent: Event { event_type: TypeOrderPlace, contents: OrderPlace(OrderPlaceEvent { order_id: 1, quantity: 100, price: 576.13 }) }
+MockExchange: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 576.13 }
+MockExchange: sending OrderCompleteEvent: Event { event_type: TypeOrderComplete, contents: OrderComplete(OrderCompleteEvent { order_id: 1, filled_quantity: 100 }) }
+PortfolioManager: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 576.13 }
+PortfolioManager: Received OrderCompleteEvent: OrderCompleteEvent { order_id: 1, filled_quantity: 100 }
+MarketDataFeeder: Read and Sending: MarketDataEvent { timestamp: "2024-10-11", open: 576.05, close: 579.58, high: 580.33, low: 575.91, volume: 42229657 }
+MockExchange: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-11", open: 576.05, close: 579.58, high: 580.33, low: 575.91, volume: 42229657 }
+Strategy: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-11", open: 576.05, close: 579.58, high: 580.33, low: 575.91, volume: 42229657 }
+Strategy: Sending OrderPlaceEvent: Event { event_type: TypeOrderPlace, contents: OrderPlace(OrderPlaceEvent { order_id: 1, quantity: 100, price: 579.58 }) }
+MockExchange: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 579.58 }
+MockExchange: sending OrderCompleteEvent: Event { event_type: TypeOrderComplete, contents: OrderComplete(OrderCompleteEvent { order_id: 1, filled_quantity: 100 }) }
+PortfolioManager: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 579.58 }
+PortfolioManager: Received OrderCompleteEvent: OrderCompleteEvent { order_id: 1, filled_quantity: 100 }
+MarketDataFeeder: Read and Sending: MarketDataEvent { timestamp: "2024-10-14", open: 581.22, close: 584.32, high: 585.27, low: 580.73, volume: 36133960 }
+MockExchange: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-14", open: 581.22, close: 584.32, high: 585.27, low: 580.73, volume: 36133960 }
+Strategy: Received MarketDataEvent: MarketDataEvent { timestamp: "2024-10-14", open: 581.22, close: 584.32, high: 585.27, low: 580.73, volume: 36133960 }
+Strategy: Sending OrderPlaceEvent: Event { event_type: TypeOrderPlace, contents: OrderPlace(OrderPlaceEvent { order_id: 1, quantity: 100, price: 584.32 }) }
+MockExchange: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 584.32 }
+MockExchange: sending OrderCompleteEvent: Event { event_type: TypeOrderComplete, contents: OrderComplete(OrderCompleteEvent { order_id: 1, filled_quantity: 100 }) }
+PortfolioManager: Received OrderPlaceEvent: OrderPlaceEvent { order_id: 1, quantity: 100, price: 584.32 }
+PortfolioManager: Received OrderCompleteEvent: OrderCompleteEvent { order_id: 1, filled_quantity: 100 }

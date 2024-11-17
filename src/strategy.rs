@@ -1,29 +1,79 @@
-use crate::event_manager::{Event, EventHandler};
-use crate::events::{EventType, OrderPlace, MarketData};
-use crossbeam::channel::Sender;
+use crate::event_manager::{Event, ModulePublish, ModuleReceive};
+use crate::events::{EventType, MarketDataEvent, OrderPlaceEvent, OrderCompleteEvent, EventContent};
+use crossbeam::channel::{Sender, Receiver, bounded};
 
-pub struct Strategy;
+pub struct Strategy {
+    subscribe_sender: Sender<Event>,
+    subscribe_receiver: Receiver<Event>,
+    publish_sender: Option<Sender<Event>>,
+}
 
-impl EventHandler for Strategy {
-    fn handle_event(&self, event: &Event, event_sender: &Sender<Event>) {
-        if let Some(market_data) = event.contents.downcast_ref::<MarketData>() {
-            println!("Strategy Module receiving and handling market data event: {:?}.", market_data);
+impl Strategy {
+    /// Creates a new Strategy module
+    pub fn new() -> Self {
+        let (subscribe_sender, subscribe_receiver) = bounded(0);
+        Strategy {
+            subscribe_sender,
+            subscribe_receiver,
+            publish_sender: None,
+        }
+    }
+
+    /// Runs the strategy logic, processing MarketDataEvent and sending OrderPlaceEvent
+    pub fn run(&self) {
+        if self.publish_sender.is_none() {
+            panic!("Publish sender is not initialized!");
         }
 
-        let market_data = OrderPlace {
-            order_id:0,
-            quantity:0.0,
-            price: 0.0,
-        };
+        loop {
+            // Receive an event from the subscribe_receiver
+            let event = self.subscribe_receiver.recv().unwrap();
+            // println!("Strategy: received event: {:?}", event);
 
-        let event = Event::new(EventType::OrderPlace, market_data);
+            if let EventType::TypeMarketData = event.event_type {
+                if let EventContent::MarketData(market_data) = event.contents {
+                    println!("Strategy: Received MarketDataEvent: {:?}", market_data);
 
-        event_sender.send(event).unwrap();
+                    // Sample OrderPlaceEvent based on MarketDataEvent
+                    let order_event = OrderPlaceEvent {
+                        order_id: 1, 
+                        quantity: 100, 
+                        price: market_data.close,
+                    };
+
+                    let order_event = Event::new(EventType::TypeOrderPlace, EventContent::OrderPlace(order_event));
+                    println!("Strategy: Sending OrderPlaceEvent: {:?}", order_event);
+
+                    // Publish the OrderPlaceEvent
+                    self.publish(order_event);
+                } else {
+                    eprintln!("Failed to pattern match event to MarketDataEvent.");
+                }
+            } else {
+                println!("Unsupported event type: {:?}", event.event_type);
+            }
+        }
+    }
+
+
+    /// Helper method to publish an event
+    fn publish(&self, event: Event) {
+        if let Some(publish_sender) = &self.publish_sender {
+            publish_sender.send(event).unwrap();
+        } else {
+            panic!("Publish sender is not initialized!");
+        }
     }
 }
 
-impl Strategy{
-    pub fn new() -> Self{
-        Strategy{}
+impl ModuleReceive for Strategy {
+    fn get_sender(&self) -> Sender<Event> {
+        self.subscribe_sender.clone()
+    }
+}
+
+impl ModulePublish for Strategy {
+    fn use_sender(&mut self, sender: Sender<Event>) {
+        self.publish_sender = Some(sender);
     }
 }

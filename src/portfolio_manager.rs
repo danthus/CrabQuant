@@ -1,70 +1,96 @@
-use crate::event_manager::{Event, EventHandler};
-use crossbeam::channel::Sender;
+use crate::event_manager::{Event, ModulePublish, ModuleReceive};
+use crate::events::{EventType, OrderCompleteEvent, OrderPlaceEvent, EventContent};
+use crossbeam::channel::{Sender, Receiver, bounded};
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
 
-// use std::collections::VecDeque;
-pub struct PortfolioManager{
+pub struct PortfolioManager {
+    subscribe_sender: Sender<Event>,
+    subscribe_receiver: Receiver<Event>,
     portfolio: Portfolio,
 }
 
-// struct Position{
-//     symbol_name: String,
-//     quantity: u32,
-// }
-struct Portfolio{
+struct Portfolio {
     asset: f64,
     cash: f64,
     available_cash: f64,
-    positions: HashMap<String, u32>,
+    positions: HashMap<String, i32>,
 }
 
-impl EventHandler for PortfolioManager {
-    fn handle_event(&self, event: &Event, _event_sender: &Sender<Event>) {
-        println!("PortfolioManager receiving event: {:?}", event);
-    }
-}
-
-pub struct PortfolioManagerWrapper {
-    p_manager: Arc<Mutex<PortfolioManager>>,
-}
-
-impl PortfolioManagerWrapper {
-    pub fn new(p_manager: Arc<Mutex<PortfolioManager>>) -> Self {
-        PortfolioManagerWrapper { p_manager: p_manager }
-    }
-}
-
-impl EventHandler for PortfolioManagerWrapper {
-    fn handle_event(&self, event: &Event, event_sender: &Sender<Event>) {
-        let pm = self.p_manager.lock().unwrap();
-        pm.handle_event(event, event_sender);
-    }
-}
-
-impl PortfolioManager{
+impl PortfolioManager {
+    /// Creates a new PortfolioManager with an initial cash balance
     pub fn new(initial_cash: f64) -> Self {
+        let (subscribe_sender, subscribe_receiver) = bounded(0);
         let portfolio = Portfolio {
             asset: initial_cash,
             cash: initial_cash,
             available_cash: initial_cash,
             positions: HashMap::new(),
         };
-        PortfolioManager { portfolio }
+
+        PortfolioManager {
+            subscribe_sender,
+            subscribe_receiver,
+            portfolio,
+        }
     }
 
-    pub fn get_available_cash(&self) -> f64 {
-        self.portfolio.available_cash
-    }
+/// Continuously process events
+pub fn run(&mut self) {
+    loop {
+        let event = self.subscribe_receiver.recv().unwrap();
+        // println!("PortfolioManager: received event: {:?}", event);
 
+        match event.contents {
+            EventContent::OrderPlace(order_place_event) => {
+                println!(
+                    "PortfolioManager: Received OrderPlaceEvent: {:?}",
+                    order_place_event
+                );
+
+                // Update portfolio with the order details
+                self.update_position(
+                    "DummySymbol".to_string(),
+                    order_place_event.quantity,
+                );
+                self.update_cash(-order_place_event.quantity as f64 * 100.0);
+            },
+            EventContent::OrderComplete(order_complete_event) =>{
+                // DO something
+                println!(
+                    "PortfolioManager: Received OrderCompleteEvent: {:?}",
+                    order_complete_event
+                );
+            },
+            _ => {
+                println!("Unsupported event type: {:?}", event.event_type);
+            }
+        }
+    }
+}
+
+    /// Updates the available cash in the portfolio
     pub fn update_cash(&mut self, amount: f64) {
         self.portfolio.cash += amount;
         self.portfolio.available_cash += amount;
     }
 
-    pub fn update_position(&mut self, symbol: String, quantity: u32) {
-        self.portfolio.positions.entry(symbol.clone())
+    /// Updates the position for a specific symbol
+    pub fn update_position(&mut self, symbol: String, quantity: i32) {
+        self.portfolio
+            .positions
+            .entry(symbol.clone())
             .and_modify(|q| *q += quantity)
-            .or_insert(quantity); 
+            .or_insert(quantity);
+    }
+
+    /// Gets the available cash in the portfolio
+    pub fn get_available_cash(&self) -> f64 {
+        self.portfolio.available_cash
+    }
+}
+
+impl ModuleReceive for PortfolioManager {
+    fn get_sender(&self) -> Sender<Event> {
+        self.subscribe_sender.clone()
     }
 }
