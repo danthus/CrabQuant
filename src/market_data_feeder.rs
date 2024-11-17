@@ -5,6 +5,7 @@ use csv::ReaderBuilder;
 use std::fs::File;
 use std::thread;
 use std::time::Duration;
+use std::time::SystemTime;
 // use std::thread;
 // use std::time::Duration;
 
@@ -51,8 +52,10 @@ impl MarketDataFeeder {
 
             // Send data through the channel
             println!("MarketDataFeeder: Read and Sending: {:?}", market_data);
+            #[cfg(feature= "timeit")]
+            println!("MDF Timestamp: {:?}", std::time::SystemTime::now());
             self.publish(Event::new(EventType::TypeMarketData, EventContent::MarketData(market_data)));
-            thread::sleep(std::time::Duration::from_millis(500));
+            thread::sleep(std::time::Duration::from_millis(1));
         }
     }
 }

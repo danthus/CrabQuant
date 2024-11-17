@@ -50,10 +50,10 @@ fn main() {
 
     // Start feeding data
     let market_data_feeder_thread = thread::spawn(move || {
-        market_data_feeder.start_feeding("./data/SPY_1day_sample.csv");
+        market_data_feeder.start_feeding("./data/SPY_1min_sample.csv");
     });
 
-    thread::sleep(std::time::Duration::from_secs(1));
+    // thread::sleep(std::time::Duration::from_millis(1));
 
     // Process events in the main thread
     let event_manager_thread = thread::spawn(move || {

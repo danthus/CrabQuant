@@ -60,6 +60,8 @@ pub fn run(&mut self) {
                     "PortfolioManager: Received OrderCompleteEvent: {:?}",
                     order_complete_event
                 );
+                #[cfg(feature= "timeit")]
+                println!("PM Timestamp: {:?}", std::time::SystemTime::now());
             },
             _ => {
                 println!("Unsupported event type: {:?}", event.event_type);

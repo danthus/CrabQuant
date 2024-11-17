@@ -41,7 +41,7 @@ pub struct EventManager {
 impl EventManager {
     pub fn new() -> Self {
         let (hp_sender, hp_receiver) = unbounded();
-        let (lp_sender, lp_receiver) = bounded(10);
+        let (lp_sender, lp_receiver) = bounded(1);
         EventManager {
             subscriber_book: HashMap::new(),
             lp_sender,
