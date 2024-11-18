@@ -1,7 +1,9 @@
 use crate::event_manager::{Event, ModulePublish, ModuleReceive};
 use crate::events::{EventType, OrderCompleteEvent, OrderPlaceEvent, MarketDataEvent, EventContent};
 use crossbeam::channel::{bounded, Receiver, Sender};
-
+#[cfg(feature= "custom_test")]
+use crate::util::Counter;
+use std::thread;
 pub struct MockExchange {
     // subscribe_sender is for event_manager to use only.
     // s_sender and s_receiver belongs to a rendezvous channel
@@ -47,20 +49,29 @@ impl MockExchange {
         if self.publish_sender.is_none() {
             panic!("publish_sender is not initialized!");
         }
-    
+        #[cfg(feature= "custom_test")]
+        let mut counter_a = Counter::new();
+        #[cfg(feature= "custom_test")]
+        let mut counter_b = Counter::new();
+        #[cfg(feature= "custom_test")]
+        let mut counter_c = Counter::new();
         loop {
             let event = self.subscribe_receiver.recv().unwrap();
             // println!("MockExchange: Received event: {:?}", event);
     
             match event.contents {
                 EventContent::MarketData(market_data) => {
-                    println!("MockExchange: Received MarketDataEvent: {:?}", market_data);
-    
+                    // println!("MockExchange: Received MarketDataEvent: {:?}", market_data);
+                    #[cfg(feature= "custom_test")]
+                    println!("MockExchange: Received MarketDataEvent{}", counter_a.next());
                     // MockExchange doesn't generate new events for MarketDataEvent
                 }
                 EventContent::OrderPlace(order_place_event) => {
-                    println!("MockExchange: Received OrderPlaceEvent: {:?}", order_place_event);
-    
+                    // println!("MockExchange: Received OrderPlaceEvent: {:?}", order_place_event);
+                    #[cfg(feature= "custom_test")]
+                    {
+                        println!("MockExchange: Received OrderPlaceEvent{}", counter_b.next());
+                    }
                     // Generate an OrderCompleteEvent in response
                     let order_complete_event = OrderCompleteEvent {
                         order_id: order_place_event.order_id, // Use the same order ID
@@ -68,8 +79,12 @@ impl MockExchange {
                     };
     
                     let complete_event = Event::new(EventType::TypeOrderComplete, EventContent::OrderComplete(order_complete_event));
-                    println!("MockExchange: sending OrderCompleteEvent: {:?}", complete_event);
-    
+                    // println!("MockExchange: sending OrderCompleteEvent: {:?}", complete_event);
+                    #[cfg(feature= "custom_test")]
+                    {
+                        thread::sleep(std::time::Duration::from_millis(10));
+                        println!("MockExchange: Sending OrderCompleteEvent{}", counter_c.next());
+                    }
                     // Publish the OrderCompleteEvent
                     self.publish(complete_event);
                 }

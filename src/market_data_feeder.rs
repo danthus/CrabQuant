@@ -1,5 +1,6 @@
 use crate::event_manager::{Event, ModulePublish};
 use crate::events::{EventType, MarketDataEvent, EventContent};
+use crate::market_data_feeder;
 use crossbeam::channel::{Sender, Receiver};
 use csv::ReaderBuilder;
 use std::fs::File;
@@ -8,6 +9,8 @@ use std::time::Duration;
 use std::time::SystemTime;
 // use std::thread;
 // use std::time::Duration;
+#[cfg(feature= "custom_test")]
+use crate::util::Counter;
 
 pub struct MarketDataFeeder {
     publish_sender: Option<Sender<Event>>,
@@ -39,6 +42,11 @@ impl MarketDataFeeder {
             .has_headers(true)
             .from_reader(file);
 
+        #[cfg(feature= "custom_test")]
+        let mut counter = Counter::new();
+
+        let mut first_data = true;
+
         for result in reader.records() {
             let record = result.expect("Failed to read record");
             let market_data = MarketDataEvent {
@@ -51,11 +59,18 @@ impl MarketDataFeeder {
             };
 
             // Send data through the channel
-            println!("MarketDataFeeder: Read and Sending: {:?}", market_data);
-            #[cfg(feature= "timeit")]
-            println!("MDF Timestamp: {:?}", std::time::SystemTime::now());
+            // println!("MarketDataFeeder: Sending: {:?}", market_data);
+            #[cfg(feature= "custom_test")]
+            {
+                println!("MarketDataFeeder: Sending MarketDataEvent{}", counter.next());
+                // println!("MDF Timestamp: {:?}", std::time::SystemTime::now());
+            }
             self.publish(Event::new(EventType::TypeMarketData, EventContent::MarketData(market_data)));
-            thread::sleep(std::time::Duration::from_millis(1));
+
+            if first_data{
+                thread::sleep(std::time::Duration::from_millis(1));
+                first_data = false;
+            }
         }
     }
 }

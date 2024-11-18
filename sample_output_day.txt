@@ -1,0 +1,121 @@
+MarketDataFeeder: Sending MarketDataEvent1
+Dispatching TypeMarketData1
+MockExchange: Received MarketDataEvent1
+Strategy: Received MarketDataEvent1
+Strategy: Sending OrderPlaceEvent1
+Dispatching TypeOrderPlace1
+MockExchange: Received OrderPlaceEvent1
+PM: Received OrderPlaceEvent1
+MarketDataFeeder: Sending MarketDataEvent2
+Dispatching TypeMarketData2
+MarketDataFeeder: Sending MarketDataEvent3
+MarketDataFeeder: Sending MarketDataEvent4
+Strategy: Received MarketDataEvent2
+Strategy: Sending OrderPlaceEvent2
+MarketDataFeeder: Sending MarketDataEvent5
+MarketDataFeeder: Sending MarketDataEvent6
+MarketDataFeeder: Sending MarketDataEvent7
+MarketDataFeeder: Sending MarketDataEvent8
+MarketDataFeeder: Sending MarketDataEvent9
+MarketDataFeeder: Sending MarketDataEvent10
+MarketDataFeeder: Sending MarketDataEvent11
+MockExchange: Sending OrderCompleteEvent1
+MockExchange: Received MarketDataEvent2
+Dispatching TypeOrderPlace2
+Dispatching TypeOrderComplete1
+MockExchange: Received OrderPlaceEvent2
+PM: Received OrderPlaceEvent1
+PM: Received OrderCompleteEvent1
+Dispatching TypeMarketData3
+Strategy: Received MarketDataEvent3
+Strategy: Sending OrderPlaceEvent3
+MockExchange: Sending OrderCompleteEvent2
+MockExchange: Received MarketDataEvent3
+Dispatching TypeOrderPlace3
+MockExchange: Received OrderPlaceEvent3
+Dispatching TypeOrderComplete2
+PM: Received OrderPlaceEvent1
+PM: Received OrderCompleteEvent1
+Dispatching TypeMarketData4
+Strategy: Received MarketDataEvent4
+Strategy: Sending OrderPlaceEvent4
+MockExchange: Sending OrderCompleteEvent3
+MockExchange: Received MarketDataEvent4
+Dispatching TypeOrderPlace4
+Dispatching TypeOrderComplete3
+MockExchange: Received OrderPlaceEvent4
+PM: Received OrderPlaceEvent1
+PM: Received OrderCompleteEvent1
+Dispatching TypeMarketData5
+Strategy: Received MarketDataEvent5
+Strategy: Sending OrderPlaceEvent5
+MockExchange: Sending OrderCompleteEvent4
+MockExchange: Received MarketDataEvent5
+Dispatching TypeOrderPlace5
+Dispatching TypeOrderComplete4
+MockExchange: Received OrderPlaceEvent5
+PM: Received OrderPlaceEvent1
+PM: Received OrderCompleteEvent1
+Dispatching TypeMarketData6
+Strategy: Received MarketDataEvent6
+Strategy: Sending OrderPlaceEvent6
+MockExchange: Sending OrderCompleteEvent5
+MockExchange: Received MarketDataEvent6
+Dispatching TypeOrderPlace6
+Dispatching TypeOrderComplete5
+MockExchange: Received OrderPlaceEvent6
+PM: Received OrderPlaceEvent1
+PM: Received OrderCompleteEvent1
+Dispatching TypeMarketData7
+Strategy: Received MarketDataEvent7
+Strategy: Sending OrderPlaceEvent7
+MockExchange: Sending OrderCompleteEvent6
+MockExchange: Received MarketDataEvent7
+Dispatching TypeOrderPlace7
+Dispatching TypeOrderComplete6
+MockExchange: Received OrderPlaceEvent7
+PM: Received OrderPlaceEvent1
+PM: Received OrderCompleteEvent1
+Dispatching TypeMarketData8
+Strategy: Received MarketDataEvent8
+Strategy: Sending OrderPlaceEvent8
+MockExchange: Sending OrderCompleteEvent7
+MockExchange: Received MarketDataEvent8
+Dispatching TypeOrderPlace8
+Dispatching TypeOrderComplete7
+MockExchange: Received OrderPlaceEvent8
+PM: Received OrderPlaceEvent1
+PM: Received OrderCompleteEvent1
+Dispatching TypeMarketData9
+Strategy: Received MarketDataEvent9
+Strategy: Sending OrderPlaceEvent9
+MockExchange: Sending OrderCompleteEvent8
+MockExchange: Received MarketDataEvent9
+Dispatching TypeOrderPlace9
+Dispatching TypeOrderComplete8
+MockExchange: Received OrderPlaceEvent9
+PM: Received OrderPlaceEvent1
+PM: Received OrderCompleteEvent1
+Dispatching TypeMarketData10
+Strategy: Received MarketDataEvent10
+Strategy: Sending OrderPlaceEvent10
+MockExchange: Sending OrderCompleteEvent9
+MockExchange: Received MarketDataEvent10
+Dispatching TypeOrderPlace10
+Dispatching TypeOrderComplete9
+MockExchange: Received OrderPlaceEvent10
+PM: Received OrderPlaceEvent1
+PM: Received OrderCompleteEvent1
+Dispatching TypeMarketData11
+Strategy: Received MarketDataEvent11
+Strategy: Sending OrderPlaceEvent11
+MockExchange: Sending OrderCompleteEvent10
+MockExchange: Received MarketDataEvent11
+Dispatching TypeOrderPlace11
+Dispatching TypeOrderComplete10
+MockExchange: Received OrderPlaceEvent11
+PM: Received OrderPlaceEvent1
+PM: Received OrderCompleteEvent1
+MockExchange: Sending OrderCompleteEvent11
+Dispatching TypeOrderComplete11
+PM: Received OrderCompleteEvent1

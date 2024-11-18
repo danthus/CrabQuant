@@ -4,6 +4,7 @@ mod market_data_feeder;
 mod mock_exchange;
 mod portfolio_manager;
 mod strategy;
+mod util;
 
 use crate::event_manager::EventManager;
 use crate::events::EventType;
@@ -19,6 +20,10 @@ fn main() {
     let mut event_manager = EventManager::new();
 
     // Initialize Modules
+    let mut strategy = Strategy::new();
+    event_manager.subscribe(EventType::TypeMarketData, &strategy);
+    event_manager.allow_publish("high".to_string(), &mut strategy);
+
     let mut mock_exchange = MockExchange::new();
     event_manager.subscribe(EventType::TypeMarketData, &mock_exchange);
     event_manager.subscribe(EventType::TypeOrderPlace, &mock_exchange);
@@ -26,10 +31,6 @@ fn main() {
 
     let mut market_data_feeder = MarketDataFeeder::new();
     event_manager.allow_publish("low".to_string(), &mut market_data_feeder);
-
-    let mut strategy = Strategy::new();
-    event_manager.subscribe(EventType::TypeMarketData, &strategy);
-    event_manager.allow_publish("high".to_string(), &mut strategy);
 
     let mut portfolio_manager = PortfolioManager::new(1000000000.0);
     event_manager.subscribe(EventType::TypeOrderPlace, &portfolio_manager);
@@ -50,14 +51,14 @@ fn main() {
 
     // Start feeding data
     let market_data_feeder_thread = thread::spawn(move || {
-        market_data_feeder.start_feeding("./data/SPY_1min_sample.csv");
+        market_data_feeder.start_feeding("./data/SPY_1day_sample.csv");
     });
 
     // thread::sleep(std::time::Duration::from_millis(1));
 
     // Process events in the main thread
     let event_manager_thread = thread::spawn(move || {
-        event_manager.process_events();
+        event_manager.proceed();
     });
 
     // Wait for threads to complete

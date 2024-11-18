@@ -2,7 +2,8 @@ use crate::event_manager::{Event, ModulePublish, ModuleReceive};
 use crate::events::{EventType, OrderCompleteEvent, OrderPlaceEvent, EventContent};
 use crossbeam::channel::{Sender, Receiver, bounded};
 use std::collections::HashMap;
-
+#[cfg(feature= "custom_test")]
+use crate::util::Counter;
 pub struct PortfolioManager {
     subscribe_sender: Sender<Event>,
     subscribe_receiver: Receiver<Event>,
@@ -40,13 +41,21 @@ pub fn run(&mut self) {
         let event = self.subscribe_receiver.recv().unwrap();
         // println!("PortfolioManager: received event: {:?}", event);
 
+        #[cfg(feature= "custom_test")]
+        let mut counter_a = Counter::new();
+        #[cfg(feature= "custom_test")]
+        let mut counter_b = Counter::new();
         match event.contents {
             EventContent::OrderPlace(order_place_event) => {
-                println!(
-                    "PortfolioManager: Received OrderPlaceEvent: {:?}",
-                    order_place_event
-                );
-
+                // println!(
+                //     "PortfolioManager: Received OrderPlaceEvent: {:?}",
+                //     order_place_event
+                // );
+                #[cfg(feature= "custom_test")]
+                {
+                    println!("PM: Received OrderPlaceEvent{}", counter_a.next());
+                    // println!("PM Timestamp: {:?}", std::time::SystemTime::now());
+                }
                 // Update portfolio with the order details
                 self.update_position(
                     "DummySymbol".to_string(),
@@ -56,12 +65,16 @@ pub fn run(&mut self) {
             },
             EventContent::OrderComplete(order_complete_event) =>{
                 // DO something
-                println!(
-                    "PortfolioManager: Received OrderCompleteEvent: {:?}",
-                    order_complete_event
-                );
-                #[cfg(feature= "timeit")]
-                println!("PM Timestamp: {:?}", std::time::SystemTime::now());
+                // println!(
+                //     "PortfolioManager: Received OrderCompleteEvent: {:?}",
+                //     order_complete_event
+                // );
+                let _ = order_complete_event;
+                #[cfg(feature= "custom_test")]
+                {
+                    println!("PM: Received OrderCompleteEvent{}", counter_b.next());
+                    // println!("PM Timestamp: {:?}", std::time::SystemTime::now());
+                }
             },
             _ => {
                 println!("Unsupported event type: {:?}", event.event_type);

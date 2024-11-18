@@ -1,7 +1,8 @@
 use crate::event_manager::{Event, ModulePublish, ModuleReceive};
 use crate::events::{EventType, MarketDataEvent, OrderPlaceEvent, OrderCompleteEvent, EventContent};
 use crossbeam::channel::{Sender, Receiver, bounded};
-
+#[cfg(feature= "custom_test")]
+use crate::util::Counter;
 pub struct Strategy {
     subscribe_sender: Sender<Event>,
     subscribe_receiver: Receiver<Event>,
@@ -25,6 +26,11 @@ impl Strategy {
             panic!("Publish sender is not initialized!");
         }
 
+        #[cfg(feature= "custom_test")]
+        let mut counter_a = Counter::new();
+        #[cfg(feature= "custom_test")]
+        let mut counter_b = Counter::new();
+
         loop {
             // Receive an event from the subscribe_receiver
             let event = self.subscribe_receiver.recv().unwrap();
@@ -32,8 +38,11 @@ impl Strategy {
 
             if let EventType::TypeMarketData = event.event_type {
                 if let EventContent::MarketData(market_data) = event.contents {
-                    println!("Strategy: Received MarketDataEvent: {:?}", market_data);
-
+                    // println!("Strategy: Received MarketDataEvent: {:?}", market_data);
+                    #[cfg(feature= "custom_test")]
+                    {
+                        println!("Strategy: Received MarketDataEvent{}", counter_a.next());
+                    }
                     // Sample OrderPlaceEvent based on MarketDataEvent
                     let order_event = OrderPlaceEvent {
                         order_id: 1, 
@@ -42,8 +51,11 @@ impl Strategy {
                     };
 
                     let order_event = Event::new(EventType::TypeOrderPlace, EventContent::OrderPlace(order_event));
-                    println!("Strategy: Sending OrderPlaceEvent: {:?}", order_event);
-
+                    // println!("Strategy: Sending OrderPlaceEvent: {:?}", order_event);
+                    #[cfg(feature= "custom_test")]
+                    {
+                        println!("Strategy: Sending OrderPlaceEvent{}", counter_b.next());
+                    }
                     // Publish the OrderPlaceEvent
                     self.publish(order_event);
                 } else {
