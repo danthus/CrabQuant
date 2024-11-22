@@ -71,14 +71,16 @@ impl MarketDataFeeder {
             }
             self.publish(Event::new(EventType::TypeMarketData, EventContent::MarketData(market_data)));
 
-            if first_data{
-                // A tiny little sprinkle of magic
-                // To fix the case when others hp modules are not ready
-                // But multiple lp events have been dispatched
-                println!("MDF: Warming up...");
-                thread::sleep(std::time::Duration::from_millis(1));
-                first_data = false;
-            }
+            // if first_data{
+            //     // A tiny little sprinkle of magic
+            //     // To fix the case when others hp modules are not ready
+            //     // But multiple lp events have been dispatched
+            //     println!("MDF: Warming up...");
+            //     thread::sleep(std::time::Duration::from_millis(1));
+            //     first_data = false;
+            // }
+            thread::sleep(std::time::Duration::from_millis(1));
+            // break;
         }
     }
 }

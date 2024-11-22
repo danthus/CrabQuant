@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use crate::util::Counter;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 #[derive(Debug, Clone)]
 pub struct Event {
@@ -46,7 +46,7 @@ pub struct EventManager {
 impl EventManager {
     pub fn new() -> Self {
         let (hp_sender, hp_receiver) = unbounded();
-        let (lp_sender, lp_receiver) = bounded(10);
+        let (lp_sender, lp_receiver) = bounded(20);
 
         #[cfg(feature = "custom_test")]
         let mut event_counters = HashMap::new();
@@ -135,20 +135,29 @@ impl EventManager {
     //     }
     // }
     pub fn proceed(&mut self) {
+
+        let event = self.lp_receiver.recv().unwrap();
+        self.dispatch_event(event);
+
+        let timeout = Duration::from_secs(3);
+        let mut start = Instant::now();
+
         loop {
             // Continuously process all high-priority events
             while let Ok(event) = self.hp_receiver.try_recv() {
                 self.dispatch_event(event);
+                start = Instant::now();
             }
 
             // Process low-priority events
             if let Ok(event) = self.lp_receiver.try_recv() {
                 self.dispatch_event(event);
-
+                start = Instant::now();
                 // After dispatching a low-priority event, check for new high-priority events
-                while let Ok(event) = self.hp_receiver.try_recv() {
-                    self.dispatch_event(event);
-                }
+                // while let Ok(event) = self.hp_receiver.try_recv() {
+                //     self.dispatch_event(event);
+                // }
+
             } else {
                 // If no events are available, you may want to sleep or handle idle state
                 // For example:
@@ -156,6 +165,14 @@ impl EventManager {
                 // If backtesting, return.
                 // println!("All lp events are handled. Backtesting process completed.");
                 // return;
+                // acc += 1;
+                // println!("acc = {}", acc);
+                if start.elapsed() >= timeout {
+                    println!("!!!!!All lp events are handled. Backtesting process completed.!!!!!!!");                    
+                    break;
+                }
+                // println!("!!!!!All lp events are handled. Backtesting process completed.!!!!!!!");
+                // break;
             }
         }
     }

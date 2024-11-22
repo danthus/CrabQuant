@@ -41,7 +41,48 @@ impl Strategy {
         loop {
             // Receive an event from the subscribe_receiver
             let event = self.subscribe_receiver.recv().unwrap();
-            // println!("Strategy: received event: {:?}", event);
+
+            // match self.subscribe_receiver.recv() {
+            //     Ok(event) => {
+            //         if let EventType::TypeMarketData = event.event_type {
+            //             if let EventContent::MarketData(market_data) = event.contents {
+            //                 // println!("Strategy: Received MarketDataEvent: {:?}", market_data);
+            //                 #[cfg(feature= "custom_test")]
+            //                 {            
+            //                     let sleep_duration = rng.gen_range(10..500);
+            //                     thread::sleep(Duration::from_millis(sleep_duration));
+            //                     println!("Strategy: Received MarketDataEvent{}", counter_a.next());
+            //                 }
+            //                 // Sample OrderPlaceEvent based on MarketDataEvent
+            //                 let order_event = OrderPlaceEvent {
+            //                     order_id: 1, 
+            //                     quantity: 100, 
+            //                     price: market_data.close,
+            //                 };
+        
+            //                 let order_event = Event::new(EventType::TypeOrderPlace, EventContent::OrderPlace(order_event));
+            //                 // println!("Strategy: Sending OrderPlaceEvent: {:?}", order_event);
+            //                 #[cfg(feature= "custom_test")]
+            //                 {                        
+            //                     let sleep_duration = rng.gen_range(10..500);
+            //                     thread::sleep(Duration::from_millis(sleep_duration));
+            //                     println!("Strategy: Sending OrderPlaceEvent{}", counter_b.next());
+            //                 }
+            //                 // Publish the OrderPlaceEvent
+            //                 self.publish(order_event);
+            //             } else {
+            //                 eprintln!("Failed to pattern match event to MarketDataEvent.");
+            //             }
+            //         } else {
+            //             println!("Unsupported event type: {:?}", event.event_type);
+            //         }
+
+            //     }
+            //     Err(_) => {
+            //         println!("!!!Strategy channel closed.!!!");
+            //         break;
+            //     }
+            // }
 
             if let EventType::TypeMarketData = event.event_type {
                 if let EventContent::MarketData(market_data) = event.contents {

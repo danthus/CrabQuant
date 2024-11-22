@@ -57,14 +57,18 @@ fn main() {
     // thread::sleep(std::time::Duration::from_millis(1));
 
     // Process events in the main thread
-    let event_manager_thread = thread::spawn(move || {
-        event_manager.proceed();
-    });
-
+    // let event_manager_thread = thread::spawn(move || {
+    //     event_manager.proceed();
+    // });
+    event_manager.proceed();
+    
+    return
     // Wait for threads to complete
-    mock_exchange_thread.join().unwrap();
-    market_data_feeder_thread.join().unwrap();
-    strategy_thread.join().unwrap();
-    portfolio_manager_thread.join().unwrap();
-    event_manager_thread.join().unwrap();
+    // println!("waiting for threads to join.");
+    // mock_exchange_thread.join().unwrap();
+    // market_data_feeder_thread.join().unwrap();
+    // strategy_thread.join().unwrap();
+    // portfolio_manager_thread.join().unwrap();
+    // println!("threads joined.");
+    // event_manager_thread.join().unwrap();
 }
