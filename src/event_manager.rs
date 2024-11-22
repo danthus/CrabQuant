@@ -39,7 +39,7 @@ pub struct EventManager {
     lp_receiver: Receiver<Event>,
     hp_sender: Sender<Event>,
     hp_receiver: Receiver<Event>,
-    #[cfg(feature= "custom_test")]
+    #[cfg(feature= "order_test")]
     event_counters: HashMap<EventType, Counter>,
 }
 
@@ -48,12 +48,12 @@ impl EventManager {
         let (hp_sender, hp_receiver) = unbounded();
         let (lp_sender, lp_receiver) = bounded(20);
 
-        #[cfg(feature = "custom_test")]
+        #[cfg(feature = "order_test")]
         let mut event_counters = HashMap::new();
-        #[cfg(feature= "custom_test")]
+        #[cfg(feature= "random_sleep_test")]
         let mut rng = rand::thread_rng();
 
-        #[cfg(feature = "custom_test")]
+        #[cfg(feature = "order_test")]
         {
             // Initialize counters for each EventType you are using
             event_counters.insert(EventType::TypeMarketData, Counter::new());
@@ -68,7 +68,7 @@ impl EventManager {
             lp_receiver,
             hp_sender,
             hp_receiver,
-            #[cfg(feature = "custom_test")]
+            #[cfg(feature = "order_test")]
             event_counters,
         }
     }
@@ -91,7 +91,7 @@ impl EventManager {
     }
 
     fn dispatch_event(&mut self, event: Event) {
-        #[cfg(feature = "custom_test")]
+        #[cfg(feature = "order_test")]
         {
             if let Some(counter) = self.event_counters.get_mut(&event.event_type) {
                 let count = counter.next();

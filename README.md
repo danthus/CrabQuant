@@ -9,9 +9,17 @@
 **Yue Chen 1010813675**
 
 ## **Sample Use**
-To run with test logging and redirect to output.txt:
+To run with order logging and redirect to output.txt:
 ```
-cargo run --features "custom_test" > output.txt
+cargo run --features "order_test" > output.txt
+```
+To run with timestamp logging and redirect to output.txt:
+```
+cargo run --features "timestamp_test"
+```
+To run with random sleep:
+```
+cargo run --features "random_sleep_test"
 ```
 ## **Motivation**
 

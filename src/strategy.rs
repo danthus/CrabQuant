@@ -1,7 +1,7 @@
 use crate::event_manager::{Event, ModulePublish, ModuleReceive};
 use crate::events::{EventType, MarketDataEvent, OrderPlaceEvent, OrderCompleteEvent, EventContent};
 use crossbeam::channel::{Sender, Receiver, bounded};
-#[cfg(feature= "custom_test")]
+#[cfg(feature= "order_test")]
 use crate::util::Counter;
 use rand::Rng;
 use std::time::Duration;
@@ -30,11 +30,11 @@ impl Strategy {
             panic!("Publish sender is not initialized!");
         }
 
-        #[cfg(feature= "custom_test")]
+        #[cfg(feature= "order_test")]
         let mut counter_a = Counter::new();
-        #[cfg(feature= "custom_test")]
+        #[cfg(feature= "order_test")]
         let mut counter_b = Counter::new();
-        #[cfg(feature= "custom_test")]
+        #[cfg(feature= "random_sleep_test")]
         let mut rng = rand::thread_rng();
 
 
@@ -87,10 +87,13 @@ impl Strategy {
             if let EventType::TypeMarketData = event.event_type {
                 if let EventContent::MarketData(market_data) = event.contents {
                     // println!("Strategy: Received MarketDataEvent: {:?}", market_data);
-                    #[cfg(feature= "custom_test")]
+                    #[cfg(feature= "random_sleep_test")]
                     {            
                         let sleep_duration = rng.gen_range(10..500);
                         thread::sleep(Duration::from_millis(sleep_duration));
+                    }
+                    #[cfg(feature= "order_test")]
+                    {
                         println!("Strategy: Received MarketDataEvent{}", counter_a.next());
                     }
                     // Sample OrderPlaceEvent based on MarketDataEvent
@@ -102,10 +105,13 @@ impl Strategy {
 
                     let order_event = Event::new(EventType::TypeOrderPlace, EventContent::OrderPlace(order_event));
                     // println!("Strategy: Sending OrderPlaceEvent: {:?}", order_event);
-                    #[cfg(feature= "custom_test")]
+                    #[cfg(feature= "random_sleep_test")]
                     {                        
                         let sleep_duration = rng.gen_range(10..500);
                         thread::sleep(Duration::from_millis(sleep_duration));
+                    }
+                    #[cfg(feature= "order_test")]
+                    {
                         println!("Strategy: Sending OrderPlaceEvent{}", counter_b.next());
                     }
                     // Publish the OrderPlaceEvent

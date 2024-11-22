@@ -9,7 +9,7 @@ use std::time::Duration;
 use std::time::SystemTime;
 use rand::Rng;
 
-#[cfg(feature= "custom_test")]
+#[cfg(feature= "order_test")]
 use crate::util::Counter;
 
 pub struct MarketDataFeeder {
@@ -42,9 +42,9 @@ impl MarketDataFeeder {
             .has_headers(true)
             .from_reader(file);
 
-        #[cfg(feature= "custom_test")]
+        #[cfg(feature= "order_test")]
         let mut counter = Counter::new();
-        #[cfg(feature= "custom_test")]
+        #[cfg(feature= "random_sleep_test")]
         let mut rng = rand::thread_rng();
 
         let mut first_data = true;
@@ -62,12 +62,15 @@ impl MarketDataFeeder {
 
             // Send data through the channel
             // println!("MarketDataFeeder: Sending: {:?}", market_data);
-            #[cfg(feature= "custom_test")]
+            #[cfg(feature= "random_sleep_event")]
             {
                 let sleep_duration = rng.gen_range(10..500);
                 thread::sleep(Duration::from_millis(sleep_duration));
+            }
+            #[cfg(feature= "order_test")]
+            {
                 println!("MarketDataFeeder: Sending MarketDataEvent{}", counter.next());
-                // println!("MDF Timestamp: {:?}", std::time::SystemTime::now());
+                println!("MDF Timestamp: {:?}", std::time::SystemTime::now());
             }
             self.publish(Event::new(EventType::TypeMarketData, EventContent::MarketData(market_data)));
 
