@@ -32,6 +32,7 @@ pub trait ModulePublish {
     fn use_sender(&mut self, sender: Sender<Event>);
 }
 pub struct EventManager {
+    // sb: 
     subscriber_book: HashMap<EventType, Vec<Sender<Event>>>,
     lp_sender: Sender<Event>,
     lp_receiver: Receiver<Event>,
@@ -97,8 +98,8 @@ impl EventManager {
             }
         }
         if let Some(subscribers) = self.subscriber_book.get(&event.event_type) {
-            for sender in subscribers {
-                if let Err(e) = sender.send(event.clone()) {
+            for dispatch_sender in subscribers {
+                if let Err(e) = dispatch_sender.send(event.clone()) {
                     eprintln!("Failed to send event to subscriber: {:?}", e);
                 }
             }

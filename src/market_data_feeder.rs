@@ -68,6 +68,7 @@ impl MarketDataFeeder {
             self.publish(Event::new(EventType::TypeMarketData, EventContent::MarketData(market_data)));
 
             if first_data{
+                println!("MDF: Warming up...");
                 thread::sleep(std::time::Duration::from_millis(1));
                 first_data = false;
             }

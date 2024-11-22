@@ -3,6 +3,7 @@ use crate::events::{EventType, MarketDataEvent, OrderPlaceEvent, OrderCompleteEv
 use crossbeam::channel::{Sender, Receiver, bounded};
 #[cfg(feature= "custom_test")]
 use crate::util::Counter;
+
 pub struct Strategy {
     subscribe_sender: Sender<Event>,
     subscribe_receiver: Receiver<Event>,
