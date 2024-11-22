@@ -2,6 +2,7 @@ use crate::event_manager::{Event, ModulePublish, ModuleReceive};
 use crate::events::{EventType, OrderCompleteEvent, OrderPlaceEvent, EventContent};
 use crossbeam::channel::{Sender, Receiver, bounded};
 use std::collections::HashMap;
+use rand::Rng;
 #[cfg(feature= "custom_test")]
 use crate::util::Counter;
 pub struct PortfolioManager {
@@ -37,14 +38,15 @@ impl PortfolioManager {
 
 /// Continuously process events
 pub fn run(&mut self) {
+    #[cfg(feature= "custom_test")]
+    let mut counter_a = Counter::new();
+    #[cfg(feature= "custom_test")]
+    let mut counter_b = Counter::new();
+
     loop {
         let event = self.subscribe_receiver.recv().unwrap();
         // println!("PortfolioManager: received event: {:?}", event);
 
-        #[cfg(feature= "custom_test")]
-        let mut counter_a = Counter::new();
-        #[cfg(feature= "custom_test")]
-        let mut counter_b = Counter::new();
         match event.contents {
             EventContent::OrderPlace(order_place_event) => {
                 // println!(

@@ -9,6 +9,8 @@ use std::time::Duration;
 use std::time::SystemTime;
 // use std::thread;
 // use std::time::Duration;
+use rand::Rng;
+
 #[cfg(feature= "custom_test")]
 use crate::util::Counter;
 
@@ -62,12 +64,17 @@ impl MarketDataFeeder {
             // println!("MarketDataFeeder: Sending: {:?}", market_data);
             #[cfg(feature= "custom_test")]
             {
+                let sleep_duraztion = rng.gen_range(10..500);
+                sleep(Duration::from_millis(sleep_duration));
                 println!("MarketDataFeeder: Sending MarketDataEvent{}", counter.next());
                 // println!("MDF Timestamp: {:?}", std::time::SystemTime::now());
             }
             self.publish(Event::new(EventType::TypeMarketData, EventContent::MarketData(market_data)));
 
             if first_data{
+                // A tiny little sprinkle of magic
+                // To fix the case when others hp modules are not ready
+                // But multiple lp events have been dispatched
                 println!("MDF: Warming up...");
                 thread::sleep(std::time::Duration::from_millis(1));
                 first_data = false;

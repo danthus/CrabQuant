@@ -3,6 +3,7 @@ use crate::events::{EventType, MarketDataEvent, OrderPlaceEvent, OrderCompleteEv
 use crossbeam::channel::{Sender, Receiver, bounded};
 #[cfg(feature= "custom_test")]
 use crate::util::Counter;
+use rand::Rng;
 
 pub struct Strategy {
     subscribe_sender: Sender<Event>,
@@ -41,7 +42,9 @@ impl Strategy {
                 if let EventContent::MarketData(market_data) = event.contents {
                     // println!("Strategy: Received MarketDataEvent: {:?}", market_data);
                     #[cfg(feature= "custom_test")]
-                    {
+                    {            
+                        let sleep_duraztion = rng.gen_range(10..500);
+                        sleep(Duration::from_millis(sleep_duration));
                         println!("Strategy: Received MarketDataEvent{}", counter_a.next());
                     }
                     // Sample OrderPlaceEvent based on MarketDataEvent
@@ -54,7 +57,9 @@ impl Strategy {
                     let order_event = Event::new(EventType::TypeOrderPlace, EventContent::OrderPlace(order_event));
                     // println!("Strategy: Sending OrderPlaceEvent: {:?}", order_event);
                     #[cfg(feature= "custom_test")]
-                    {
+                    {                        
+                        let sleep_duraztion = rng.gen_range(10..500);
+                        sleep(Duration::from_millis(sleep_duration));
                         println!("Strategy: Sending OrderPlaceEvent{}", counter_b.next());
                     }
                     // Publish the OrderPlaceEvent

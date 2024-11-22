@@ -150,6 +150,9 @@ impl EventManager {
                 // If no events are available, you may want to sleep or handle idle state
                 // For example:
                 // std::thread::sleep(std::time::Duration::from_millis(1));
+                // If backtesting, return.
+                // println!("All lp events are handled. Backtesting process completed.");
+                // return;
             }
         }
     }
