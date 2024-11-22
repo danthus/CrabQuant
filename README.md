@@ -8,6 +8,11 @@
 **Haoran Zhou 1003970713**  
 **Yue Chen 1010813675**
 
+## **Sample Use**
+To run with test logging and redirect to output.txt:
+```
+cargo run --features "custom_test" > output.txt
+```
 ## **Motivation**
 
 Accurate, efficient, and reproducible backtesting is fundamental to the research and development of quantitative trading strategies. As the critical first step in validating a strategy's effectiveness, backtesting allows traders to simulate performance on historical data, offering essential insights before any capital is put at risk in live markets.
