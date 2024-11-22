@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use crate::util::Counter;
+use std::time::Duration;
 
 #[derive(Debug, Clone)]
 pub struct Event {
@@ -49,6 +50,8 @@ impl EventManager {
 
         #[cfg(feature = "custom_test")]
         let mut event_counters = HashMap::new();
+        #[cfg(feature= "custom_test")]
+        let mut rng = rand::thread_rng();
 
         #[cfg(feature = "custom_test")]
         {

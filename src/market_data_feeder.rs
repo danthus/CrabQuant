@@ -7,8 +7,6 @@ use std::fs::File;
 use std::thread;
 use std::time::Duration;
 use std::time::SystemTime;
-// use std::thread;
-// use std::time::Duration;
 use rand::Rng;
 
 #[cfg(feature= "custom_test")]
@@ -46,6 +44,8 @@ impl MarketDataFeeder {
 
         #[cfg(feature= "custom_test")]
         let mut counter = Counter::new();
+        #[cfg(feature= "custom_test")]
+        let mut rng = rand::thread_rng();
 
         let mut first_data = true;
 
@@ -64,8 +64,8 @@ impl MarketDataFeeder {
             // println!("MarketDataFeeder: Sending: {:?}", market_data);
             #[cfg(feature= "custom_test")]
             {
-                let sleep_duraztion = rng.gen_range(10..500);
-                sleep(Duration::from_millis(sleep_duration));
+                let sleep_duration = rng.gen_range(10..500);
+                thread::sleep(Duration::from_millis(sleep_duration));
                 println!("MarketDataFeeder: Sending MarketDataEvent{}", counter.next());
                 // println!("MDF Timestamp: {:?}", std::time::SystemTime::now());
             }

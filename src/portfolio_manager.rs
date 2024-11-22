@@ -5,6 +5,8 @@ use std::collections::HashMap;
 use rand::Rng;
 #[cfg(feature= "custom_test")]
 use crate::util::Counter;
+use std::time::Duration;
+use std::thread;
 pub struct PortfolioManager {
     subscribe_sender: Sender<Event>,
     subscribe_receiver: Receiver<Event>,
@@ -42,6 +44,8 @@ pub fn run(&mut self) {
     let mut counter_a = Counter::new();
     #[cfg(feature= "custom_test")]
     let mut counter_b = Counter::new();
+    #[cfg(feature= "custom_test")]
+    let mut rng = rand::thread_rng();
 
     loop {
         let event = self.subscribe_receiver.recv().unwrap();

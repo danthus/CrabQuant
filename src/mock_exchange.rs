@@ -5,6 +5,7 @@ use crossbeam::channel::{bounded, Receiver, Sender};
 use crate::util::Counter;
 use std::thread;
 use rand::Rng;
+use std::time::Duration;
 
 pub struct MockExchange {
     // subscribe_sender is for event_manager to use only.
@@ -57,6 +58,9 @@ impl MockExchange {
         let mut counter_b = Counter::new();
         #[cfg(feature= "custom_test")]
         let mut counter_c = Counter::new();
+        #[cfg(feature= "custom_test")]
+        let mut rng = rand::thread_rng();
+        
         loop {
             let event = self.subscribe_receiver.recv().unwrap();
             // println!("MockExchange: Received event: {:?}", event);
@@ -67,7 +71,7 @@ impl MockExchange {
                     #[cfg(feature= "custom_test")]
                     {
                         let sleep_duration = rng.gen_range(10..500);
-                        sleep(Duration::from_millis(sleep_duration));
+                        thread::sleep(Duration::from_millis(sleep_duration));
                         println!("MockExchange: Received MarketDataEvent{}", counter_a.next());
                     }
                     // MockExchange doesn't generate new events for MarketDataEvent
@@ -77,7 +81,7 @@ impl MockExchange {
                     #[cfg(feature= "custom_test")]
                     {
                         let sleep_duration = rng.gen_range(10..500);
-                        sleep(Duration::from_millis(sleep_duration));
+                        thread::sleep(Duration::from_millis(sleep_duration));
                         println!("MockExchange: Received OrderPlaceEvent{}", counter_b.next());
                     }
                     // Generate an OrderCompleteEvent in response
@@ -91,7 +95,7 @@ impl MockExchange {
                     #[cfg(feature= "custom_test")]
                     {
                         let sleep_duration = rng.gen_range(10..500);
-                        sleep(Duration::from_millis(sleep_duration));
+                        thread::sleep(Duration::from_millis(sleep_duration));
                         println!("MockExchange: Sending OrderCompleteEvent{}", counter_c.next());
                     }
                     // Publish the OrderCompleteEvent

@@ -4,6 +4,8 @@ use crossbeam::channel::{Sender, Receiver, bounded};
 #[cfg(feature= "custom_test")]
 use crate::util::Counter;
 use rand::Rng;
+use std::time::Duration;
+use std::thread;
 
 pub struct Strategy {
     subscribe_sender: Sender<Event>,
@@ -32,6 +34,9 @@ impl Strategy {
         let mut counter_a = Counter::new();
         #[cfg(feature= "custom_test")]
         let mut counter_b = Counter::new();
+        #[cfg(feature= "custom_test")]
+        let mut rng = rand::thread_rng();
+
 
         loop {
             // Receive an event from the subscribe_receiver
@@ -43,8 +48,8 @@ impl Strategy {
                     // println!("Strategy: Received MarketDataEvent: {:?}", market_data);
                     #[cfg(feature= "custom_test")]
                     {            
-                        let sleep_duraztion = rng.gen_range(10..500);
-                        sleep(Duration::from_millis(sleep_duration));
+                        let sleep_duration = rng.gen_range(10..500);
+                        thread::sleep(Duration::from_millis(sleep_duration));
                         println!("Strategy: Received MarketDataEvent{}", counter_a.next());
                     }
                     // Sample OrderPlaceEvent based on MarketDataEvent
@@ -58,8 +63,8 @@ impl Strategy {
                     // println!("Strategy: Sending OrderPlaceEvent: {:?}", order_event);
                     #[cfg(feature= "custom_test")]
                     {                        
-                        let sleep_duraztion = rng.gen_range(10..500);
-                        sleep(Duration::from_millis(sleep_duration));
+                        let sleep_duration = rng.gen_range(10..500);
+                        thread::sleep(Duration::from_millis(sleep_duration));
                         println!("Strategy: Sending OrderPlaceEvent{}", counter_b.next());
                     }
                     // Publish the OrderPlaceEvent
