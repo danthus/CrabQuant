@@ -1,7 +1,7 @@
 use crate::event_manager::{Event, ModulePublish, ModuleReceive};
 use crate::events::{EventType, OrderCompleteEvent, OrderPlaceEvent, MarketDataEvent, EventContent};
 use crossbeam::channel::{bounded, Receiver, Sender};
-#[cfg(feature= "custom_test")]
+#[cfg(feature= "order_test")]
 use crate::util::Counter;
 use std::thread;
 use rand::Rng;
@@ -52,15 +52,15 @@ impl MockExchange {
         if self.publish_sender.is_none() {
             panic!("publish_sender is not initialized!");
         }
-        #[cfg(feature= "custom_test")]
+        #[cfg(feature= "order_test")]
         let mut counter_a = Counter::new();
-        #[cfg(feature= "custom_test")]
+        #[cfg(feature= "order_test")]
         let mut counter_b = Counter::new();
-        #[cfg(feature= "custom_test")]
+        #[cfg(feature= "order_test")]
         let mut counter_c = Counter::new();
-        #[cfg(feature= "custom_test")]
+        #[cfg(feature= "random_sleep_test")]
         let mut rng = rand::thread_rng();
-        
+
         loop {
             let event = self.subscribe_receiver.recv().unwrap();
             // println!("MockExchange: Received event: {:?}", event);
@@ -68,20 +68,26 @@ impl MockExchange {
             match event.contents {
                 EventContent::MarketData(market_data) => {
                     // println!("MockExchange: Received MarketDataEvent: {:?}", market_data);
-                    #[cfg(feature= "custom_test")]
+                    #[cfg(feature= "random_sleep_test")]
                     {
                         let sleep_duration = rng.gen_range(10..500);
                         thread::sleep(Duration::from_millis(sleep_duration));
+                    }
+                    #[cfg(feature= "order_test")]
+                    {
                         println!("MockExchange: Received MarketDataEvent{}", counter_a.next());
                     }
                     // MockExchange doesn't generate new events for MarketDataEvent
                 }
                 EventContent::OrderPlace(order_place_event) => {
                     // println!("MockExchange: Received OrderPlaceEvent: {:?}", order_place_event);
-                    #[cfg(feature= "custom_test")]
+                    #[cfg(feature= "random_sleep_test")]
                     {
                         let sleep_duration = rng.gen_range(10..500);
                         thread::sleep(Duration::from_millis(sleep_duration));
+                    }
+                    #[cfg(feature= "order_test")]
+                    {
                         println!("MockExchange: Received OrderPlaceEvent{}", counter_b.next());
                     }
                     // Generate an OrderCompleteEvent in response
@@ -92,10 +98,13 @@ impl MockExchange {
     
                     let complete_event = Event::new(EventType::TypeOrderComplete, EventContent::OrderComplete(order_complete_event));
                     // println!("MockExchange: sending OrderCompleteEvent: {:?}", complete_event);
-                    #[cfg(feature= "custom_test")]
+                    #[cfg(feature= "random_sleep_test")]
                     {
                         let sleep_duration = rng.gen_range(10..500);
                         thread::sleep(Duration::from_millis(sleep_duration));
+                    }
+                    #[cfg(feature= "order_test")]
+                    {
                         println!("MockExchange: Sending OrderCompleteEvent{}", counter_c.next());
                     }
                     // Publish the OrderCompleteEvent

@@ -3,7 +3,7 @@ use crate::events::{EventType, OrderCompleteEvent, OrderPlaceEvent, EventContent
 use crossbeam::channel::{Sender, Receiver, bounded};
 use std::collections::HashMap;
 use rand::Rng;
-#[cfg(feature= "custom_test")]
+#[cfg(feature= "order_test")]
 use crate::util::Counter;
 use std::time::Duration;
 use std::thread;
@@ -40,11 +40,11 @@ impl PortfolioManager {
 
 /// Continuously process events
 pub fn run(&mut self) {
-    #[cfg(feature= "custom_test")]
+    #[cfg(feature= "order_test")]
     let mut counter_a = Counter::new();
-    #[cfg(feature= "custom_test")]
+    #[cfg(feature= "order_test")]
     let mut counter_b = Counter::new();
-    #[cfg(feature= "custom_test")]
+    #[cfg(feature= "random_sleep_test")]
     let mut rng = rand::thread_rng();
 
     loop {
@@ -57,7 +57,7 @@ pub fn run(&mut self) {
                 //     "PortfolioManager: Received OrderPlaceEvent: {:?}",
                 //     order_place_event
                 // );
-                #[cfg(feature= "custom_test")]
+                #[cfg(feature= "order_test")]
                 {
                     println!("PM: Received OrderPlaceEvent{}", counter_a.next());
                     // println!("PM Timestamp: {:?}", std::time::SystemTime::now());
@@ -76,10 +76,13 @@ pub fn run(&mut self) {
                 //     order_complete_event
                 // );
                 let _ = order_complete_event;
-                #[cfg(feature= "custom_test")]
+                #[cfg(feature = "order_test")]
                 {
                     println!("PM: Received OrderCompleteEvent{}", counter_b.next());
-                    // println!("PM Timestamp: {:?}", std::time::SystemTime::now());
+                }
+                #[cfg(feature = "timestamp_test")]
+                {
+                    println!("PM Timestamp: {:?}", std::time::SystemTime::now());
                 }
             },
             _ => {

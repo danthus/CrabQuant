@@ -1,0 +1,144 @@
+MarketDataFeeder: Sending MarketDataEvent1
+MDF Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 492391000 }
+MDF: Warming up...
+Dispatching TypeMarketData1
+Strategy: Received MarketDataEvent1
+Strategy: Sending OrderPlaceEvent1
+MockExchange: Received MarketDataEvent1
+Dispatching TypeOrderPlace1
+MockExchange: Received OrderPlaceEvent1
+MockExchange: Sending OrderCompleteEvent1
+PM: Received OrderPlaceEvent1
+Dispatching TypeOrderComplete1
+PM: Received OrderCompleteEvent1
+PM Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 492749000 }
+MarketDataFeeder: Sending MarketDataEvent2
+MDF Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 493787000 }
+Dispatching TypeMarketData2
+MarketDataFeeder: Sending MarketDataEvent3
+MDF Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 493808000 }
+Dispatching TypeMarketData3
+MockExchange: Received MarketDataEvent2
+MarketDataFeeder: Sending MarketDataEvent4
+MDF Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 493838000 }
+Strategy: Received MarketDataEvent2
+MarketDataFeeder: Sending MarketDataEvent5
+MDF Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 493853000 }
+Strategy: Sending OrderPlaceEvent2
+Strategy: Received MarketDataEvent3
+Strategy: Sending OrderPlaceEvent3
+MarketDataFeeder: Sending MarketDataEvent6
+MockExchange: Received MarketDataEvent3
+Dispatching TypeOrderPlace2
+Dispatching TypeOrderPlace3
+MockExchange: Received OrderPlaceEvent2
+MockExchange: Sending OrderCompleteEvent2
+MockExchange: Received OrderPlaceEvent3
+MDF Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 493885000 }
+MockExchange: Sending OrderCompleteEvent3
+MarketDataFeeder: Sending MarketDataEvent7
+MDF Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 493935000 }
+PM: Received OrderPlaceEvent2
+MarketDataFeeder: Sending MarketDataEvent8
+MDF Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 493952000 }
+Dispatching TypeOrderComplete2
+PM: Received OrderPlaceEvent3
+PM: Received OrderCompleteEvent2
+PM Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 493985000 }
+MarketDataFeeder: Sending MarketDataEvent9
+MDF Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 493993000 }
+Dispatching TypeOrderComplete3
+MarketDataFeeder: Sending MarketDataEvent10
+PM: Received OrderCompleteEvent3
+PM Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 494016000 }
+Dispatching TypeMarketData4
+Dispatching TypeMarketData5
+Strategy: Received MarketDataEvent4
+Strategy: Sending OrderPlaceEvent4
+Strategy: Received MarketDataEvent5
+MDF Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 494011000 }
+Strategy: Sending OrderPlaceEvent5
+MockExchange: Received MarketDataEvent4
+MockExchange: Received MarketDataEvent5
+MarketDataFeeder: Sending MarketDataEvent11
+MDF Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 494082000 }
+Dispatching TypeOrderPlace4
+Dispatching TypeOrderPlace5
+MockExchange: Received OrderPlaceEvent4
+MockExchange: Sending OrderCompleteEvent4
+PM: Received OrderPlaceEvent4
+MockExchange: Received OrderPlaceEvent5
+MockExchange: Sending OrderCompleteEvent5
+PM: Received OrderPlaceEvent5
+Dispatching TypeOrderComplete4
+Dispatching TypeOrderComplete5
+PM: Received OrderCompleteEvent4
+PM Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 494156000 }
+PM: Received OrderCompleteEvent5
+PM Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 494162000 }
+Dispatching TypeMarketData6
+Dispatching TypeMarketData7
+Strategy: Received MarketDataEvent6
+Strategy: Sending OrderPlaceEvent6
+Strategy: Received MarketDataEvent7
+Strategy: Sending OrderPlaceEvent7
+MockExchange: Received MarketDataEvent6
+MockExchange: Received MarketDataEvent7
+Dispatching TypeOrderPlace6
+Dispatching TypeOrderPlace7
+MockExchange: Received OrderPlaceEvent6
+MockExchange: Sending OrderCompleteEvent6
+MockExchange: Received OrderPlaceEvent7
+MockExchange: Sending OrderCompleteEvent7
+PM: Received OrderPlaceEvent6
+PM: Received OrderPlaceEvent7
+Dispatching TypeOrderComplete6
+Dispatching TypeOrderComplete7
+PM: Received OrderCompleteEvent6
+PM Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 494273000 }
+PM: Received OrderCompleteEvent7
+PM Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 494279000 }
+Dispatching TypeMarketData8
+Dispatching TypeMarketData9
+Strategy: Received MarketDataEvent8
+Strategy: Sending OrderPlaceEvent8
+Strategy: Received MarketDataEvent9
+Strategy: Sending OrderPlaceEvent9
+MockExchange: Received MarketDataEvent8
+MockExchange: Received MarketDataEvent9
+Dispatching TypeOrderPlace8
+Dispatching TypeOrderPlace9
+MockExchange: Received OrderPlaceEvent8
+MockExchange: Sending OrderCompleteEvent8
+MockExchange: Received OrderPlaceEvent9
+MockExchange: Sending OrderCompleteEvent9
+PM: Received OrderPlaceEvent8
+PM: Received OrderPlaceEvent9
+Dispatching TypeOrderComplete8
+Dispatching TypeOrderComplete9
+PM: Received OrderCompleteEvent8
+PM Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 494361000 }
+PM: Received OrderCompleteEvent9
+PM Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 494364000 }
+Dispatching TypeMarketData10
+Dispatching TypeMarketData11
+Strategy: Received MarketDataEvent10
+Strategy: Sending OrderPlaceEvent10
+MockExchange: Received MarketDataEvent10
+MockExchange: Received MarketDataEvent11
+Dispatching TypeOrderPlace10
+Strategy: Received MarketDataEvent11
+Strategy: Sending OrderPlaceEvent11
+MockExchange: Received OrderPlaceEvent10
+MockExchange: Sending OrderCompleteEvent10
+Dispatching TypeOrderPlace11
+PM: Received OrderPlaceEvent10
+MockExchange: Received OrderPlaceEvent11
+Dispatching TypeOrderComplete10
+MockExchange: Sending OrderCompleteEvent11
+PM: Received OrderPlaceEvent11
+PM: Received OrderCompleteEvent10
+PM Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 494451000 }
+Dispatching TypeOrderComplete11
+PM: Received OrderCompleteEvent11
+PM Timestamp: SystemTime { tv_sec: 1732310479, tv_nsec: 494469000 }
