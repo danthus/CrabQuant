@@ -58,7 +58,7 @@ impl EventManager {
             // Initialize counters for each EventType you are using
             event_counters.insert(EventType::TypeMarketData, Counter::new());
             event_counters.insert(EventType::TypeOrderPlace, Counter::new());
-            event_counters.insert(EventType::TypeOrderComplete, Counter::new());
+            event_counters.insert(EventType::TypePortfolioInfo, Counter::new());
             // Add other EventTypes as needed
         }
 

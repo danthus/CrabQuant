@@ -1,11 +1,28 @@
 use crate::event_manager::{Event, ModulePublish, ModuleReceive};
-use crate::events::{EventType, OrderCompleteEvent, OrderPlaceEvent, MarketDataEvent, EventContent};
+use crate::events::{Order, EventType, Portfolio, PortfolioInfoEvent, OrderPlaceEvent, MarketDataEvent, EventContent};
 use crossbeam::channel::{bounded, Receiver, Sender};
 #[cfg(feature= "order_test")]
 use crate::util::Counter;
+use std::collections::HashMap;
 use std::thread;
 use rand::Rng;
 use std::time::Duration;
+
+
+impl Portfolio{
+    fn new(initial_cash:f64 ) -> Self{
+        Portfolio{
+            asset : 0.0,
+            cash : initial_cash,
+            available_cash : initial_cash,
+            positions : HashMap::new(),
+        }
+    }
+
+    fn try_update_asset(market_data: MarketDataEvent) -> () {
+        // tries to update asset
+    }
+}
 
 pub struct MockExchange {
     // subscribe_sender is for event_manager to use only.
@@ -15,7 +32,11 @@ pub struct MockExchange {
     subscribe_receiver: Receiver<Event>,
     // Use publish_sender to send events to event manager
     publish_sender: Option<Sender<Event>>,
+    portfolio: Portfolio,
+    pending_orders: Vec<Order>,
 }
+
+
 
 impl ModuleReceive for MockExchange {
     fn get_sender(&self) -> Sender<Event> {
@@ -34,21 +55,25 @@ impl ModulePublish for MockExchange {
 impl MockExchange {
     pub fn new() -> Self {
         let (subscribe_sender, subscribe_receiver) = bounded(0);
+        let portfolio = Portfolio::new(1000000.);
+        let pending_orders = Vec::new();
         MockExchange {
             subscribe_sender,
             subscribe_receiver,
             publish_sender: None,
+            portfolio,
+            pending_orders,
         }
     }
 
-    fn publish(&self, event:Event) -> (){
+    fn publish(&mut self, event:Event) -> (){
         if let Some(publish_sender) = &self.publish_sender {
             publish_sender.send(event).unwrap();
         } else {
             panic!("publish_sender is not initialized!");
         }
     }
-    pub fn run(&self) -> () {
+    pub fn run(&mut self) -> () {
         if self.publish_sender.is_none() {
             panic!("publish_sender is not initialized!");
         }
@@ -63,57 +88,53 @@ impl MockExchange {
 
         loop {
             let event = self.subscribe_receiver.recv().unwrap();
-            // println!("MockExchange: Received event: {:?}", event);
-    
-            match event.contents {
-                EventContent::MarketData(market_data) => {
-                    // println!("MockExchange: Received MarketDataEvent: {:?}", market_data);
-                    #[cfg(feature= "random_sleep_test")]
-                    {
-                        let sleep_duration = rng.gen_range(10..500);
-                        thread::sleep(Duration::from_millis(sleep_duration));
-                    }
-                    #[cfg(feature= "order_test")]
-                    {
-                        println!("MockExchange: Received MarketDataEvent{}", counter_a.next());
-                    }
-                    // MockExchange doesn't generate new events for MarketDataEvent
+
+            match event.event_type{
+                EventType::TypeMarketData => {
+                    self.process_marketevent(event);
                 }
-                EventContent::OrderPlace(order_place_event) => {
-                    // println!("MockExchange: Received OrderPlaceEvent: {:?}", order_place_event);
-                    #[cfg(feature= "random_sleep_test")]
-                    {
-                        let sleep_duration = rng.gen_range(10..500);
-                        thread::sleep(Duration::from_millis(sleep_duration));
-                    }
-                    #[cfg(feature= "order_test")]
-                    {
-                        println!("MockExchange: Received OrderPlaceEvent{}", counter_b.next());
-                    }
-                    // Generate an OrderCompleteEvent in response
-                    let order_complete_event = OrderCompleteEvent {
-                        order_id: order_place_event.order_id, // Use the same order ID
-                        filled_quantity: order_place_event.quantity, // Example filled quantity
-                    };
-    
-                    let complete_event = Event::new(EventType::TypeOrderComplete, EventContent::OrderComplete(order_complete_event));
-                    // println!("MockExchange: sending OrderCompleteEvent: {:?}", complete_event);
-                    #[cfg(feature= "random_sleep_test")]
-                    {
-                        let sleep_duration = rng.gen_range(10..500);
-                        thread::sleep(Duration::from_millis(sleep_duration));
-                    }
-                    #[cfg(feature= "order_test")]
-                    {
-                        println!("MockExchange: Sending OrderCompleteEvent{}", counter_c.next());
-                    }
-                    // Publish the OrderCompleteEvent
-                    self.publish(complete_event);
+                EventType::TypeOrderPlace => {
+                    self.process_orderplace(event);
                 }
                 _ => {
                     println!("MockExchange: Unsupported event type: {:?}", event.event_type);
                 }
             }
+        }
+    }
+
+    fn process_marketevent(&mut self, event:Event){
+        // Check if order is valid. If yes, modify portfolio and send. If not, drop it.
+        if true {
+            self.publish(self.get_portfolio());
+        }
+    }
+    fn process_orderplace(&mut self, event:Event){
+        // Check if order is valid. If yes, modify portfolio and send. If not, drop it.
+        // Add order to to_do_list
+        if let EventContent::OrderPlace(order_place_event) = event.contents {
+            // Parse the order from the OrderPlaceEvent
+            let order = order_place_event.order;
+    
+            // Add the parsed order to the pending_orders Vec
+            self.pending_orders.push(order.clone());
+    
+            // println!("Order added to pending_orders: {:?}", order);
+        } else {
+            // Handle the case where the EventContent is not OrderPlace
+            eprintln!("Invalid event content for OrderPlace: {:?}", event.contents);
+        }
+    }
+    fn get_portfolio(&self) -> Event{
+        let portfolio_info = PortfolioInfoEvent {
+            id: 1,
+            portfolio: self.portfolio.clone(),
+        };
+
+        // Wrap it into an Event
+        Event {
+            event_type: EventType::TypePortfolioInfo,
+            contents: EventContent::PortfolioInfo(portfolio_info), 
         }
     }
 }

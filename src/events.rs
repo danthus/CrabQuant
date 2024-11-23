@@ -1,7 +1,7 @@
 // src/models/mod.rs
+use std::collections::HashMap;
 
-
-// Note that the events should only contain immutable simple data.
+// Note that the events should only contain immutable simple data. NVM.
 #[derive(Debug, Clone)]
 pub struct MarketDataEvent {
     pub timestamp: String,
@@ -14,16 +14,23 @@ pub struct MarketDataEvent {
 
 #[derive(Debug, Clone)]
 pub struct OrderPlaceEvent {
-    pub order_id: u64,
-    pub quantity: i32,
-    pub price: f64,
-    // TBD: other fields
+    pub event_id: u64,
+    pub order: Order,
 }
 
 #[derive(Debug, Clone)]
-pub struct OrderCompleteEvent {
-    pub order_id: u64,
-    pub filled_quantity: i32,
+
+pub struct Portfolio {
+    pub asset: f64,
+    pub cash: f64,
+    pub available_cash: f64,
+    pub positions: HashMap<String, i32>,
+}
+
+#[derive(Debug, Clone)]
+pub struct PortfolioInfoEvent {
+    pub id: u64,
+    pub portfolio: Portfolio,
     // TBD: other fields
 }
 
@@ -31,14 +38,14 @@ pub struct OrderCompleteEvent {
 pub enum EventType {
     TypeMarketData,
     TypeOrderPlace,
-    TypeOrderComplete,
+    TypePortfolioInfo,
 }
 
 #[derive(Debug, Clone)]
 pub enum EventContent {
     MarketData(MarketDataEvent),
     OrderPlace(OrderPlaceEvent),
-    OrderComplete(OrderCompleteEvent),
+    PortfolioInfo(PortfolioInfoEvent),
 }
 
 // #[derive(Debug, Hash, Eq, PartialEq, Clone)]
@@ -48,3 +55,21 @@ pub enum EventContent {
 //     Strategy,
 //     PortfolioManager,
 // }
+#[derive(Debug, Clone)]
+pub enum Order{
+    FireAndDrop(FireAndDropOrder),
+}
+
+#[derive(Debug, Clone)]
+
+pub enum OrderDirection{
+    Buy,
+    Sell,
+}#[derive(Debug, Clone)]
+
+pub struct FireAndDropOrder{
+    order_id: i32,
+    amount: i32,
+    direction: OrderDirection,
+}
+
