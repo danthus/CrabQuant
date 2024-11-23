@@ -82,4 +82,8 @@ impl Portfolio{
             positions : HashMap::new(),
         }
     }
+
+    pub fn update_asset(&mut self, market_data:MarketDataEvent){
+        // UPDATE ASSET
+    }
 }
