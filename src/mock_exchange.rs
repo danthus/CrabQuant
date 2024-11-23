@@ -3,6 +3,7 @@ use crate::events::{Order, EventType, Portfolio, PortfolioInfoEvent, OrderPlaceE
 use crossbeam::channel::{bounded, Receiver, Sender};
 #[cfg(feature= "order_test")]
 use crate::util::Counter;
+use std::borrow::BorrowMut;
 use std::collections::HashMap;
 use std::thread;
 use rand::Rng;
@@ -76,10 +77,19 @@ impl MockExchange {
 
             match event.event_type{
                 EventType::TypeMarketData => {
-                    self.process_marketevent(event);
+                    if let EventContent::MarketData(market_data_event) = event.contents {
+                        self.process_marketevent(market_data_event);
+                    } else {
+                        eprintln!("Invalid content for MarketDataEvent: {:?}", event.contents);
+                    }
                 }
                 EventType::TypeOrderPlace => {
-                    self.process_orderplace(event);
+                    if let EventContent::OrderPlace(order_place_event) = event.contents {
+                        // Pass the parsed MarketDataEvent to the processing function
+                        self.process_orderplace(order_place_event);
+                    } else {
+                        eprintln!("Invalid content for MarketDataEvent: {:?}", event.contents);
+                    }
                 }
                 _ => {
                     println!("MockExchange: Unsupported event type: {:?}", event.event_type);
@@ -88,27 +98,21 @@ impl MockExchange {
         }
     }
 
-    fn process_marketevent(&mut self, event:Event){
-        // Check if order is valid. If yes, modify portfolio and send. If not, drop it.
-        if true {
-            self.publish(self.get_portfolio());
-        }
+    fn process_marketevent(&mut self, market_data_event:MarketDataEvent){
+        // TODO: Check if order is valid. If yes, modify portfolio and send. If not, drop it.
+
     }
-    fn process_orderplace(&mut self, event:Event){
+            // if true {
+        //     self.publish(self.get_portfolio());
+        // }
+    fn process_orderplace(&mut self, order_place_event:OrderPlaceEvent){
         // Check if order is valid. If yes, modify portfolio and send. If not, drop it.
         // Add order to to_do_list
-        if let EventContent::OrderPlace(order_place_event) = event.contents {
-            // Parse the order from the OrderPlaceEvent
             let order = order_place_event.order;
     
             // Add the parsed order to the pending_orders Vec
             self.pending_orders.push(order.clone());
     
-            // println!("Order added to pending_orders: {:?}", order);
-        } else {
-            // Handle the case where the EventContent is not OrderPlace
-            eprintln!("Invalid event content for OrderPlace: {:?}", event.contents);
-        }
     }
     fn get_portfolio(&self) -> Event{
         let portfolio_info = PortfolioInfoEvent {
