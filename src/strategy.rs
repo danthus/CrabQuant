@@ -63,8 +63,9 @@ impl Strategy {
             eprintln!("Received an invalid event for PortfolioInfo: {:?}", event.contents);
         }
     }
+    
     fn process_marketevent(&mut self, event: Event){
-
+        
     }
 
     /// Helper method to publish an event

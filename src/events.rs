@@ -82,8 +82,4 @@ impl Portfolio{
             positions : HashMap::new(),
         }
     }
-
-    fn try_update_asset(market_data: MarketDataEvent) -> () {
-        // tries to update asset
-    }
 }

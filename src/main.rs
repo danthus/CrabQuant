@@ -4,6 +4,7 @@ mod market_data_feeder;
 mod mock_exchange;
 mod strategy;
 mod util;
+mod data_analyzer;
 
 use crate::event_manager::EventManager;
 use crate::events::EventType;
@@ -12,6 +13,7 @@ use market_data_feeder::MarketDataFeeder;
 use mock_exchange::MockExchange;
 // use portfolio_manager::PortfolioManager;
 use strategy::Strategy;
+use data_analyzer::DataAnalyzer;
 use std::thread;
 
 fn main() {
@@ -32,9 +34,10 @@ fn main() {
     let mut market_data_feeder = MarketDataFeeder::new();
     event_manager.allow_publish("low".to_string(), &mut market_data_feeder);
 
-    // let mut portfolio_manager = PortfolioManager::new(1000000000.0);
-    // event_manager.subscribe(EventType::TypeOrderPlace, &portfolio_manager);
-    // event_manager.subscribe(EventType::TypePortfolioInfo, &portfolio_manager);
+    let mut data_analyzer = DataAnalyzer::new();
+    event_manager.subscribe(EventType::TypeMarketData, &data_analyzer);
+    event_manager.subscribe(EventType::TypePortfolioInfo, &data_analyzer);
+    
 
     // Run modules
     let _mock_exchange_thread = thread::spawn(move || {
@@ -45,6 +48,9 @@ fn main() {
         strategy.run();
     });
 
+    let _data_analyzer_thread = thread::spawn(move || {
+        data_analyzer.run();
+    });
 
     // Start feeding data
     let _market_data_feeder_thread = thread::spawn(move || {
