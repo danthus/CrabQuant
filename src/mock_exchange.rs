@@ -9,21 +9,6 @@ use rand::Rng;
 use std::time::Duration;
 
 
-impl Portfolio{
-    fn new(initial_cash:f64 ) -> Self{
-        Portfolio{
-            asset : 0.0,
-            cash : initial_cash,
-            available_cash : initial_cash,
-            positions : HashMap::new(),
-        }
-    }
-
-    fn try_update_asset(market_data: MarketDataEvent) -> () {
-        // tries to update asset
-    }
-}
-
 pub struct MockExchange {
     // subscribe_sender is for event_manager to use only.
     // s_sender and s_receiver belongs to a rendezvous channel

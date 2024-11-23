@@ -73,3 +73,17 @@ pub struct FireAndDropOrder{
     direction: OrderDirection,
 }
 
+impl Portfolio{
+    pub fn new(initial_cash:f64 ) -> Self{
+        Portfolio{
+            asset : 0.0,
+            cash : initial_cash,
+            available_cash : initial_cash,
+            positions : HashMap::new(),
+        }
+    }
+
+    fn try_update_asset(market_data: MarketDataEvent) -> () {
+        // tries to update asset
+    }
+}
