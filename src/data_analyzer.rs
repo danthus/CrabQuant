@@ -1,5 +1,5 @@
-use crate::event_manager::{Event, ModulePublish, ModuleReceive};
-use crate::events::{Order, EventType, Portfolio, PortfolioInfoEvent, OrderPlaceEvent, MarketDataEvent, EventContent};
+use crate::event_manager::{ModulePublish, ModuleReceive};
+use crate::{events::*, market_data_feeder};
 use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
 #[cfg(feature= "order_test")]
 use crate::util::Counter;
@@ -53,35 +53,29 @@ impl DataAnalyzer {
         loop {
             let event = self.subscribe_receiver.recv().unwrap();
 
-            match event.event_type{
-                EventType::TypeMarketData => {
-                    self.process_marketevent(event);
+            match event {
+                Event::MarketData(market_data_event) => {
+                    self.process_marketevent(market_data_event);
                 }
-                EventType::TypePortfolioInfo => {
-                    self.process_portfolioinfo(event);
+                Event::PortfolioInfo(portfolio_info_event) => {
+                    self.process_portfolioinfo(portfolio_info_event);
                 }
                 _ => {
-                    println!("MockExchange: Unsupported event type: {:?}", event.event_type);
+                    println!("MockExchange: Unsupported event: {:?}", event);
                 }
             }
         }
     }
 
-    fn process_marketevent(&mut self, event:Event){
+    fn process_marketevent(&mut self, market_data_event: MarketDataEvent){
         // TODO: use marketdata event to plot baseline
         // Or maintain a vec to update asset (currently to be handled by mockexchange)
-    }
-    fn process_portfolioinfo(&mut self, event: Event) {
-        // Ensure the event content is of type PortfolioInfo
-        if let EventContent::PortfolioInfo(portfolio_info_event) = event.contents {
-            // Update the local portfolio with the received portfolio information
-            self.local_portfolio = portfolio_info_event.portfolio.clone();
-            // println!("Updated local portfolio: {:?}", self.portfolio_local);
-            // TODO: update assets vector
 
-        } else {
-            // Handle invalid event content gracefully
-            eprintln!("Received an invalid event for PortfolioInfo: {:?}", event.contents);
-        }
+    }
+    fn process_portfolioinfo(&mut self, portfolio_info_event: PortfolioInfoEvent) {
+        self.local_portfolio = portfolio_info_event.portfolio.clone();            
+        
+        // TODO: update assets vector
+        
     }
 }
