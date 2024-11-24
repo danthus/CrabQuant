@@ -1,5 +1,5 @@
-use crate::event_manager::{Event, ModulePublish, ModuleReceive};
-use crate::events::{EventContent, EventType, MarketDataEvent, Order, OrderPlaceEvent, Portfolio, PortfolioInfoEvent};
+use crate::event_manager::{ModulePublish, ModuleReceive};
+use crate::events::*;
 use crossbeam::channel::{Sender, Receiver, bounded};
 #[cfg(feature= "order_test")]
 use crate::util::Counter;
@@ -38,33 +38,28 @@ impl Strategy {
             let event = self.subscribe_receiver.recv().unwrap();
 
             // Call the corresponding process function based on event type
-            match event.event_type {
-                EventType::TypeMarketData => {
-                    self.process_marketevent(event);
+            match event {
+                Event::MarketData(market_data_event) => {
+                    self.process_marketevent(market_data_event);
                 }
-                EventType::TypePortfolioInfo => {
-                    self.process_portfolioinfo(event);
+                Event::PortfolioInfo(portfolio_info_event) => {
+                    self.process_portfolioinfo(portfolio_info_event);
                 }
                 _ => {
-                    println!("Strategy: Unsupported event type: {:?}", event.event_type);
+                    println!("Strategy: Unsupported event: {:?}", event);
                 }
             }
         }
     }
 
-    fn process_portfolioinfo(&mut self, event: Event) {
+    fn process_portfolioinfo(&mut self, portfolio_info_event: PortfolioInfoEvent) {
         // Ensure the event content is of type PortfolioInfo
-        if let EventContent::PortfolioInfo(portfolio_info_event) = event.contents {
-            // Update the local portfolio with the received portfolio information
-            self.portfolio_local = portfolio_info_event.portfolio.clone();
-            // println!("Updated local portfolio: {:?}", self.portfolio_local);
-        } else {
-            // Handle invalid event content gracefully
-            eprintln!("Received an invalid event for PortfolioInfo: {:?}", event.contents);
-        }
+        self.portfolio_local = portfolio_info_event.portfolio.clone();
     }
     
-    fn process_marketevent(&mut self, event: Event){
+    fn process_marketevent(&mut self, market_data_event: MarketDataEvent){
+        // let orders = 
+        // self.publish(Event::new_order_place(orders));
         
     }
 

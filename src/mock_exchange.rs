@@ -86,7 +86,7 @@ impl MockExchange {
                     println!("Received a PortfolioInfoEvent, no action required.");
                 }
                 _ => {
-                    println!("MockExchange: Unsupported event type.");
+                    println!("Strategy: Unsupported event: {:?}", event);
                 }
             }
         }
