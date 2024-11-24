@@ -82,9 +82,6 @@ impl MockExchange {
                 Event::OrderPlace(order_place_event) => {
                     self.process_orderplace(order_place_event);
                 }
-                Event::PortfolioInfo(_) => {
-                    println!("Received a PortfolioInfoEvent, no action required.");
-                }
                 _ => {
                     println!("Strategy: Unsupported event: {:?}", event);
                 }
@@ -94,12 +91,13 @@ impl MockExchange {
 
     fn process_marketevent(&mut self, market_data_event:MarketDataEvent){
         // TODO: Check if order is valid. If yes, modify portfolio and send. If not, drop it.
-
+        // println!("MEX: Processing event: {:?}", market_data_event);
+        println!("MEX: Handling: {:?}", market_data_event);
     }
             // if true {
         //     self.publish(self.get_portfolio());
         // }
-    fn process_orderplace(&mut self, order_place_event:OrderPlaceEvent) -> Event{
+    fn process_orderplace(&mut self, order_place_event:OrderPlaceEvent){
         // Check if order is valid. If yes, modify portfolio and send. If not, drop it.
         // Add order to to_do_list
             let order = order_place_event.clone().orders.pop().unwrap();
@@ -107,6 +105,8 @@ impl MockExchange {
             // Add the parsed order to the pending_orders Vec
             self.pending_orders.push(order.clone());
 
-        Event::new_portfolio_info(self.portfolio.clone())
+        let portfolio_info_event = Event::new_portfolio_info(self.portfolio.clone());
+        println!("MEX: Publishing event: {:?}", portfolio_info_event);
+        self.publish(portfolio_info_event);
     }
 }

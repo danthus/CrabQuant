@@ -67,14 +67,13 @@ impl EventManager {
     //         .push(sender.clone());
     // }
 
-    pub fn subscribe<T: ModuleReceive + 'static>(&mut self, module: &T) {
+    pub fn subscribe<E: 'static, T: ModuleReceive>(&mut self, module: &T) {
+        let type_id = TypeId::of::<E>();
         let sender = module.get_sender();
-        let type_id = TypeId::of::<T>();
-
         self.subscriber_book
             .entry(type_id)
             .or_insert_with(Vec::new)
-            .push(sender.clone());
+            .push(sender);
     }
     
     pub fn allow_publish<T: ModulePublish>(&mut self, priority: String, module: &mut T) {
@@ -117,29 +116,6 @@ impl EventManager {
         }
     }
 
-    // pub fn proceed(&mut self) {
-    //     loop {
-    //         // If some events in hp channel, handle them
-    //         while !self.hp_receiver.is_empty() {
-    //             match self.hp_receiver.recv(){
-    //                 Ok(event) => self.dispatch_event(event),
-    //                 Err(e) => panic!("{}", e),
-    //             }
-    //         }
-    //         // If no HP event is available, process a low-priority event
-    //         if !self.lp_receiver.is_empty(){
-    //             match self.lp_receiver.recv(){
-    //                 Ok(event) => self.dispatch_event(event),
-    //                 Err(e) => panic!("{}", e),
-    //             }
-    //         } else{
-    //             // If backtesting, return.
-    //             // println!("All lp events are handled. Backtesting process completed.");
-    //             // return;
-    //             // TODO: If live trade, keep looping.
-    //         }
-    //     }
-    // }
     pub fn proceed(&mut self) {
 
         let event = self.lp_receiver.recv().unwrap();

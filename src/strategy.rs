@@ -60,7 +60,6 @@ impl Strategy {
     fn process_marketevent(&mut self, market_data_event: MarketDataEvent){
         // let orders = 
         // self.publish(Event::new_order_place(orders));
-        
     }
 
     /// Helper method to publish an event
