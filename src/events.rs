@@ -7,8 +7,7 @@ use std::sync::Mutex;
 lazy_static::lazy_static! {
     static ref EVENT_ID_COUNTER_MDE: Mutex<Counter> = Mutex::new(Counter::new());
     static ref EVENT_ID_COUNTER_OPE: Mutex<Counter> = Mutex::new(Counter::new());
-    static ref EVENT_ID_COUNTER_PIE: Mutex<Counter> = Mutex::new(Counter::new());
-}
+    static ref EVENT_ID_COUNTER_PIE: Mutex<Counter> = Mutex::new(Counter::new());}
 // Note that the events should only contain immutable simple data. NVM.
 
 
@@ -22,6 +21,7 @@ pub enum Event {
 impl Event {
     pub fn new_market_data(
         timestamp: String,
+        
         open: f64,
         close: f64,
         high: f64,
@@ -40,9 +40,9 @@ impl Event {
         })
     }
 
-    pub fn new_order_place(orders: Vec<Order>) -> Self {
+    pub fn new_order_place(order: Order) -> Self {
         let id = EVENT_ID_COUNTER_OPE.lock().unwrap().next();
-        Event::OrderPlace(OrderPlaceEvent { id, orders })
+        Event::OrderPlace(OrderPlaceEvent { id, order })
     }
 
     pub fn new_portfolio_info(portfolio: Portfolio) -> Self {
@@ -80,7 +80,7 @@ impl Hash for MarketDataEvent {
 #[derive(Debug, Clone)]
 pub struct OrderPlaceEvent {
     pub id: u64,
-    pub orders: Vec<Order>,
+    pub order: Order,
 }
 
 #[derive(Debug, Clone)]
@@ -89,15 +89,14 @@ pub enum Order{
 }
 
 #[derive(Debug, Clone)]
-
 pub enum OrderDirection{
     Buy,
     Sell,
-}#[derive(Debug, Clone)]
+}
 
+#[derive(Debug, Clone)]
 pub struct FireAndDropOrder{
     pub symbol: String,
-    pub order_id: i32,
     pub amount: i32,
     pub direction: OrderDirection,
 }
@@ -156,8 +155,8 @@ impl Portfolio{
             positions : HashMap::new(),
         }
     }
+}
 
-    pub fn update_asset(&mut self, market_data:MarketDataEvent){
-        // UPDATE ASSET
-    }
+pub trait PortfolioUpdater {
+    fn update_asset(&mut self, portfolio: &mut Portfolio, market_data: MarketDataEvent);
 }

@@ -39,17 +39,17 @@ impl MovingWindow {
 
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use lazy_static::lazy_static;
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+//     use lazy_static::lazy_static;
 
-    fn init_vector() -> MovingWindow {
-        mv = MovingWindow(10);
-    }
+//     fn init_vector() -> MovingWindow {
+//         mv = MovingWindow(10);
+//     }
 
-    #[test]
-    fn test_avg() {
+//     #[test]
+//     fn test_avg() {
 
-    }
-}
+//     }
+// }

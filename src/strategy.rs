@@ -62,7 +62,6 @@ impl Strategy {
     }
     
     fn process_marketevent(&mut self, market_data_event: MarketDataEvent){
-
         self.moving_window.update(market_data_event.close as f32);
         
         let ma5 = self.moving_window.average(5);
@@ -70,14 +69,15 @@ impl Strategy {
 
         // ma5 > ma10 buy
         if ma5 > ma10 {
-            let fire_and_drop = FireAndDropOrder{ symbol: "none", order_id: }
-            let order = Order::FireAndDrop(())
-            let event = Event::new_order_place(vec![order]);
+            let fire_and_drop = FireAndDropOrder{ symbol: String::from("None"), amount: 100, direction: OrderDirection::Buy };
+            let event = Event::new_order_place(Order::FireAndDrop(fire_and_drop));
             self.publish(event);
         }
         // ma5 < ma10 sell
         else if ma5 < ma10 {
-
+            let fire_and_drop = FireAndDropOrder{ symbol: String::from("None"), amount: 100, direction: OrderDirection::Sell };
+            let event = Event::new_order_place(Order::FireAndDrop(fire_and_drop));
+            self.publish(event);
         }
     }
 

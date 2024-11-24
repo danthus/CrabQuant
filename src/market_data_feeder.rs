@@ -72,6 +72,7 @@ impl MarketDataFeeder {
                 println!("MarketDataFeeder: Sending MarketDataEvent{}", counter.next());
                 println!("MDF Timestamp: {:?}", std::time::SystemTime::now());
             }
+            println!("MDF: Publishing : {:?}", market_data_event);
             self.publish(market_data_event);
 
             // if first_data{

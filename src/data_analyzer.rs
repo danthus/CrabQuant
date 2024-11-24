@@ -73,6 +73,7 @@ impl DataAnalyzer {
 
     }
     fn process_portfolioinfo(&mut self, portfolio_info_event: PortfolioInfoEvent) {
+        println!("DA: Updating event: {:?}", portfolio_info_event);
         self.local_portfolio = portfolio_info_event.portfolio.clone();            
         
         // TODO: update assets vector
