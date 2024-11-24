@@ -1,26 +1,12 @@
-use crate::events::{EventType, EventContent};
+use crate::events::{Event, MarketDataEvent, PortfolioInfoEvent, OrderPlaceEvent};
 use crossbeam::channel::{unbounded, Receiver, Sender, bounded};
-use std::any::Any;
+use std::any::{Any, TypeId};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use crate::util::Counter;
 use std::time::{Duration, Instant};
 
-#[derive(Debug, Clone)]
-pub struct Event {
-    pub event_type: EventType,
-    pub contents: EventContent,
-}
-
-impl Event {
-    pub fn new(event_type: EventType, contents: EventContent) -> Self {
-        Event {
-            event_type,
-            contents,
-        }
-    }
-}
 
 pub trait ModuleReceive {
     // For modules to give the rendezvous channel sender to the event_manager.
@@ -34,7 +20,7 @@ pub trait ModulePublish {
 }
 pub struct EventManager {
     // sb: 
-    subscriber_book: HashMap<EventType, Vec<Sender<Event>>>,
+    subscriber_book: HashMap<TypeId, Vec<Sender<Event>>>,
     lp_sender: Sender<Event>,
     lp_receiver: Receiver<Event>,
     hp_sender: Sender<Event>,
@@ -73,14 +59,24 @@ impl EventManager {
         }
     }
 
-    pub fn subscribe<T: ModuleReceive>(&mut self, event_type: EventType, module: &T) {
+    // pub fn subscribe<T: ModuleReceive>(&mut self, event_type: EventType, module: &T) {
+    //     let sender = module.get_sender();
+    //     self.subscriber_book
+    //         .entry(event_type)
+    //         .or_insert_with(Vec::new)
+    //         .push(sender.clone());
+    // }
+
+    pub fn subscribe<T: ModuleReceive + 'static>(&mut self, module: &T) {
         let sender = module.get_sender();
+        let type_id = TypeId::of::<T>();
+
         self.subscriber_book
-            .entry(event_type)
+            .entry(type_id)
             .or_insert_with(Vec::new)
             .push(sender.clone());
     }
-
+    
     pub fn allow_publish<T: ModulePublish>(&mut self, priority: String, module: &mut T) {
         // Allow module to publish to one of the lp/hp channel.
         match priority.as_str() {
@@ -91,23 +87,33 @@ impl EventManager {
     }
 
     fn dispatch_event(&mut self, event: Event) {
+        // Use TypeId of the event for dynamic dispatch
+        let type_id = match &event {
+            Event::MarketData(_) => TypeId::of::<MarketDataEvent>(),
+            Event::OrderPlace(_) => TypeId::of::<OrderPlaceEvent>(),
+            Event::PortfolioInfo(_) => TypeId::of::<PortfolioInfoEvent>(),
+        };
+    
         #[cfg(feature = "order_test")]
         {
-            if let Some(counter) = self.event_counters.get_mut(&event.event_type) {
+            // Event counters based on TypeId
+            if let Some(counter) = self.event_counters.get_mut(&type_id) {
                 let count = counter.next();
-                println!("Dispatching {:?}{}", event.event_type, count);
+                println!("Dispatching event of type {:?} with count {}", type_id, count);
             } else {
-                println!("Dispatching {:?}", event.event_type);
+                println!("Dispatching event of type {:?}", type_id);
             }
         }
-        if let Some(subscribers) = self.subscriber_book.get(&event.event_type) {
+
+        // Dispatch to subscribers
+        if let Some(subscribers) = self.subscriber_book.get(&type_id) {
             for dispatch_sender in subscribers {
                 if let Err(e) = dispatch_sender.send(event.clone()) {
                     eprintln!("Failed to send event to subscriber: {:?}", e);
                 }
             }
         } else {
-            eprintln!("No subscribers found for event type: {:?}", event.event_type);
+            eprintln!("No subscribers found for event type: {:?}", type_id);
         }
     }
 

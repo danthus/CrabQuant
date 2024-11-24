@@ -1,5 +1,5 @@
-use crate::event_manager::{Event, ModulePublish, ModuleReceive};
-use crate::events::{Order, EventType, Portfolio, PortfolioInfoEvent, OrderPlaceEvent, MarketDataEvent, EventContent};
+use crate::event_manager::{ModulePublish, ModuleReceive};
+use crate::events::{Order, Event, Portfolio, PortfolioInfoEvent, OrderPlaceEvent, MarketDataEvent};
 use crossbeam::channel::{bounded, Receiver, Sender};
 #[cfg(feature= "order_test")]
 use crate::util::Counter;
@@ -74,25 +74,19 @@ impl MockExchange {
 
         loop {
             let event = self.subscribe_receiver.recv().unwrap();
-
-            match event.event_type{
-                EventType::TypeMarketData => {
-                    if let EventContent::MarketData(market_data_event) = event.contents {
-                        self.process_marketevent(market_data_event);
-                    } else {
-                        eprintln!("Invalid content for MarketDataEvent: {:?}", event.contents);
-                    }
+    
+            match event {
+                Event::MarketData(market_data_event) => {
+                    self.process_marketevent(market_data_event);
                 }
-                EventType::TypeOrderPlace => {
-                    if let EventContent::OrderPlace(order_place_event) = event.contents {
-                        // Pass the parsed MarketDataEvent to the processing function
-                        self.process_orderplace(order_place_event);
-                    } else {
-                        eprintln!("Invalid content for MarketDataEvent: {:?}", event.contents);
-                    }
+                Event::OrderPlace(order_place_event) => {
+                    self.process_orderplace(order_place_event);
+                }
+                Event::PortfolioInfo(_) => {
+                    println!("Received a PortfolioInfoEvent, no action required.");
                 }
                 _ => {
-                    println!("MockExchange: Unsupported event type: {:?}", event.event_type);
+                    println!("MockExchange: Unsupported event type.");
                 }
             }
         }
@@ -105,25 +99,14 @@ impl MockExchange {
             // if true {
         //     self.publish(self.get_portfolio());
         // }
-    fn process_orderplace(&mut self, order_place_event:OrderPlaceEvent){
+    fn process_orderplace(&mut self, order_place_event:OrderPlaceEvent) -> Event{
         // Check if order is valid. If yes, modify portfolio and send. If not, drop it.
         // Add order to to_do_list
-            let order = order_place_event.order;
+            let order = order_place_event.clone().orders.pop().unwrap();
     
             // Add the parsed order to the pending_orders Vec
             self.pending_orders.push(order.clone());
-    
-    }
-    fn get_portfolio(&self) -> Event{
-        let portfolio_info = PortfolioInfoEvent {
-            id: 1,
-            portfolio: self.portfolio.clone(),
-        };
 
-        // Wrap it into an Event
-        Event {
-            event_type: EventType::TypePortfolioInfo,
-            contents: EventContent::PortfolioInfo(portfolio_info), 
-        }
+        Event::new_portfolio_info(self.portfolio.clone())
     }
 }

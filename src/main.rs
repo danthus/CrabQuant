@@ -7,7 +7,6 @@ mod util;
 mod data_analyzer;
 
 use crate::event_manager::EventManager;
-use crate::events::EventType;
 
 use market_data_feeder::MarketDataFeeder;
 use mock_exchange::MockExchange;
@@ -22,21 +21,21 @@ fn main() {
 
     // Initialize Modules
     let mut strategy = Strategy::new();
-    event_manager.subscribe(EventType::TypeMarketData, &strategy);
-    event_manager.subscribe(EventType::TypePortfolioInfo, &strategy);
+    event_manager.subscribe( &strategy);
+    event_manager.subscribe( &strategy);
     event_manager.allow_publish("high".to_string(), &mut strategy);
 
     let mut mock_exchange: MockExchange = MockExchange::new();
-    event_manager.subscribe(EventType::TypeMarketData, &mock_exchange);
-    event_manager.subscribe(EventType::TypeOrderPlace, &mock_exchange);
+    event_manager.subscribe( &mock_exchange);
+    event_manager.subscribe( &mock_exchange);
     event_manager.allow_publish("high".to_string(), &mut mock_exchange);
 
     let mut market_data_feeder = MarketDataFeeder::new();
     event_manager.allow_publish("low".to_string(), &mut market_data_feeder);
 
     let mut data_analyzer = DataAnalyzer::new();
-    event_manager.subscribe(EventType::TypeMarketData, &data_analyzer);
-    event_manager.subscribe(EventType::TypePortfolioInfo, &data_analyzer);
+    event_manager.subscribe( &data_analyzer);
+    event_manager.subscribe( &data_analyzer);
     
 
     // Run modules
