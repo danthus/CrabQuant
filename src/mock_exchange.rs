@@ -100,7 +100,7 @@ impl MockExchange {
     fn process_orderplace(&mut self, order_place_event:OrderPlaceEvent){
         // Check if order is valid. If yes, modify portfolio and send. If not, drop it.
         // Add order to to_do_list
-            let order = order_place_event.clone().orders.pop().unwrap();
+            let order = order_place_event.order;
     
             // Add the parsed order to the pending_orders Vec
             self.pending_orders.push(order.clone());
