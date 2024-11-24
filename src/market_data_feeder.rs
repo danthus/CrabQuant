@@ -1,6 +1,6 @@
-use crate::event_manager::{Event, ModulePublish};
-use crate::events::{EventType, MarketDataEvent, EventContent};
-use crate::market_data_feeder;
+use crate::event_manager::ModulePublish;
+use crate::events::*;
+
 use crossbeam::channel::{Sender, Receiver};
 use csv::ReaderBuilder;
 use std::fs::File;
@@ -47,18 +47,18 @@ impl MarketDataFeeder {
         #[cfg(feature= "random_sleep_test")]
         let mut rng = rand::thread_rng();
 
-        let mut first_data = true;
+        // let mut first_data = true;
 
         for result in reader.records() {
             let record = result.expect("Failed to read record");
-            let market_data = MarketDataEvent {
-                timestamp: record[0].to_string(),
-                open: record[1].parse().expect("Invalid open value"),
-                high: record[2].parse().expect("Invalid high value"),
-                low: record[3].parse().expect("Invalid low value"),
-                close: record[4].parse().expect("Invalid close value"),
-                volume: record[5].parse().expect("Invalid volume value"),
-            };
+            let timestamp= record[0].to_string();
+            let open= record[1].parse().expect("Invalid open value");
+            let high= record[2].parse().expect("Invalid high value");
+            let low= record[3].parse().expect("Invalid low value");
+            let close= record[4].parse().expect("Invalid close value");
+            let volume= record[5].parse().expect("Invalid volume value");
+
+            let market_data_event = Event::new_market_data(timestamp, open, close, high, low, volume);
 
             // Send data through the channel
             // println!("MarketDataFeeder: Sending: {:?}", market_data);
@@ -72,7 +72,7 @@ impl MarketDataFeeder {
                 println!("MarketDataFeeder: Sending MarketDataEvent{}", counter.next());
                 println!("MDF Timestamp: {:?}", std::time::SystemTime::now());
             }
-            self.publish(Event::new(EventType::TypeMarketData, EventContent::MarketData(market_data)));
+            self.publish(market_data_event);
 
             // if first_data{
             //     // A tiny little sprinkle of magic
