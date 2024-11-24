@@ -5,6 +5,7 @@ mod mock_exchange;
 mod strategy;
 mod util;
 mod data_analyzer;
+mod strategy_helper;
 
 use crate::event_manager::EventManager;
 

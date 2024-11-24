@@ -1,5 +1,6 @@
 use crate::event_manager::{ModulePublish, ModuleReceive};
 use crate::events::*;
+use crate::strategy_helper::*;
 use crossbeam::channel::{Sender, Receiver, bounded};
 #[cfg(feature= "order_test")]
 use crate::util::Counter;
@@ -12,6 +13,7 @@ pub struct Strategy {
     subscribe_receiver: Receiver<Event>,
     publish_sender: Option<Sender<Event>>,
     portfolio_local: Portfolio,
+    moving_window: MovingWindow,
 }
 
 impl Strategy {
@@ -19,11 +21,13 @@ impl Strategy {
     pub fn new() -> Self {
         let (subscribe_sender, subscribe_receiver) = bounded(0);
         let portfolio_local = Portfolio::new(0.0);
+        let moving_window = MovingWindow::new(20);
         Strategy {
             subscribe_sender,
             subscribe_receiver,
             publish_sender: None,
             portfolio_local,
+            moving_window,
         }
     }
 
@@ -58,9 +62,23 @@ impl Strategy {
     }
     
     fn process_marketevent(&mut self, market_data_event: MarketDataEvent){
-        // let orders = 
-        // self.publish(Event::new_order_place(orders));
+
+        self.moving_window.update(market_data_event.close as f32);
         
+        let ma5 = self.moving_window.average(5);
+        let ma10 = self.moving_window.average(10);
+
+        // ma5 > ma10 buy
+        if ma5 > ma10 {
+            let fire_and_drop = FireAndDropOrder{ symbol: "none", order_id: }
+            let order = Order::FireAndDrop(())
+            let event = Event::new_order_place(vec![order]);
+            self.publish(event);
+        }
+        // ma5 < ma10 sell
+        else if ma5 < ma10 {
+
+        }
     }
 
     /// Helper method to publish an event
