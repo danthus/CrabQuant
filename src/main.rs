@@ -24,7 +24,7 @@ fn main() {
     let mut strategy = Strategy::new();
     // Subscribe to specific event types for the strategy module
     event_manager.subscribe::<MarketDataEvent, Strategy>(&strategy);
-    event_manager.subscribe::<OrderPlaceEvent, Strategy>(&strategy);
+    event_manager.subscribe::<PortfolioInfoEvent, Strategy>(&strategy);
     event_manager.allow_publish("high".to_string(), &mut strategy);
 
     let mut mock_exchange: MockExchange = MockExchange::new();

@@ -64,20 +64,23 @@ impl Strategy {
     fn process_marketevent(&mut self, market_data_event: MarketDataEvent){
         self.moving_window.update(market_data_event.close as f32);
         
-        let ma5 = self.moving_window.average(5);
-        let ma10 = self.moving_window.average(10);
+        let ma5 = self.moving_window.average(2);
+        let ma10 = self.moving_window.average(3);
+        // println!("ma5: {}, ma10: {}", ma5, ma10);
 
         // ma5 > ma10 buy
         if ma5 > ma10 {
             let fire_and_drop = FireAndDropOrder{ symbol: String::from("None"), amount: 100, direction: OrderDirection::Buy };
-            let event = Event::new_order_place(Order::FireAndDrop(fire_and_drop));
-            self.publish(event);
+            let order_place_event = Event::new_order_place(Order::FireAndDrop(fire_and_drop));
+            println!("Strategy: Publishing event: {:?}", order_place_event);
+            self.publish(order_place_event);
         }
         // ma5 < ma10 sell
         else if ma5 < ma10 {
             let fire_and_drop = FireAndDropOrder{ symbol: String::from("None"), amount: 100, direction: OrderDirection::Sell };
-            let event = Event::new_order_place(Order::FireAndDrop(fire_and_drop));
-            self.publish(event);
+            let order_place_event = Event::new_order_place(Order::FireAndDrop(fire_and_drop));
+            println!("Strategy: Publishing event: {:?}", order_place_event);
+            self.publish(order_place_event);
         }
     }
 
