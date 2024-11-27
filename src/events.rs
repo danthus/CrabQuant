@@ -91,7 +91,7 @@ pub enum Order{
     LimitPrice(LimitPriceOrder),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum OrderDirection{
     Buy,
     Sell,
@@ -169,6 +169,7 @@ impl Portfolio{
 }
 
 pub trait PortfolioUpdater {
-    fn update_asset(&mut self, portfolio: &mut Portfolio, market_data: MarketDataEvent);
+    fn update_asset(&mut self, market_data: MarketDataEvent);
     // fn set_volume(&mut self, portfolio: &mut Portfolio);
+    fn update_fill(&mut self, symbol: String, amount: i32, price: f64, direction: OrderDirection);
 }
