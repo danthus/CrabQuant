@@ -14,6 +14,7 @@ pub struct Strategy {
     publish_sender: Option<Sender<Event>>,
     portfolio_local: Portfolio,
     moving_window: MovingWindow,
+    factor: f64,
 }
 
 impl Strategy {
@@ -22,12 +23,14 @@ impl Strategy {
         let (subscribe_sender, subscribe_receiver) = bounded(0);
         let portfolio_local = Portfolio::new(0.0);
         let moving_window = MovingWindow::new(20);
+        let factor = 1.2;
         Strategy {
             subscribe_sender,
             subscribe_receiver,
             publish_sender: None,
             portfolio_local,
             moving_window,
+            factor,
         }
     }
 
@@ -64,20 +67,24 @@ impl Strategy {
     fn process_marketevent(&mut self, market_data_event: MarketDataEvent){
         self.moving_window.update(market_data_event.close as f32);
         
-        let ma5 = self.moving_window.average(2);
-        let ma10 = self.moving_window.average(3);
+        let ma_short = self.moving_window.average(2);
+        let ma_long = self.moving_window.average(3);
         // println!("ma5: {}, ma10: {}", ma5, ma10);
 
         // ma5 > ma10 buy
-        if ma5 > ma10 {
-            let fire_and_drop = FireAndDropOrder{ symbol: String::from("None"), amount: 100, direction: OrderDirection::Buy };
-            let order_place_event = Event::new_order_place(Order::FireAndDrop(fire_and_drop));
-            println!("Strategy: Publishing event: {:?}", order_place_event);
-            self.publish(order_place_event);
+        if ma_short > ma_long {
+            let quantity = (self.portfolio_local.available_cash / (market_data_event.close * self.factor)).round() as i32;
+            if quantity > 0 {
+                let fire_and_drop = FireAndDropOrder{ symbol: market_data_event.symbol, amount: quantity, direction: OrderDirection::Buy };
+                let order_place_event = Event::new_order_place(Order::FireAndDrop(fire_and_drop));
+                println!("Strategy: Publishing event: {:?}", order_place_event);
+                self.publish(order_place_event);
+            }
         }
         // ma5 < ma10 sell
-        else if ma5 < ma10 {
-            let fire_and_drop = FireAndDropOrder{ symbol: String::from("None"), amount: 100, direction: OrderDirection::Sell };
+        else if ma_short < ma_long {
+            let quantity = (self.portfolio_local.available_cash / (market_data_event.close * self.factor)).round() as i32;
+            let fire_and_drop = FireAndDropOrder{ symbol: market_data_event.symbol, amount: quantity, direction: OrderDirection::Sell };
             let order_place_event = Event::new_order_place(Order::FireAndDrop(fire_and_drop));
             println!("Strategy: Publishing event: {:?}", order_place_event);
             self.publish(order_place_event);
