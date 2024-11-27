@@ -57,8 +57,8 @@ impl MarketDataFeeder {
             let low= record[3].parse().expect("Invalid low value");
             let close= record[4].parse().expect("Invalid close value");
             let volume= record[5].parse().expect("Invalid volume value");
-
-            let market_data_event = Event::new_market_data(timestamp, open, close, high, low, volume);
+            let symbol = "SNP".to_string() ;
+            let market_data_event = Event::new_market_data(timestamp, symbol, open, close, high, low, volume);
 
             // Send data through the channel
             // println!("MarketDataFeeder: Sending: {:?}", market_data);

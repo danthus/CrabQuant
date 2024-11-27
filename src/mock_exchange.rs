@@ -53,12 +53,14 @@ impl MockExchange {
     }
 
     fn publish(&mut self, event:Event) -> (){
+        // To push an Event to EventManager.
         if let Some(publish_sender) = &self.publish_sender {
             publish_sender.send(event).unwrap();
         } else {
             panic!("publish_sender is not initialized!");
         }
     }
+
     pub fn run(&mut self) -> () {
         if self.publish_sender.is_none() {
             panic!("publish_sender is not initialized!");
@@ -94,16 +96,14 @@ impl MockExchange {
         // println!("MEX: Processing event: {:?}", market_data_event);
         println!("MEX: Handling: {:?}", market_data_event);
     }
-            // if true {
-        //     self.publish(self.get_portfolio());
-        // }
+
     fn process_orderplace(&mut self, order_place_event:OrderPlaceEvent){
         // Check if order is valid. If yes, modify portfolio and send. If not, drop it.
         // Add order to to_do_list
-            let order = order_place_event.order;
-    
-            // Add the parsed order to the pending_orders Vec
-            self.pending_orders.push(order.clone());
+        let order = order_place_event.order;
+
+        // Add the parsed order to the pending_orders Vec
+        self.pending_orders.push(order.clone());
 
         let portfolio_info_event = Event::new_portfolio_info(self.portfolio.clone());
         println!("MEX: Publishing event: {:?}", portfolio_info_event);

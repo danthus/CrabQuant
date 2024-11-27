@@ -21,7 +21,7 @@ pub enum Event {
 impl Event {
     pub fn new_market_data(
         timestamp: String,
-        
+        symbol: String,
         open: f64,
         close: f64,
         high: f64,
@@ -31,6 +31,7 @@ impl Event {
         let id = EVENT_ID_COUNTER_MDE.lock().unwrap().next();
         Event::MarketData(MarketDataEvent {
             id,
+            symbol,
             timestamp,
             open,
             close,
@@ -54,6 +55,7 @@ impl Event {
 #[derive(Debug, Clone)]
 pub struct MarketDataEvent {
     pub id: u64,
+    pub symbol: String,
     pub timestamp: String,
     pub open: f64,
     pub close: f64,
@@ -159,4 +161,5 @@ impl Portfolio{
 
 pub trait PortfolioUpdater {
     fn update_asset(&mut self, portfolio: &mut Portfolio, market_data: MarketDataEvent);
+    // fn set_volume(&mut self, portfolio: &mut Portfolio);
 }
