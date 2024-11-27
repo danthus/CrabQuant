@@ -88,6 +88,7 @@ pub struct OrderPlaceEvent {
 #[derive(Debug, Clone)]
 pub enum Order{
     FireAndDrop(FireAndDropOrder),
+    LimitPrice(LimitPriceOrder),
 }
 
 #[derive(Debug, Clone)]
@@ -100,6 +101,14 @@ pub enum OrderDirection{
 pub struct FireAndDropOrder{
     pub symbol: String,
     pub amount: i32,
+    pub direction: OrderDirection,
+}
+
+#[derive(Debug, Clone)]
+pub struct LimitPriceOrder{
+    pub symbol: String,
+    pub amount: i32,
+    pub limit_price: f64,
     pub direction: OrderDirection,
 }
 
