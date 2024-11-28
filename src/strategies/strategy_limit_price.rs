@@ -47,16 +47,20 @@ impl Strategy for StrategyLimitPrice {
         // ma5 < ma10 sell
         else if ma_short < ma_long {
             let quantity = (self.portfolio_local.available_cash / (market_data_event.close * self.factor)).round() as i32;
-            let current_position = *self.portfolio_local.positions.get(&market_data_event.symbol).unwrap();
-            if quantity > 0 && quantity < current_position {
-                let fire_and_drop = LimitPriceOrder{ symbol: market_data_event.symbol, amount: quantity, limit_price:market_data_event.high, direction: OrderDirection::Sell };
-                let order_place_event = Event::new_order_place(Order::LimitPrice(fire_and_drop));
-                Some(order_place_event)
-            }
-            else if quantity > current_position {
-                let fire_and_drop = LimitPriceOrder{ symbol: market_data_event.symbol, amount: current_position, limit_price:market_data_event.high, direction: OrderDirection::Sell };
-                let order_place_event = Event::new_order_place(Order::LimitPrice(fire_and_drop));
-                Some(order_place_event)
+            if let Some(current_position) = self.portfolio_local.positions.get(&market_data_event.symbol) {
+                if quantity > 0 && quantity < *current_position {
+                    let fire_and_drop = LimitPriceOrder{ symbol: market_data_event.symbol, amount: quantity, limit_price:market_data_event.high, direction: OrderDirection::Sell };
+                    let order_place_event = Event::new_order_place(Order::LimitPrice(fire_and_drop));
+                    Some(order_place_event)
+                }
+                else if quantity > *current_position {
+                    let fire_and_drop = LimitPriceOrder{ symbol: market_data_event.symbol, amount: *current_position, limit_price:market_data_event.high, direction: OrderDirection::Sell };
+                    let order_place_event = Event::new_order_place(Order::LimitPrice(fire_and_drop));
+                    Some(order_place_event)
+                }
+                else {
+                    None
+                }
             }
             else {
                 None
