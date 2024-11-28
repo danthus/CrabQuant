@@ -1,0 +1,89 @@
+MDF: Publishing : MarketData(MarketDataEvent { id: 1, symbol: "SNP", timestamp: "2024-09-30", open: 570.42, close: 573.76, high: 574.38, low: 568.08, volume: 62442720 })
+MDF: Publishing : MarketData(MarketDataEvent { id: 2, symbol: "SNP", timestamp: "2024-10-01", open: 573.4, close: 568.62, high: 574.0622, low: 566.0, volume: 72348202 })
+MDF: Publishing : MarketData(MarketDataEvent { id: 3, symbol: "SNP", timestamp: "2024-10-02", open: 567.71, close: 568.86, high: 569.9, low: 565.27, volume: 38353837 })
+MDF: Publishing : MarketData(MarketDataEvent { id: 4, symbol: "SNP", timestamp: "2024-10-03", open: 567.36, close: 567.82, high: 569.8025, low: 565.49, volume: 40098655 })
+MDF: Publishing : MarketData(MarketDataEvent { id: 5, symbol: "SNP", timestamp: "2024-10-04", open: 572.35, close: 572.98, high: 573.36, low: 568.1, volume: 42949020 })
+MEX: Handling: MarketDataEvent { id: 1, symbol: "SNP", timestamp: "2024-09-30", open: 570.42, close: 573.76, high: 574.38, low: 568.08, volume: 62442720 }
+MDF: Publishing : MarketData(MarketDataEvent { id: 6, symbol: "SNP", timestamp: "2024-10-07", open: 571.3, close: 567.8, high: 571.9599, low: 566.63, volume: 49791417 })
+MEX: Publishing: PortfolioInfo(PortfolioInfoEvent { id: 1, portfolio: Portfolio { asset: 1000000.0, cash: 1000000.0, available_cash: 1000000.0, positions: {} } })
+MDF: Publishing : MarketData(MarketDataEvent { id: 7, symbol: "SNP", timestamp: "2024-10-08", open: 570.42, close: 573.17, high: 573.78, low: 569.5299, volume: 37336110 })
+DA: Updating event: MarketDataEvent { id: 1, symbol: "SNP", timestamp: "2024-09-30", open: 570.42, close: 573.76, high: 574.38, low: 568.08, volume: 62442720 }
+MEX: Handling: MarketDataEvent { id: 2, symbol: "SNP", timestamp: "2024-10-01", open: 573.4, close: 568.62, high: 574.0622, low: 566.0, volume: 72348202 }
+MEX: Publishing: PortfolioInfo(PortfolioInfoEvent { id: 2, portfolio: Portfolio { asset: 1000000.0, cash: 1000000.0, available_cash: 1000000.0, positions: {} } })
+MDF: Publishing : MarketData(MarketDataEvent { id: 8, symbol: "SNP", timestamp: "2024-10-09", open: 573.16, close: 577.14, high: 577.71, low: 572.55, volume: 37809403 })
+MEX: Handling: MarketDataEvent { id: 3, symbol: "SNP", timestamp: "2024-10-02", open: 567.71, close: 568.86, high: 569.9, low: 565.27, volume: 38353837 }
+MEX: Publishing: PortfolioInfo(PortfolioInfoEvent { id: 3, portfolio: Portfolio { asset: 1000000.0, cash: 1000000.0, available_cash: 1000000.0, positions: {} } })
+MEX: Handling: MarketDataEvent { id: 4, symbol: "SNP", timestamp: "2024-10-03", open: 567.36, close: 567.82, high: 569.8025, low: 565.49, volume: 40098655 }
+MEX: Publishing: PortfolioInfo(PortfolioInfoEvent { id: 4, portfolio: Portfolio { asset: 1000000.0, cash: 1000000.0, available_cash: 1000000.0, positions: {} } })
+MDF: Publishing : MarketData(MarketDataEvent { id: 9, symbol: "SNP", timestamp: "2024-10-10", open: 575.77, close: 576.13, high: 577.58, low: 574.49, volume: 44348254 })
+Strategy: Publishing event: OrderPlace(OrderPlaceEvent { id: 1, order: LimitPrice(LimitPriceOrder { symbol: "SNP", amount: 1454, limit_price: 573.36, direction: Buy }) }), 
+	based on MarketDataEvent { id: 5, symbol: "SNP", timestamp: "2024-10-04", open: 572.35, close: 572.98, high: 573.36, low: 568.1, volume: 42949020 }
+MEX: Handling: MarketDataEvent { id: 5, symbol: "SNP", timestamp: "2024-10-04", open: 572.35, close: 572.98, high: 573.36, low: 568.1, volume: 42949020 }
+MEX: Publishing: PortfolioInfo(PortfolioInfoEvent { id: 5, portfolio: Portfolio { asset: 1000000.0, cash: 1000000.0, available_cash: 1000000.0, positions: {} } })
+MEX: Received Order: LimitPrice(LimitPriceOrder { symbol: "SNP", amount: 1454, limit_price: 573.36, direction: Buy })
+MDF: Publishing : MarketData(MarketDataEvent { id: 10, symbol: "SNP", timestamp: "2024-10-11", open: 576.05, close: 579.58, high: 580.33, low: 575.91, volume: 42229657 })
+Strategy: Publishing event: OrderPlace(OrderPlaceEvent { id: 2, order: LimitPrice(LimitPriceOrder { symbol: "SNP", amount: 1467, limit_price: 571.9599, direction: Buy }) }), 
+	based on MarketDataEvent { id: 6, symbol: "SNP", timestamp: "2024-10-07", open: 571.3, close: 567.8, high: 571.9599, low: 566.63, volume: 49791417 }
+MDF: Publishing : MarketData(MarketDataEvent { id: 11, symbol: "SNP", timestamp: "2024-10-14", open: 581.22, close: 584.32, high: 585.27, low: 580.73, volume: 36133960 })
+MEX: Handling: MarketDataEvent { id: 6, symbol: "SNP", timestamp: "2024-10-07", open: 571.3, close: 567.8, high: 571.9599, low: 566.63, volume: 49791417 }
+MEX: Filling Order: LimitPrice(LimitPriceOrder { symbol: "SNP", amount: 1454, limit_price: 573.36, direction: Buy }), 
+	upon receiving MarketDataEvent { id: 6, symbol: "SNP", timestamp: "2024-10-07", open: 571.3, close: 567.8, high: 571.9599, low: 566.63, volume: 49791417 }
+MEX: Filled Buy Order: Symbol: SNP, Amount: 1454, Price: 569.29495, Total Cost: 827754.8572999999
+MEX: Updated Portfolio Asset Value: 997826.3427, Cash: 172245.14270000008, Symbol: SNP, Position Value: 825581.2
+MEX: Publishing: PortfolioInfo(PortfolioInfoEvent { id: 6, portfolio: Portfolio { asset: 997826.3427, cash: 172245.14270000008, available_cash: 172245.14270000008, positions: {"SNP": 1454} } })
+MEX: Handling: MarketDataEvent { id: 7, symbol: "SNP", timestamp: "2024-10-08", open: 570.42, close: 573.17, high: 573.78, low: 569.5299, volume: 37336110 }
+MEX: Updated Portfolio Asset Value: 1005634.3227, Cash: 172245.14270000008, Symbol: SNP, Position Value: 833389.1799999999
+MEX: Publishing: PortfolioInfo(PortfolioInfoEvent { id: 7, portfolio: Portfolio { asset: 1005634.3227, cash: 172245.14270000008, available_cash: 172245.14270000008, positions: {"SNP": 1454} } })
+MEX: Received Order: LimitPrice(LimitPriceOrder { symbol: "SNP", amount: 1467, limit_price: 571.9599, direction: Buy })
+MEX: Handling: MarketDataEvent { id: 8, symbol: "SNP", timestamp: "2024-10-09", open: 573.16, close: 577.14, high: 577.71, low: 572.55, volume: 37809403 }
+MEX: Dropping Order: LimitPrice(LimitPriceOrder { symbol: "SNP", amount: 1467, limit_price: 571.9599, direction: Buy }), 
+	upon receiving MarketDataEvent { id: 8, symbol: "SNP", timestamp: "2024-10-09", open: 573.16, close: 577.14, high: 577.71, low: 572.55, volume: 37809403 }
+Strategy: Publishing event: OrderPlace(OrderPlaceEvent { id: 3, order: LimitPrice(LimitPriceOrder { symbol: "SNP", amount: 248, limit_price: 577.71, direction: Buy }) }), 
+	based on MarketDataEvent { id: 8, symbol: "SNP", timestamp: "2024-10-09", open: 573.16, close: 577.14, high: 577.71, low: 572.55, volume: 37809403 }
+MEX: Updated Portfolio Asset Value: 1011406.7027, Cash: 172245.14270000008, Symbol: SNP, Position Value: 839161.5599999999
+MEX: Publishing: PortfolioInfo(PortfolioInfoEvent { id: 8, portfolio: Portfolio { asset: 1011406.7027, cash: 172245.14270000008, available_cash: 172245.14270000008, positions: {"SNP": 1454} } })
+MEX: Handling: MarketDataEvent { id: 9, symbol: "SNP", timestamp: "2024-10-10", open: 575.77, close: 576.13, high: 577.58, low: 574.49, volume: 44348254 }
+MEX: Updated Portfolio Asset Value: 1009938.1627000001, Cash: 172245.14270000008, Symbol: SNP, Position Value: 837693.02
+MEX: Publishing: PortfolioInfo(PortfolioInfoEvent { id: 9, portfolio: Portfolio { asset: 1009938.1627000001, cash: 172245.14270000008, available_cash: 172245.14270000008, positions: {"SNP": 1454} } })
+Strategy: Publishing event: OrderPlace(OrderPlaceEvent { id: 4, order: LimitPrice(LimitPriceOrder { symbol: "SNP", amount: 42, limit_price: 577.58, direction: Buy }) }), 
+	based on MarketDataEvent { id: 9, symbol: "SNP", timestamp: "2024-10-10", open: 575.77, close: 576.13, high: 577.58, low: 574.49, volume: 44348254 }
+MEX: Received Order: LimitPrice(LimitPriceOrder { symbol: "SNP", amount: 248, limit_price: 577.71, direction: Buy })
+MEX: Received Order: LimitPrice(LimitPriceOrder { symbol: "SNP", amount: 42, limit_price: 577.58, direction: Buy })
+MEX: Handling: MarketDataEvent { id: 10, symbol: "SNP", timestamp: "2024-10-11", open: 576.05, close: 579.58, high: 580.33, low: 575.91, volume: 42229657 }
+MEX: Dropping Order: LimitPrice(LimitPriceOrder { symbol: "SNP", amount: 248, limit_price: 577.71, direction: Buy }), 
+	upon receiving MarketDataEvent { id: 10, symbol: "SNP", timestamp: "2024-10-11", open: 576.05, close: 579.58, high: 580.33, low: 575.91, volume: 42229657 }
+MEX: Dropping Order: LimitPrice(LimitPriceOrder { symbol: "SNP", amount: 42, limit_price: 577.58, direction: Buy }), 
+	upon receiving MarketDataEvent { id: 10, symbol: "SNP", timestamp: "2024-10-11", open: 576.05, close: 579.58, high: 580.33, low: 575.91, volume: 42229657 }
+MEX: Updated Portfolio Asset Value: 1014954.4627000001, Cash: 172245.14270000008, Symbol: SNP, Position Value: 842709.3200000001
+MEX: Publishing: PortfolioInfo(PortfolioInfoEvent { id: 10, portfolio: Portfolio { asset: 1014954.4627000001, cash: 172245.14270000008, available_cash: 172245.14270000008, positions: {"SNP": 1454} } })
+Strategy: Publishing event: OrderPlace(OrderPlaceEvent { id: 5, order: LimitPrice(LimitPriceOrder { symbol: "SNP", amount: 247, limit_price: 580.33, direction: Buy }) }), 
+	based on MarketDataEvent { id: 10, symbol: "SNP", timestamp: "2024-10-11", open: 576.05, close: 579.58, high: 580.33, low: 575.91, volume: 42229657 }
+Strategy: Publishing event: OrderPlace(OrderPlaceEvent { id: 6, order: LimitPrice(LimitPriceOrder { symbol: "SNP", amount: 41, limit_price: 585.27, direction: Buy }) }), 
+	based on MarketDataEvent { id: 11, symbol: "SNP", timestamp: "2024-10-14", open: 581.22, close: 584.32, high: 585.27, low: 580.73, volume: 36133960 }
+MEX: Handling: MarketDataEvent { id: 11, symbol: "SNP", timestamp: "2024-10-14", open: 581.22, close: 584.32, high: 585.27, low: 580.73, volume: 36133960 }
+MEX: Updated Portfolio Asset Value: 1021846.4227000001, Cash: 172245.14270000008, Symbol: SNP, Position Value: 849601.28
+MEX: Publishing: PortfolioInfo(PortfolioInfoEvent { id: 11, portfolio: Portfolio { asset: 1021846.4227000001, cash: 172245.14270000008, available_cash: 172245.14270000008, positions: {"SNP": 1454} } })
+MEX: Received Order: LimitPrice(LimitPriceOrder { symbol: "SNP", amount: 247, limit_price: 580.33, direction: Buy })
+MEX: Received Order: LimitPrice(LimitPriceOrder { symbol: "SNP", amount: 41, limit_price: 585.27, direction: Buy })
+DA: Updating event: MarketDataEvent { id: 2, symbol: "SNP", timestamp: "2024-10-01", open: 573.4, close: 568.62, high: 574.0622, low: 566.0, volume: 72348202 }
+DA: Updating event: PortfolioInfoEvent { id: 1, portfolio: Portfolio { asset: 1000000.0, cash: 1000000.0, available_cash: 1000000.0, positions: {} } }
+DA: Updating event: MarketDataEvent { id: 3, symbol: "SNP", timestamp: "2024-10-02", open: 567.71, close: 568.86, high: 569.9, low: 565.27, volume: 38353837 }
+DA: Updating event: PortfolioInfoEvent { id: 2, portfolio: Portfolio { asset: 1000000.0, cash: 1000000.0, available_cash: 1000000.0, positions: {} } }
+DA: Updating event: MarketDataEvent { id: 4, symbol: "SNP", timestamp: "2024-10-03", open: 567.36, close: 567.82, high: 569.8025, low: 565.49, volume: 40098655 }
+DA: Updating event: PortfolioInfoEvent { id: 3, portfolio: Portfolio { asset: 1000000.0, cash: 1000000.0, available_cash: 1000000.0, positions: {} } }
+DA: Updating event: MarketDataEvent { id: 5, symbol: "SNP", timestamp: "2024-10-04", open: 572.35, close: 572.98, high: 573.36, low: 568.1, volume: 42949020 }
+DA: Updating event: PortfolioInfoEvent { id: 4, portfolio: Portfolio { asset: 1000000.0, cash: 1000000.0, available_cash: 1000000.0, positions: {} } }
+DA: Updating event: PortfolioInfoEvent { id: 5, portfolio: Portfolio { asset: 1000000.0, cash: 1000000.0, available_cash: 1000000.0, positions: {} } }
+DA: Updating event: MarketDataEvent { id: 6, symbol: "SNP", timestamp: "2024-10-07", open: 571.3, close: 567.8, high: 571.9599, low: 566.63, volume: 49791417 }
+DA: Updating event: MarketDataEvent { id: 7, symbol: "SNP", timestamp: "2024-10-08", open: 570.42, close: 573.17, high: 573.78, low: 569.5299, volume: 37336110 }
+DA: Updating event: PortfolioInfoEvent { id: 6, portfolio: Portfolio { asset: 997826.3427, cash: 172245.14270000008, available_cash: 172245.14270000008, positions: {"SNP": 1454} } }
+DA: Updating event: PortfolioInfoEvent { id: 7, portfolio: Portfolio { asset: 1005634.3227, cash: 172245.14270000008, available_cash: 172245.14270000008, positions: {"SNP": 1454} } }
+DA: Updating event: MarketDataEvent { id: 8, symbol: "SNP", timestamp: "2024-10-09", open: 573.16, close: 577.14, high: 577.71, low: 572.55, volume: 37809403 }
+DA: Updating event: MarketDataEvent { id: 9, symbol: "SNP", timestamp: "2024-10-10", open: 575.77, close: 576.13, high: 577.58, low: 574.49, volume: 44348254 }
+DA: Updating event: PortfolioInfoEvent { id: 8, portfolio: Portfolio { asset: 1011406.7027, cash: 172245.14270000008, available_cash: 172245.14270000008, positions: {"SNP": 1454} } }
+DA: Updating event: PortfolioInfoEvent { id: 9, portfolio: Portfolio { asset: 1009938.1627000001, cash: 172245.14270000008, available_cash: 172245.14270000008, positions: {"SNP": 1454} } }
+DA: Updating event: MarketDataEvent { id: 10, symbol: "SNP", timestamp: "2024-10-11", open: 576.05, close: 579.58, high: 580.33, low: 575.91, volume: 42229657 }
+DA: Updating event: MarketDataEvent { id: 11, symbol: "SNP", timestamp: "2024-10-14", open: 581.22, close: 584.32, high: 585.27, low: 580.73, volume: 36133960 }
+DA: Updating event: PortfolioInfoEvent { id: 10, portfolio: Portfolio { asset: 1014954.4627000001, cash: 172245.14270000008, available_cash: 172245.14270000008, positions: {"SNP": 1454} } }
+DA: Updating event: PortfolioInfoEvent { id: 11, portfolio: Portfolio { asset: 1021846.4227000001, cash: 172245.14270000008, available_cash: 172245.14270000008, positions: {"SNP": 1454} } }
+!!!!!All lp events are handled. Backtesting process completed.!!!!!!!
