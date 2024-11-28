@@ -39,7 +39,7 @@ impl Strategy for StrategyLimitPrice {
         let quantity = (self.portfolio_local.available_cash / (market_data_event.close * self.price_factor)).floor() as i32;
         
         // ma_short > ma_long buy and last signal is sell
-        if ma_short > ma_long && self.last_signal == 2 {
+        if ma_short > ma_long && self.last_signal != 1 {
             let max_volume = (market_data_event.volume as f32 *self.volume_factor).floor() as i32;
             let buy_volume = if quantity > max_volume {max_volume} else {quantity};
 
@@ -55,7 +55,7 @@ impl Strategy for StrategyLimitPrice {
             }
         }
         // ma_short < ma_long sell and last signal is buy
-        else if ma_short < ma_long && self.last_signal == 1 {
+        else if ma_short < ma_long && self.last_signal != 2 {
 
             if let Some(current_position) = self.portfolio_local.positions.get(&market_data_event.symbol) {
                 if quantity > 0 && quantity < *current_position {
