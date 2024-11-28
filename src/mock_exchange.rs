@@ -58,13 +58,13 @@ impl MockExchange {
         if let Some(publish_sender) = &self.publish_sender {
             publish_sender.send(event).unwrap();
         } else {
-            panic!("publish_sender is not initialized!");
+            panic!("MEX: publish_sender is not initialized!");
         }
     }
 
     pub fn run(&mut self) -> () {
         if self.publish_sender.is_none() {
-            panic!("publish_sender is not initialized!");
+            panic!("MEX: publish_sender is not initialized!");
         }
         #[cfg(feature= "order_test")]
         let mut counter_a = Counter::new();
@@ -86,7 +86,7 @@ impl MockExchange {
                     self.process_orderplace(order_place_event);
                 }
                 _ => {
-                    println!("Strategy: Unsupported event: {:?}", event);
+                    println!("MEX: Unsupported event: {:?}", event);
                 }
             }
         }
@@ -97,7 +97,7 @@ impl MockExchange {
     
         // Calculate the mean price from market data
         let mean_price = (market_data_event.high + market_data_event.low) / 2.0;
-        println!("MEX: Calculated mean price: {}", mean_price);
+        // println!("MEX: Calculated mean price: {}", mean_price);
     
         // Temporary vector to store filled orders
         let mut filled_orders = Vec::new();
@@ -136,8 +136,11 @@ impl MockExchange {
         for (symbol, amount, price, direction) in filled_orders {
             self.update_fill(symbol, amount, price, direction);
         }
-
         self.update_asset(market_data_event);
+
+        let portfolio_info_event = Event::new_portfolio_info(self.portfolio.clone());
+        println!("MEX: Publishing event: {:?}", portfolio_info_event);
+        self.publish(portfolio_info_event);
     }
 
     fn process_orderplace(&mut self, order_place_event:OrderPlaceEvent){
@@ -147,10 +150,6 @@ impl MockExchange {
 
         // Add the parsed order to the pending_orders Vec
         self.pending_orders.push(order.clone());
-
-        let portfolio_info_event = Event::new_portfolio_info(self.portfolio.clone());
-        println!("MEX: Publishing event: {:?}", portfolio_info_event);
-        self.publish(portfolio_info_event);
     }
 }
 
@@ -172,17 +171,20 @@ impl PortfolioUpdater for MockExchange{
                 });
     
             println!(
-                "Updated Portfolio Asset Value: {}, Cash: {}, Symbol: {}, Position Value: {}",
+                "MEX: Updated Portfolio Asset Value: {}, Cash: {}, Symbol: {}, Position Value: {}",
                 self.portfolio.asset, self.portfolio.cash, market_data.symbol, position_value
             );
-        } else {
-            // If the symbol is not in the positions, just recalculate the total asset
-            self.portfolio.asset = self.portfolio.cash;
-            println!(
-                "Symbol {} not found in portfolio. Asset Value set to cash: {}",
-                market_data.symbol, self.portfolio.cash
-            );
-        }
+        } 
+        // else {
+        //     // If the symbol is not in the positions, just recalculate the total asset
+        //     self.portfolio.asset = self.portfolio.cash;
+        //     println!(
+        //         "MEX: Symbol {} not found in portfolio. Asset Value set to cash: {}",
+        //         market_data.symbol, self.portfolio.cash
+        //     );
+        // }
+        // Update the available cash too.
+        self.portfolio.available_cash = self.portfolio.cash;
     }
     fn update_fill(&mut self, symbol: String, amount: i32, price: f64, direction: OrderDirection) {
         match direction {
@@ -197,7 +199,7 @@ impl PortfolioUpdater for MockExchange{
                 *position_entry += amount;
 
                 println!(
-                    "Filled Buy Order: Symbol: {}, Amount: {}, Price: {}, Total Cost: {}",
+                    "MEX: Filled Buy Order: Symbol: {}, Amount: {}, Price: {}, Total Cost: {}",
                     symbol, amount, price, total_cost
                 );
             }
@@ -214,20 +216,20 @@ impl PortfolioUpdater for MockExchange{
                     // Ensure no negative holdings
                     if *position_entry < 0 {
                         println!(
-                            "Warning: Selling more than owned for symbol {}. Setting position to 0.",
+                            "MEX: Warning: Selling more than owned for symbol {}. Setting position to 0.",
                             symbol
                         );
                         *position_entry = 0;
                     }
                 } else {
                     println!(
-                        "Warning: Attempted to sell {} of {}, but no position exists.",
+                        "MEX: Warning: Attempted to sell {} of {}, but no position exists.",
                         amount, symbol
                     );
                 }
 
                 println!(
-                    "Filled Sell Order: Symbol: {}, Amount: {}, Price: {}, Total Value: {}",
+                    "MEX: Filled Sell Order: Symbol: {}, Amount: {}, Price: {}, Total Value: {}",
                     symbol, amount, price, total_value
                 );
             }

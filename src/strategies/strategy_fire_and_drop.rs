@@ -15,7 +15,7 @@ impl StrategyFireAndDrop{
     pub fn new() -> Self {
         let portfolio_local = Portfolio::new(0.0);
         let moving_window = MovingWindow::new(20);
-        let factor = 1.2;
+        let factor: f64 = 1.2;
         StrategyFireAndDrop {
             portfolio_local,
             moving_window,
@@ -38,7 +38,6 @@ impl Strategy for StrategyFireAndDrop {
             if quantity > 0 {
                 let fire_and_drop = FireAndDropOrder{ symbol: market_data_event.symbol, amount: quantity, direction: OrderDirection::Buy };
                 let order_place_event = Event::new_order_place(Order::FireAndDrop(fire_and_drop));
-                println!("!!!!Buy order!!!!: {:?}", order_place_event);
                 Some(order_place_event)
             }
             else {

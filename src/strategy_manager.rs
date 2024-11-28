@@ -91,6 +91,7 @@ impl StrategyManager {
             // }
         }
         for event in events.drain(..) {
+            println!("Strategy: Publishing event: {:?}", event);
             self.publish(event);
         } 
     }
