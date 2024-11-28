@@ -1,6 +1,6 @@
 use crate::event_manager::{ModulePublish, ModuleReceive};
 use crate::events::*;
-use crate::strategy_helper::*;
+use crate::strategies::strategy_helper::*;
 use crossbeam::channel::{Sender, Receiver, bounded};
 #[cfg(feature= "order_test")]
 use crate::util::Counter;

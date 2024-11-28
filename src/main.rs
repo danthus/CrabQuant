@@ -2,31 +2,40 @@ mod event_manager;
 mod events;
 mod market_data_feeder;
 mod mock_exchange;
-mod strategy_fire_and_drop;
-mod strategy_limit_price;
 mod util;
 mod data_analyzer;
-mod strategy_helper;
+mod strategy_manager;
+mod strategies;
 
 use crate::event_manager::EventManager;
 
 use market_data_feeder::MarketDataFeeder;
 use mock_exchange::MockExchange;
 // use portfolio_manager::PortfolioManager;
-use strategy_fire_and_drop::Strategy;
 use data_analyzer::DataAnalyzer;
+use strategy_manager::StrategyManager;
+use strategies::strategy_fire_and_drop::StrategyFireAndDrop;
 use std::thread;
 use events::*;
+
 fn main() {
     // Initialize event manager
     let mut event_manager = EventManager::new();
 
-    // Initialize Modules
-    let mut strategy = Strategy::new();
-    // Subscribe to specific event types for the strategy module
-    event_manager.subscribe::<MarketDataEvent, Strategy>(&strategy);
-    event_manager.subscribe::<PortfolioInfoEvent, Strategy>(&strategy);
-    event_manager.allow_publish("high".to_string(), &mut strategy);
+    let strategy_fire_and_drop = StrategyFireAndDrop::new();
+    let mut strategy_manager = StrategyManager::new();
+    strategy_manager.add_strategy(Box::new(strategy_fire_and_drop));
+
+    event_manager.subscribe::<MarketDataEvent, StrategyManager>(&strategy_manager);
+    event_manager.subscribe::<PortfolioInfoEvent, StrategyManager>(&strategy_manager);
+    event_manager.allow_publish("high".to_string(), &mut strategy_manager);
+
+    // // Initialize Modules
+    // let mut strategy = Strategy::new();
+    // // Subscribe to specific event types for the strategy module
+    // event_manager.subscribe::<MarketDataEvent, Strategy>(&strategy);
+    // event_manager.subscribe::<PortfolioInfoEvent, Strategy>(&strategy);
+    // event_manager.allow_publish("high".to_string(), &mut strategy);
 
     let mut mock_exchange: MockExchange = MockExchange::new();
     // Subscribe to specific event types for the mock exchange module
@@ -50,7 +59,7 @@ fn main() {
     });
 
     let _strategy_thread = thread::spawn(move || {
-        strategy.run();
+        strategy_manager.run();
     });
 
     let _data_analyzer_thread = thread::spawn(move || {
