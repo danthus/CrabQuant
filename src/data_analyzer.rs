@@ -21,7 +21,7 @@ pub struct DataAnalyzer {
     market_data: Vec<(String, f64)>,
     // local_portfolio: use this to parse PortfolioInfoEvents
     local_portfolio: Portfolio,
-    asset_history: Vec<Order>,
+    asset_history: Vec<(String, f64)>,
 }
 
 impl ModuleReceive for DataAnalyzer {
@@ -67,7 +67,10 @@ impl DataAnalyzer {
                     });
                 }
                 Event::PortfolioInfo(portfolio_info_event) => {
-                    self.process_portfolioinfo(portfolio_info_event);
+                    // self.process_portfolioinfo(portfolio_info_event);
+                    self.process_portfolioinfo(portfolio_info_event).unwrap_or_else(|err| {
+                        eprintln!("Error updating plot: {}", err);
+                    });
                 }
                 _ => {
                     println!("DataAnalyzer: Unsupported event: {:?}", event);
@@ -82,18 +85,38 @@ impl DataAnalyzer {
         println!("DA: Updating event: {:?}", market_data_event);
         self.market_data.push((market_data_event.timestamp.clone(), market_data_event.close));
         // if self.market_data.len()>10 {println!("market_data: {:?}", &self.market_data);}
-        self.plot(&self.market_data, "baseline.png")?;
+        // self.plot(&self.market_data, "baseline.png")?;
         Ok(())
     }
 
-    fn plot(&self, data: &[(String, f64)], output_path: &str) -> Result<(), Box<dyn Error>> {
-        if data.is_empty() {
+    fn plot(&self, market_data: &[(String, f64)], asset_history: &[(String, f64)], output_path: &str) -> Result<(), Box<dyn Error>> {
+        if market_data.is_empty() && asset_history.is_empty() {
             eprintln!("No data points available for plotting.");
             return Ok(());
         }
-        // Calculate y-axis range dynamically
-        let y_min = data.iter().map(|&(_, close)| close).fold(f64::INFINITY, f64::min);
-        let y_max = data.iter().map(|&(_, close)| close).fold(f64::NEG_INFINITY, f64::max);
+        // Get the first market data value to standardize
+        let first_market_value = market_data[0].1;
+        let first_asset_value = asset_history[0].1;
+        
+        // Standardize market data
+        let standardized_market_data: Vec<(String, f64)> = market_data
+            .iter()
+            .map(|(timestamp, value)| (timestamp.clone(), value / first_market_value))
+            .collect();
+
+        // Standardize asset history
+        let standardized_asset_history: Vec<(String, f64)> = asset_history
+            .iter()
+            .map(|(timestamp, value)| (timestamp.clone(), value / first_asset_value))
+            .collect();
+
+        // Calculate the y-axis range for standardized data
+        let all_y_values = standardized_market_data
+            .iter()
+            .map(|&(_, value)| value)
+            .chain(standardized_asset_history.iter().map(|&(_, value)| value));
+        let y_min = all_y_values.clone().fold(f64::INFINITY, f64::min);
+        let y_max = all_y_values.fold(f64::NEG_INFINITY, f64::max);
         // if data.len()>10 {
         //     println!("ymin: {}", y_min);
         //     println!("ymax: {}", y_max);
@@ -104,10 +127,10 @@ impl DataAnalyzer {
         root_area.fill(&WHITE)?;
 
         let mut chart = ChartBuilder::on(&root_area)
-            .caption("Baseline Performance", ("sans-serif", 18))
+            .caption("Market Data and Asset History", ("sans-serif", 18))
             .x_label_area_size(60)
             .y_label_area_size(60)
-            .build_cartesian_2d(0..data.len(), y_min..y_max)?;
+            .build_cartesian_2d(0..market_data.len().max(asset_history.len()), y_min..y_max)?;
 
         // Configure the mesh
         chart
@@ -115,31 +138,43 @@ impl DataAnalyzer {
             // .x_labels(11)
             // .y_labels(11)
             .x_desc("Date")
-            .y_desc("Price")
+            .y_desc("Value")
             .axis_desc_style(("sans-serif", 18))
             .x_label_formatter(&|x| {
                 if let Some(index) = x.to_usize() {
                     // println!("index: {}", index);
                     // println!("datalen: {}", data.len());
-                    if index < data.len() {
+                    if index < standardized_market_data.len() {
                         // Extract the date portion from the timestamp
                         // println!("index: {}", index);
                         // println!("x: {}", data[index].0.to_string());
-                        return data[index].0.to_string();
+                        return standardized_market_data[index].0.clone();
                     }
                 }
                 "".to_string()
             })
             .draw()?;
 
-        // Draw the data series
+        // Plot the market data (close prices) in blue
         chart
             .draw_series(LineSeries::new(
-                data.iter().enumerate().map(|(i, &(_, close))| (i, close)),
+                standardized_market_data.iter().enumerate().map(|(i, &(_, close))| (i, close)),
                 &BLUE,
             ))?
-            .label("Close Price")
+            .label("Market Data")
             .legend(|(x, y)| PathElement::new([(x, y), (x + 20, y)], &BLUE));
+
+        // Plot the asset history in red
+        chart
+            .draw_series(LineSeries::new(
+                standardized_asset_history
+            .iter()
+            .enumerate()
+            .map(|(i, &(_, asset))| (i, asset)),
+        &RED,
+            ))?
+        .label("Asset Value")
+        .legend(|(x, y)| PathElement::new([(x, y), (x + 20, y)], &RED));
 
         // Draw the legend
         chart
@@ -154,11 +189,22 @@ impl DataAnalyzer {
         Ok(())
     }
 
-    fn process_portfolioinfo(&mut self, portfolio_info_event: PortfolioInfoEvent) {
+    fn process_portfolioinfo(&mut self, portfolio_info_event: PortfolioInfoEvent) -> Result<(), Box<dyn Error>> {
         println!("DA: Updating event: {:?}", portfolio_info_event);
         self.local_portfolio = portfolio_info_event.portfolio.clone();            
         
         // TODO: update assets vector
+        // Use the timestamp of the last market_data
+        if let Some((latest_timestamp, _)) = self.market_data.last() {
+        // Add to asset_history with the latest market_data timestamp
+            self.asset_history.push((latest_timestamp.clone(), self.local_portfolio.asset));
 
+        // Plot the asset_history
+            self.plot(&self.market_data, &self.asset_history, "performance.png")?;
+        } else {
+            eprintln!("No market data available to synchronize with portfolio info!");
+            return Ok(());
+        }
+        Ok(())
     }
 }
