@@ -27,7 +27,7 @@ impl StrategyFireAndDrop{
 impl Strategy for StrategyFireAndDrop {
     fn process(&mut self, market_data_event: MarketDataEvent) -> Option<Event> {
         self.moving_window.update(market_data_event.close as f32);
-        
+        println!("!!!!available cash: {}", self.portfolio_local.available_cash);
         let ma_short = self.moving_window.average(2);
         let ma_long = self.moving_window.average(3);
         // println!("ma5: {}, ma10: {}", ma5, ma10);
@@ -47,8 +47,14 @@ impl Strategy for StrategyFireAndDrop {
         // ma5 < ma10 sell
         else if ma_short < ma_long {
             let quantity = (self.portfolio_local.available_cash / (market_data_event.close * self.factor)).round() as i32;
-            if quantity > 0 {
+            let current_position = *self.portfolio_local.positions.get(&market_data_event.symbol).unwrap();
+            if quantity > 0 && quantity < current_position {
                 let fire_and_drop = FireAndDropOrder{ symbol: market_data_event.symbol, amount: quantity, direction: OrderDirection::Sell };
+                let order_place_event = Event::new_order_place(Order::FireAndDrop(fire_and_drop));
+                Some(order_place_event)
+            }
+            else if quantity > current_position {
+                let fire_and_drop = FireAndDropOrder{ symbol: market_data_event.symbol, amount: current_position, direction: OrderDirection::Sell };
                 let order_place_event = Event::new_order_place(Order::FireAndDrop(fire_and_drop));
                 Some(order_place_event)
             }

@@ -139,7 +139,7 @@ impl MockExchange {
         self.update_asset(market_data_event);
 
         let portfolio_info_event = Event::new_portfolio_info(self.portfolio.clone());
-        println!("MEX: Publishing event: {:?}", portfolio_info_event);
+        println!("MEX: Publishing: {:?}", portfolio_info_event);
         self.publish(portfolio_info_event);
     }
 
