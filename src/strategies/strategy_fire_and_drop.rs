@@ -38,6 +38,7 @@ impl Strategy for StrategyFireAndDrop {
             if quantity > 0 {
                 let fire_and_drop = FireAndDropOrder{ symbol: market_data_event.symbol, amount: quantity, direction: OrderDirection::Buy };
                 let order_place_event = Event::new_order_place(Order::FireAndDrop(fire_and_drop));
+                println!("!!!!Buy order!!!!: {:?}", order_place_event);
                 Some(order_place_event)
             }
             else {
@@ -60,5 +61,9 @@ impl Strategy for StrategyFireAndDrop {
         else {
             None
         }
+    }
+
+    fn update(&mut self, portfolio: Portfolio) {
+        self.portfolio_local = portfolio.clone();
     }
 }
