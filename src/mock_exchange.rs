@@ -93,7 +93,7 @@ impl MockExchange {
     }
 
     fn process_marketevent(&mut self, market_data_event: MarketDataEvent) {
-        println!("MEX: Handling: {:?}", market_data_event);
+        println!("MEX: Received: {:?}", market_data_event);
     
         // Calculate the mean price from market data
         let mean_price = (market_data_event.high + market_data_event.low) / 2.0;
@@ -210,29 +210,38 @@ impl PortfolioUpdater for MockExchange{
                 );
             }
             OrderDirection::Sell => {
-                // Calculate the total value of the sell
-                let total_value = price * amount.abs() as f64;
+                // Ensure the sell order is valid before proceeding
+                // let position_entry = self.portfolio.positions.get(&symbol);
+                let mut total_value = 0.;
+                match self.portfolio.positions.get(&symbol) {
+                    Some(&position_entry) => {
+                        if position_entry < amount.abs() {
+                            println!(
+                                "MEX: Warning : Insufficient holdings to sell {} of {}. Available: {}. Selling the available amount instead.",
+                                amount.abs(),
+                                symbol,
+                                position_entry
+                            );
+                            total_value = price * position_entry as f64;
+                            self.portfolio.positions.insert(symbol.clone(), 0);
 
-                // Add cash and update the position
-                self.portfolio.cash += total_value;
+                        } else {
+                            let new_pos = position_entry - amount;
 
-                if let Some(position_entry) = self.portfolio.positions.get_mut(&symbol) {
-                    *position_entry -= amount;
-
-                    // Ensure no negative holdings
-                    if *position_entry < 0 {
-                        println!(
-                            "MEX: Warning: Selling more than owned for symbol {}. Setting position to 0.",
-                            symbol
-                        );
-                        *position_entry = 0;
+                            total_value = price * amount as f64;
+                            self.portfolio.positions.insert(symbol.clone(), new_pos);
+                        }
                     }
-                } else {
-                    println!(
-                        "MEX: Warning: Attempted to sell {} of {}, but no position exists.",
-                        amount, symbol
-                    );
+                    None => {
+                        println!(
+                            "MEX: Warning : No holdings for symbol {} to sell {}.",
+                            symbol, amount.abs()
+                        );
+                        return; // Exit the function without processing the order
+                    }
                 }
+
+                self.portfolio.cash += total_value;
 
                 println!(
                     "MEX: Filled Sell Order: Symbol: {}, Amount: {}, Price: {}, Total Value: {}",

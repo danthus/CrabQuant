@@ -53,9 +53,11 @@ impl StrategyManager {
 
             match event {
                 Event::MarketData(market_data_event) => {
+                    println!("Strategy: Received: {:?}", market_data_event);
                     self.process_marketevent(market_data_event, &mut events_to_publish);
                 }
                 Event::PortfolioInfo(portfolio_info_event) => {
+                    println!("Strategy: Received: {:?}", portfolio_info_event);
                     self.process_portfolioinfo(portfolio_info_event);
                 }
                 _ => {
