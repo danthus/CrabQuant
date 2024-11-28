@@ -14,7 +14,8 @@ use mock_exchange::MockExchange;
 // use portfolio_manager::PortfolioManager;
 use data_analyzer::DataAnalyzer;
 use strategy_manager::StrategyManager;
-use strategies::strategy_fire_and_drop::StrategyFireAndDrop;
+// use strategies::strategy_fire_and_drop::StrategyFireAndDrop;
+use strategies::strategy_limit_price::StrategyLimitPrice;
 use std::thread;
 use events::*;
 
@@ -22,9 +23,10 @@ fn main() {
     // Initialize event manager
     let mut event_manager = EventManager::new();
 
-    let strategy_fire_and_drop = StrategyFireAndDrop::new();
+    // let strategy_fire_and_drop = StrategyFireAndDrop::new();
+    let strategy_limit_price = StrategyLimitPrice::new();
     let mut strategy_manager = StrategyManager::new();
-    strategy_manager.add_strategy(Box::new(strategy_fire_and_drop));
+    strategy_manager.add_strategy(Box::new(strategy_limit_price));
 
     event_manager.subscribe::<MarketDataEvent, StrategyManager>(&strategy_manager);
     event_manager.subscribe::<PortfolioInfoEvent, StrategyManager>(&strategy_manager);
