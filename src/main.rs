@@ -25,7 +25,7 @@ fn main() {
 
     // let strategy_fire_and_drop = StrategyFireAndDrop::new();
     let strategy_limit_price = StrategyLimitPrice::new();
-    let mut strategy_manager = StrategyManager::new(vec![0.5]);
+    let mut strategy_manager = StrategyManager::new(vec![1.]);
     strategy_manager.add_strategy(Box::new(strategy_limit_price));
 
     event_manager.subscribe::<MarketDataEvent, StrategyManager>(&strategy_manager);

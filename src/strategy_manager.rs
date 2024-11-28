@@ -91,7 +91,7 @@ impl StrategyManager {
             // }
         }
         for event in events.drain(..) {
-            println!("Strategy: Publishing event: {:?}", event);
+            println!("Strategy: Publishing event: {:?}, \n\tbased on {:?}", event, market_data_event);
             self.publish(event);
         } 
     }

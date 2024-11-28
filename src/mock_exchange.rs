@@ -114,14 +114,20 @@ impl MockExchange {
                     match direction {
                         OrderDirection::Buy => {
                             if mean_price <= limit_price {
+                                println!("MEX: Filling Order: {:?}, \n\tupon receiving {:?}", order, market_data_event);
                                 filled_orders.push((symbol, amount, mean_price, direction));
                                 return false; // Remove this order
+                            } else{
+                                println!("MEX: Dropping Order: {:?}, \n\tupon receiving {:?}", order, market_data_event);
                             }
                         }
                         OrderDirection::Sell => {
                             if mean_price >= limit_price {
+                                println!("MEX: Filling Order: {:?}, \n\tupon receiving {:?}", order, market_data_event);
                                 filled_orders.push((symbol, amount, mean_price, direction));
                                 return false; // Remove this order
+                            } else{
+                                println!("MEX: Dropping Order: {:?}, \n\tupon receiving {:?}", order, market_data_event);
                             }
                         }
                     }
@@ -147,7 +153,7 @@ impl MockExchange {
         // Check if order is valid. If yes, modify portfolio and send. If not, drop it.
         // Add order to to_do_list
         let order = order_place_event.order;
-
+        println!("MEX: Received Order: {:?}", order);
         // Add the parsed order to the pending_orders Vec
         self.pending_orders.push(order.clone());
     }
