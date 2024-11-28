@@ -15,7 +15,7 @@ impl StrategyFireAndDrop{
     pub fn new() -> Self {
         let portfolio_local = Portfolio::new(0.0);
         let moving_window = MovingWindow::new(20);
-        let factor = 1.2;
+        let factor: f64 = 1.2;
         StrategyFireAndDrop {
             portfolio_local,
             moving_window,

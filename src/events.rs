@@ -160,7 +160,7 @@ pub struct Portfolio {
 impl Portfolio{
     pub fn new(initial_cash:f64 ) -> Self{
         Portfolio{
-            asset : 0.0,
+            asset : initial_cash,
             cash : initial_cash,
             available_cash : initial_cash,
             positions : HashMap::new(),
