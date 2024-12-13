@@ -50,15 +50,54 @@ impl MarketDataFeeder {
         // let mut first_data = true;
 
         for result in reader.records() {
+            // let record = result.expect("Failed to read record");
+            // let timestamp= record[0].to_string();
+            // let open= record[1].parse().expect("Invalid open value");
+            // let high= record[2].parse().expect("Invalid high value");
+            // let low= record[3].parse().expect("Invalid low value");
+            // let close= record[4].parse().expect("Invalid close value");
+            // let volume= record[5].parse().expect("Invalid volume value");
+            // let symbol = "TSLA".to_string() ;
+            // let market_data_event = Event::new_market_data(timestamp, symbol, open, close, high, low, volume);
+
             let record = result.expect("Failed to read record");
-            let timestamp= record[0].to_string();
-            let open= record[1].parse().expect("Invalid open value");
-            let high= record[2].parse().expect("Invalid high value");
-            let low= record[3].parse().expect("Invalid low value");
-            let close= record[4].parse().expect("Invalid close value");
-            let volume= record[5].parse().expect("Invalid volume value");
-            let symbol = "TSLA".to_string() ;
-            let market_data_event = Event::new_market_data(timestamp, symbol, open, close, high, low, volume);
+    // Parse the timestamp (Date)
+    let timestamp = record[0].to_string();
+    
+    // Parse the Close/Last price (removing the '$' sign)
+    let close: f64 = record[1]
+        .trim_start_matches('$')
+        .parse()
+        .expect("Invalid close value");
+    
+    // Parse the Volume
+    let volume: i32 = record[2]
+        .parse()
+        .expect("Invalid volume value");
+    
+    // Parse the Open price (removing the '$' sign)
+    let open: f64 = record[3]
+        .trim_start_matches('$')
+        .parse()
+        .expect("Invalid open value");
+    
+    // Parse the High price (removing the '$' sign)
+    let high: f64 = record[4]
+        .trim_start_matches('$')
+        .parse()
+        .expect("Invalid high value");
+    
+    // Parse the Low price (removing the '$' sign)
+    let low: f64 = record[5]
+        .trim_start_matches('$')
+        .parse()
+        .expect("Invalid low value");
+    
+    // Set a hardcoded symbol (e.g., TSLA)
+    let symbol = "TSLA".to_string();
+    
+    // Create a MarketDataEvent
+    let market_data_event = Event::new_market_data(timestamp, symbol, open, close, high, low, volume);
 
             // Send data through the channel
             // println!("MarketDataFeeder: Sending: {:?}", market_data);
@@ -83,7 +122,7 @@ impl MarketDataFeeder {
             //     thread::sleep(std::time::Duration::from_millis(1));
             //     first_data = false;
             // }
-            // thread::sleep(std::time::Duration::from_millis(1));
+            thread::sleep(std::time::Duration::from_millis(1));
             // break;
         }
     }

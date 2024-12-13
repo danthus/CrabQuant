@@ -3,6 +3,9 @@ use crate::MarketDataEvent;
 use crate::event_manager::{ModulePublish, ModuleReceive};
 use crate::events::*;
 use crossbeam::channel::{Sender, Receiver, bounded};
+use core::time;
+use std::time::Duration;
+use std::thread;
 
 pub trait Strategy {
     /// Called when market data is received.
@@ -55,6 +58,7 @@ impl StrategyManager {
                 Event::MarketData(market_data_event) => {
                     println!("Strategy: Received: {:?}", market_data_event);
                     self.process_marketevent(market_data_event, &mut events_to_publish);
+                    // thread::sleep(time::Duration::from_secs(1));
                 }
                 Event::PortfolioInfo(portfolio_info_event) => {
                     println!("Strategy: Received: {:?}", portfolio_info_event);

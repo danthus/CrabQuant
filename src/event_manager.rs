@@ -135,11 +135,6 @@ impl EventManager {
             if let Ok(event) = self.lp_receiver.try_recv() {
                 self.dispatch_event(event);
                 start = Instant::now();
-                // After dispatching a low-priority event, check for new high-priority events
-                // while let Ok(event) = self.hp_receiver.try_recv() {
-                //     self.dispatch_event(event);
-                // }
-
             } else {
                 // If no events are available, you may want to sleep or handle idle state
                 // For example:

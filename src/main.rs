@@ -70,7 +70,7 @@ fn main() {
 
     // Start feeding data
     let _market_data_feeder_thread = thread::spawn(move || {
-        market_data_feeder.start_feeding("./data/TSLA_1min_sample.csv");
+        market_data_feeder.start_feeding("./data/TSLA_DAY_80D.csv");
     });
 
     event_manager.proceed();

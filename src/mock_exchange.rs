@@ -94,7 +94,7 @@ impl MockExchange {
 
     fn process_marketevent(&mut self, market_data_event: MarketDataEvent) {
         println!("MEX: Received: {:?}", market_data_event);
-    
+        
         // Calculate the mean price from market data
         let mean_price = (market_data_event.high + market_data_event.low) / 2.0;
         // println!("MEX: Calculated mean price: {}", mean_price);
