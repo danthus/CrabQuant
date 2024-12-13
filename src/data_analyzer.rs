@@ -3,17 +3,18 @@ use crate::{events::*, market_data_feeder};
 use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
 use num_traits::cast::ToPrimitive;
 use plotters::prelude::*;
+use simplelog::*;
 use std::error::Error;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-use simplelog::*;
 
 pub struct DataAnalyzer {
     subscribe_sender: Sender<Event>,
     subscribe_receiver: Receiver<Event>,
     market_data_history: Arc<Mutex<Vec<(String, f64)>>>,
     asset_history: Arc<Mutex<Vec<(String, f64)>>>,
+    cash_history: Arc<Mutex<Vec<(String, f64)>>>,
     local_portfolio: Portfolio,
 }
 
@@ -28,11 +29,13 @@ impl DataAnalyzer {
         let (subscribe_sender, subscribe_receiver) = unbounded();
         let market_data_history = Arc::new(Mutex::new(Vec::new()));
         let asset_history = Arc::new(Mutex::new(Vec::new()));
+        let cash_history = Arc::new(Mutex::new(Vec::new()));
         let local_portfolio = Portfolio::new(0.0);
 
         // Spawn a new thread for plotting
         let market_data_history_clone = Arc::clone(&market_data_history);
         let asset_history_clone = Arc::clone(&asset_history);
+        let cash_history_clone = Arc::clone(&cash_history);
 
         thread::spawn(move || {
             let mut last_lengths = (0, 0); // Track lengths of histories
@@ -46,11 +49,16 @@ impl DataAnalyzer {
                     let data = asset_history_clone.lock().unwrap();
                     data.clone()
                 };
+                let cash_history_snapshot = {
+                    let data = cash_history_clone.lock().unwrap();
+                    data.clone()
+                };
 
                 // Plot and save the data if there are updates
                 if let Err(err) = DataAnalyzer::plot(
                     &market_data_snapshot,
                     &asset_history_snapshot,
+                    &cash_history_snapshot,
                     &mut last_lengths,
                     "performance.png",
                 ) {
@@ -66,6 +74,7 @@ impl DataAnalyzer {
             subscribe_receiver,
             market_data_history,
             asset_history,
+            cash_history,
             local_portfolio,
         }
     }
@@ -97,9 +106,11 @@ impl DataAnalyzer {
     fn process_portfolioinfo(&mut self, portfolio_info_event: PortfolioInfoEvent) {
         self.local_portfolio = portfolio_info_event.portfolio.clone();
         let mut asset_history = self.asset_history.lock().unwrap();
+        let mut cash_history = self.cash_history.lock().unwrap();
 
         if let Some((latest_timestamp, _)) = self.market_data_history.lock().unwrap().last() {
             asset_history.push((latest_timestamp.clone(), self.local_portfolio.asset));
+            cash_history.push((latest_timestamp.clone(), self.local_portfolio.cash));
         }
         // println!("DA: Updated asset history: {:?}", self.local_portfolio);
         debug!("Updated asset history: {:?}", self.local_portfolio);
@@ -108,6 +119,7 @@ impl DataAnalyzer {
     fn plot(
         market_data: &[(String, f64)],
         asset_history: &[(String, f64)],
+        cash_history: &[(String, f64)],
         last_lengths: &mut (usize, usize), // Track the lengths of the histories
         output_path: &str,
     ) -> Result<(), Box<dyn Error>> {
@@ -129,6 +141,7 @@ impl DataAnalyzer {
 
         let first_market_value = market_data.get(0).map_or(1.0, |(_, value)| *value);
         let first_asset_value = asset_history.get(0).map_or(1.0, |(_, value)| *value);
+        let first_cash_value = cash_history.get(0).map_or(1.0, |(_, value)| *value);
 
         let standardized_market_data: Vec<(String, f64)> = market_data
             .iter()
@@ -140,10 +153,27 @@ impl DataAnalyzer {
             .map(|(timestamp, value)| (timestamp.clone(), value / first_asset_value))
             .collect();
 
+        // Calculate (asset - cash) and standardize
+        let standardized_difference: Vec<(String, f64)> = asset_history
+            .iter()
+            .map(|(timestamp, asset_value)| {
+                // Find corresponding cash value by timestamp
+                let cash_value = cash_history
+                    .iter()
+                    .find(|(cash_timestamp, _)| cash_timestamp == timestamp)
+                    .map(|(_, value)| *value)
+                    .unwrap_or(0.0); // Default to 0.0 if no matching timestamp
+
+                let difference = asset_value - cash_value; // Calculate asset - cash
+                (timestamp.clone(), difference / first_asset_value) // Standardize by first asset value
+            })
+            .collect();
+
         let all_y_values = standardized_market_data
             .iter()
             .map(|&(_, value)| value)
-            .chain(standardized_asset_history.iter().map(|&(_, value)| value));
+            .chain(standardized_asset_history.iter().map(|&(_, value)| value))
+            .chain(standardized_difference.iter().map(|&(_, value)| value));
         let y_min = all_y_values.clone().fold(f64::INFINITY, f64::min);
         let y_max = all_y_values.fold(f64::NEG_INFINITY, f64::max);
 
@@ -193,8 +223,32 @@ impl DataAnalyzer {
                     .map(|(i, &(_, asset))| (i, asset)),
                 &RED,
             ))?
-            .label("Asset Value")
+            .label("Total Asset Value")
             .legend(|(x, y)| PathElement::new([(x, y), (x + 20, y)], &RED));
+
+        // Plot the asset-cash difference as a color block (area chart)
+        chart
+            .draw_series(AreaSeries::new(
+                standardized_difference
+                    .iter()
+                    .enumerate()
+                    .map(|(i, &(_, diff))| (i, diff)),
+                0.0,             // Baseline for the area chart
+                &GREEN.mix(0.2), // Semi-transparent green for the color block
+            ))?
+            .label("Position Value")
+            .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 20, y + 5)], &GREEN.mix(0.5)));
+
+        // chart
+        //     .draw_series(LineSeries::new(
+        //         standardized_difference
+        //             .iter()
+        //             .enumerate()
+        //             .map(|(i, &(_, diff))| (i, diff)),
+        //         &GREEN,
+        //     ))?
+        //     .label("Position Value")
+        //     .legend(|(x, y)| PathElement::new([(x, y), (x + 20, y)], &GREEN));
 
         // Draw the legend
         chart
