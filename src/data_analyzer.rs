@@ -200,7 +200,7 @@ impl DataAnalyzer {
             self.asset_history.push((latest_timestamp.clone(), self.local_portfolio.asset));
 
         // Plot the asset_history
-            if portfolio_info_event.id==8700 {self.plot(&self.market_data, &self.asset_history, "performance.png")?};
+            if portfolio_info_event.id==2516 {self.plot(&self.market_data, &self.asset_history, "performance.png")?};
         } else {
             eprintln!("No market data available to synchronize with portfolio info!");
             return Ok(());
