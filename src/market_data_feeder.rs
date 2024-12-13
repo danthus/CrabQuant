@@ -122,7 +122,7 @@ impl MarketDataFeeder {
             //     thread::sleep(std::time::Duration::from_millis(1));
             //     first_data = false;
             // }
-            thread::sleep(std::time::Duration::from_millis(1));
+            thread::sleep(std::time::Duration::from_millis(2));
             // break;
         }
     }

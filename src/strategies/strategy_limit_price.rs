@@ -42,7 +42,7 @@ impl Strategy for StrategyLimitPrice {
         self.moving_window.update(market_data_event.close as f32);
         
         let ma_short = self.moving_window.average(5);
-        let ma_long = self.moving_window.average(20);
+        let ma_long = self.moving_window.average(10);
         let quantity = (self.portfolio_local.available_cash / (market_data_event.close * self.price_factor)).floor() as i32;
         
         // ma_short > ma_long buy and last signal is not buy
@@ -50,7 +50,7 @@ impl Strategy for StrategyLimitPrice {
             let max_volume = (market_data_event.volume as f32 *self.volume_factor).floor() as i32;
             let buy_volume = if quantity > max_volume {max_volume} else {quantity};
             self.last_signal = LastSignal::IsBuy;
-            
+
             if quantity > 0 {
                 let fire_and_drop = LimitPriceOrder{ symbol: market_data_event.symbol, amount: buy_volume, limit_price:market_data_event.low, direction: OrderDirection::Buy };
                 let order_place_event = Event::new_order_place(Order::LimitPrice(fire_and_drop));
