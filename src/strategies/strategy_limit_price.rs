@@ -52,7 +52,7 @@ impl Strategy for StrategyLimitPrice {
             self.last_signal = LastSignal::IsBuy;
 
             if quantity > 0 {
-                let fire_and_drop = LimitPriceOrder{ symbol: market_data_event.symbol, amount: buy_volume, limit_price:market_data_event.low, direction: OrderDirection::Buy };
+                let fire_and_drop = LimitPriceOrder{ symbol: market_data_event.symbol, amount: buy_volume, limit_price:market_data_event.low*2., direction: OrderDirection::Buy };
                 let order_place_event = Event::new_order_place(Order::LimitPrice(fire_and_drop));
                 self.portfolio_local.available_cash = self.portfolio_local.available_cash - quantity as f64*market_data_event.close;
                 Some(order_place_event)
@@ -66,13 +66,13 @@ impl Strategy for StrategyLimitPrice {
             self.last_signal = LastSignal::IsSell;
             if let Some(current_position) = self.portfolio_local.positions.get(&market_data_event.symbol) {
                 if quantity > 0 && quantity < *current_position {
-                    let fire_and_drop = LimitPriceOrder{ symbol: market_data_event.symbol, amount: quantity, limit_price:market_data_event.low, direction: OrderDirection::Sell };
-                    let order_place_event = Event::new_order_place(Order::LimitPrice(fire_and_drop));
+                    let limit_price_order = LimitPriceOrder{ symbol: market_data_event.symbol, amount: quantity, limit_price:market_data_event.low*0., direction: OrderDirection::Sell };
+                    let order_place_event = Event::new_order_place(Order::LimitPrice(limit_price_order));
                     Some(order_place_event)
                 }
                 else if quantity > *current_position {
-                    let fire_and_drop = LimitPriceOrder{ symbol: market_data_event.symbol, amount: *current_position, limit_price:market_data_event.low, direction: OrderDirection::Sell };
-                    let order_place_event = Event::new_order_place(Order::LimitPrice(fire_and_drop));
+                    let limit_price_order = LimitPriceOrder{ symbol: market_data_event.symbol, amount: *current_position, limit_price:market_data_event.low*0., direction: OrderDirection::Sell };
+                    let order_place_event = Event::new_order_place(Order::LimitPrice(limit_price_order));
                     Some(order_place_event)
                 }
                 else {
