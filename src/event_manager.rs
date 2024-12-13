@@ -6,6 +6,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use crate::util::Counter;
 use std::time::{Duration, Instant};
+use simplelog::*;
 
 
 pub trait ModuleReceive {
@@ -145,7 +146,8 @@ impl EventManager {
                 // acc += 1;
                 // println!("acc = {}", acc);
                 if start.elapsed() >= timeout {
-                    println!("!!!!!All lp events are handled. Backtesting process completed.!!!!!!!");                    
+                    // println!("!!!!!All lp events are handled. Backtesting process completed.!!!!!!!"); 
+                    info!("All data feeded, backtesting completed.");                   
                     break;
                 }
                 // println!("!!!!!All lp events are handled. Backtesting process completed.!!!!!!!");

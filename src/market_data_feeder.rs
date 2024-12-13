@@ -5,9 +5,7 @@ use crossbeam::channel::{Sender, Receiver};
 use csv::ReaderBuilder;
 use std::fs::File;
 use std::thread;
-use std::time::Duration;
-use std::time::SystemTime;
-use rand::Rng;
+use simplelog::*;
 
 #[cfg(feature= "order_test")]
 use crate::util::Counter;
@@ -61,43 +59,43 @@ impl MarketDataFeeder {
             // let market_data_event = Event::new_market_data(timestamp, symbol, open, close, high, low, volume);
 
             let record = result.expect("Failed to read record");
-    // Parse the timestamp (Date)
-    let timestamp = record[0].to_string();
-    
-    // Parse the Close/Last price (removing the '$' sign)
-    let close: f64 = record[1]
-        .trim_start_matches('$')
-        .parse()
-        .expect("Invalid close value");
-    
-    // Parse the Volume
-    let volume: i32 = record[2]
-        .parse()
-        .expect("Invalid volume value");
-    
-    // Parse the Open price (removing the '$' sign)
-    let open: f64 = record[3]
-        .trim_start_matches('$')
-        .parse()
-        .expect("Invalid open value");
-    
-    // Parse the High price (removing the '$' sign)
-    let high: f64 = record[4]
-        .trim_start_matches('$')
-        .parse()
-        .expect("Invalid high value");
-    
-    // Parse the Low price (removing the '$' sign)
-    let low: f64 = record[5]
-        .trim_start_matches('$')
-        .parse()
-        .expect("Invalid low value");
-    
-    // Set a hardcoded symbol (e.g., TSLA)
-    let symbol = "TSLA".to_string();
-    
-    // Create a MarketDataEvent
-    let market_data_event = Event::new_market_data(timestamp, symbol, open, close, high, low, volume);
+            // Parse the timestamp (Date)
+            let timestamp = record[0].to_string();
+            
+            // Parse the Close/Last price (removing the '$' sign)
+            let close: f64 = record[1]
+                .trim_start_matches('$')
+                .parse()
+                .expect("Invalid close value");
+            
+            // Parse the Volume
+            let volume: i32 = record[2]
+                .parse()
+                .expect("Invalid volume value");
+            
+            // Parse the Open price (removing the '$' sign)
+            let open: f64 = record[3]
+                .trim_start_matches('$')
+                .parse()
+                .expect("Invalid open value");
+            
+            // Parse the High price (removing the '$' sign)
+            let high: f64 = record[4]
+                .trim_start_matches('$')
+                .parse()
+                .expect("Invalid high value");
+            
+            // Parse the Low price (removing the '$' sign)
+            let low: f64 = record[5]
+                .trim_start_matches('$')
+                .parse()
+                .expect("Invalid low value");
+            
+            // Set a hardcoded symbol (e.g., TSLA)
+            let symbol = "TSLA".to_string();
+            
+            // Create a MarketDataEvent
+            let market_data_event = Event::new_market_data(timestamp, symbol, open, close, high, low, volume);
 
             // Send data through the channel
             // println!("MarketDataFeeder: Sending: {:?}", market_data);
@@ -111,7 +109,8 @@ impl MarketDataFeeder {
                 println!("MarketDataFeeder: Sending MarketDataEvent{}", counter.next());
                 println!("MDF Timestamp: {:?}", std::time::SystemTime::now());
             }
-            println!("MDF: Publishing : {:?}", market_data_event);
+            // println!("MDF: Publishing : {:?}", market_data_event);
+            debug!("Market data event: {:?}", market_data_event);
             self.publish(market_data_event);
 
             // if first_data{

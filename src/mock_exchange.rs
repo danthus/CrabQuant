@@ -2,6 +2,7 @@ use crate::event_manager::{ModulePublish, ModuleReceive};
 use crate::events::{Order, OrderDirection, Event, Portfolio, PortfolioInfoEvent, OrderPlaceEvent, MarketDataEvent};
 use crate::PortfolioUpdater;
 use crossbeam::channel::{bounded, Receiver, Sender};
+use simplelog::debug;
 #[cfg(feature= "order_test")]
 use crate::util::Counter;
 use std::borrow::BorrowMut;
@@ -93,7 +94,8 @@ impl MockExchange {
     }
 
     fn process_marketevent(&mut self, market_data_event: MarketDataEvent) {
-        println!("MEX: Received: {:?}", market_data_event);
+        // println!("MEX: Received: {:?}", market_data_event);
+        debug!("Received market data: {:?}", market_data_event);
         
         // Calculate the mean price from market data
         let mean_price = (market_data_event.high + market_data_event.low) / 2.0;
@@ -114,20 +116,24 @@ impl MockExchange {
                     match direction {
                         OrderDirection::Buy => {
                             if mean_price <= limit_price {
-                                println!("MEX: Filling Order: {:?}, \n\tupon receiving {:?}", order, market_data_event);
+                                // println!("MEX: Filling Order: {:?}, \n\tupon receiving {:?}", order, market_data_event);
+                                debug!("Filling order (market id = {:?}): {:?}", market_data_event.id, order);
                                 filled_orders.push((symbol, amount, mean_price, direction));
                                 return false; // Remove this order
                             } else{
-                                println!("MEX: Dropping Order: {:?}, \n\tupon receiving {:?}", order, market_data_event);
+                                // println!("MEX: Dropping Order: {:?}, \n\tupon receiving {:?}", order, market_data_event);
+                                debug!("Dropping order (market id = {:?}): {:?}", market_data_event.id, order);
                             }
                         }
                         OrderDirection::Sell => {
                             if mean_price >= limit_price {
-                                println!("MEX: Filling Order: {:?}, \n\tupon receiving {:?}", order, market_data_event);
+                                // println!("MEX: Filling Order: {:?}, \n\tupon receiving {:?}", order, market_data_event);
+                                debug!("Filling order (market id = {:?}): {:?}", market_data_event.id, order);
                                 filled_orders.push((symbol, amount, mean_price, direction));
                                 return false; // Remove this order
                             } else{
-                                println!("MEX: Dropping Order: {:?}, \n\tupon receiving {:?}", order, market_data_event);
+                                // println!("MEX: Dropping Order: {:?}, \n\tupon receiving {:?}", order, market_data_event);
+                                debug!("Dropping order (market id = {:?}): {:?}", market_data_event.id, order);
                             }
                         }
                     }
@@ -145,14 +151,16 @@ impl MockExchange {
         self.update_asset(market_data_event);
 
         let portfolio_info_event = Event::new_portfolio_info(self.portfolio.clone());
-        println!("MEX: Publishing: {:?}", portfolio_info_event);
+        // println!("MEX: Publishing: {:?}", portfolio_info_event);
+        debug!("Publishing portfolio: {:?}", portfolio_info_event);
         self.publish(portfolio_info_event);
     }
 
     fn process_orderplace(&mut self, order_place_event:OrderPlaceEvent){
         // Check if order is valid. If yes, modify portfolio and send. If not, drop it.
         // Add order to to_do_list
-        println!("MEX: Received OrderPlaceEvent: {:?}", order_place_event);
+        // println!("MEX: Received OrderPlaceEvent: {:?}", order_place_event);
+        debug!("Received order place: {:?}", order_place_event);
         let order = order_place_event.order;
         // Add the parsed order to the pending_orders Vec
         self.pending_orders.push(order.clone());
@@ -176,10 +184,11 @@ impl PortfolioUpdater for MockExchange{
                     }
                 });
     
-            println!(
-                "MEX: Updated Portfolio Asset Value: {}, Cash: {}, Symbol: {}, Position Value: {}",
-                self.portfolio.asset, self.portfolio.cash, market_data.symbol, position_value
-            );
+            // println!(
+            //     "MEX: Updated Portfolio Asset Value: {}, Cash: {}, Symbol: {}, Position Value: {}",
+            //     self.portfolio.asset, self.portfolio.cash, market_data.symbol, position_value
+            // );
+            debug!("Updated portfolio: Value: {}, Cash: {}, Symbol: {}, Position Value: {}", self.portfolio.asset, self.portfolio.cash, market_data.symbol, position_value);
         } 
         // else {
         //     // If the symbol is not in the positions, just recalculate the total asset
@@ -204,10 +213,11 @@ impl PortfolioUpdater for MockExchange{
                 let position_entry = self.portfolio.positions.entry(symbol.clone()).or_insert(0);
                 *position_entry += amount;
 
-                println!(
-                    "MEX: Filled Buy Order: Symbol: {}, Amount: {}, Price: {}, Total Cost: {}",
-                    symbol, amount, price, total_cost
-                );
+                // println!(
+                //     "MEX: Filled Buy Order: Symbol: {}, Amount: {}, Price: {}, Total Cost: {}",
+                //     symbol, amount, price, total_cost
+                // );
+                debug!("Filled Buy Order: Symbol: {}, Amount: {}, Price: {}, Total Cost: {}", symbol, amount, price, total_cost);
             }
             OrderDirection::Sell => {
                 // Ensure the sell order is valid before proceeding
@@ -216,12 +226,13 @@ impl PortfolioUpdater for MockExchange{
                 match self.portfolio.positions.get(&symbol) {
                     Some(&position_entry) => {
                         if position_entry < amount.abs() {
-                            println!(
-                                "MEX: Warning : Insufficient holdings to sell {} of {}. Available: {}. Selling the available amount instead.",
-                                amount.abs(),
-                                symbol,
-                                position_entry
-                            );
+                            // println!(
+                            //     "MEX: Warning : Insufficient holdings to sell {} of {}. Available: {}. Selling the available amount instead.",
+                            //     amount.abs(),
+                            //     symbol,
+                            //     position_entry
+                            // );
+                            debug!("Warning: Insufficient holdings to sell {} of {}. Available: {}. Selling the available amount instead.", amount.abs(), symbol, position_entry);
                             total_value = price * position_entry as f64;
                             self.portfolio.positions.insert(symbol.clone(), 0);
 
@@ -233,20 +244,22 @@ impl PortfolioUpdater for MockExchange{
                         }
                     }
                     None => {
-                        println!(
-                            "MEX: Warning : No holdings for symbol {} to sell {}.",
-                            symbol, amount.abs()
-                        );
+                        // println!(
+                        //     "MEX: Warning : No holdings for symbol {} to sell {}.",
+                        //     symbol, amount.abs()
+                        // );
+                        debug!("Warning: No holdings for symbol {} to sell {}.", symbol, amount.abs());
                         return; // Exit the function without processing the order
                     }
                 }
 
                 self.portfolio.cash += total_value;
 
-                println!(
-                    "MEX: Filled Sell Order: Symbol: {}, Amount: {}, Price: {}, Total Value: {}",
-                    symbol, amount, price, total_value
-                );
+                // println!(
+                //     "MEX: Filled Sell Order: Symbol: {}, Amount: {}, Price: {}, Total Value: {}",
+                //     symbol, amount, price, total_value
+                // );
+                debug!("Filled Sell Order: Symbol: {}, Amount: {}, Price: {}, Total Value: {}", symbol, amount, price, total_value);
             }
         }
     }

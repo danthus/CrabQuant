@@ -19,7 +19,23 @@ use strategies::strategy_limit_price::StrategyLimitPrice;
 use std::thread;
 use events::*;
 
+use simplelog::*;
+use std::fs::File;
+
 fn main() {
+    let config = ConfigBuilder::new()
+        .set_time_level(LevelFilter::Off) // Turn off timestamps
+        .build();
+
+    CombinedLogger::init(
+        vec![
+            TermLogger::new(LevelFilter::Info, config.clone(), TerminalMode::Mixed, ColorChoice::Auto),
+            WriteLogger::new(LevelFilter::Debug, config, File::create("Trading.log").unwrap()),
+        ]
+    ).unwrap();
+    
+    info!("CrabQuant Starting ...");
+
     // Initialize event manager
     let mut event_manager = EventManager::new();
 
@@ -73,6 +89,7 @@ fn main() {
         market_data_feeder.start_feeding("./data/TSLA_DAY_10Y.csv");
     });
 
+    info!("Mock Exchange, Strategy, Data Analyzer, Data Feeder initialized, start data feeding ...");
     event_manager.proceed();
     
     return

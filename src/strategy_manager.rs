@@ -3,9 +3,7 @@ use crate::MarketDataEvent;
 use crate::event_manager::{ModulePublish, ModuleReceive};
 use crate::events::*;
 use crossbeam::channel::{Sender, Receiver, bounded};
-use core::time;
-use std::time::Duration;
-use std::thread;
+use simplelog::*;
 
 pub trait Strategy {
     /// Called when market data is received.
@@ -56,16 +54,16 @@ impl StrategyManager {
 
             match event {
                 Event::MarketData(market_data_event) => {
-                    println!("Strategy: Received: {:?}", market_data_event);
+                    // println!("Strategy: Received: {:?}", market_data_event);
                     self.process_marketevent(market_data_event, &mut events_to_publish);
                     // thread::sleep(time::Duration::from_secs(1));
                 }
                 Event::PortfolioInfo(portfolio_info_event) => {
-                    println!("Strategy: Received: {:?}", portfolio_info_event);
+                    // println!("Strategy: Received: {:?}", portfolio_info_event);
                     self.process_portfolioinfo(portfolio_info_event);
                 }
                 _ => {
-                    println!("Strategy: Unsupported event: {:?}", event);
+                    // println!("Strategy: Unsupported event: {:?}", event);
                 }
             }
         }
@@ -97,21 +95,11 @@ impl StrategyManager {
             // }
         }
         for event in events.drain(..) {
-            println!("Strategy: Publishing event: {:?}, \n\tbased on {:?}", event, market_data_event);
+            // println!("Strategy: Publishing event: {:?}, \n\tbased on {:?}", event, market_data_event);
+            debug!("Publish order place (market id = {:?}): {:?}", market_data_event.id, event);
             self.publish(event);
         } 
     }
-
-    // fn publish_events(&self, events: &mut Vec<Event>) {
-    //     if let Some(publish_sender) = &self.publish_sender {
-    //         for event in events.drain(..){
-    //             println!("Strategy: Publishing event: {:?}", event);
-    //             publish_sender.send(event).unwrap();
-    //         }
-    //     } else {
-    //         panic!("Publish sender is not initialized!");
-    //     }
-    // }
 
     fn publish(&self, event: Event) {
         if let Some(publish_sender) = &self.publish_sender {

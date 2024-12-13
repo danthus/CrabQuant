@@ -7,6 +7,7 @@ use std::error::Error;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
+use simplelog::*;
 
 pub struct DataAnalyzer {
     subscribe_sender: Sender<Event>,
@@ -89,7 +90,8 @@ impl DataAnalyzer {
     fn process_marketevent(&mut self, market_data_event: MarketDataEvent) {
         let mut market_data_history = self.market_data_history.lock().unwrap();
         market_data_history.push((market_data_event.timestamp.clone(), market_data_event.close));
-        println!("DA: Updated market data history: {:?}", market_data_event);
+        // println!("DA: Updated market data history: {:?}", market_data_event);
+        debug!("Updated market data history: {:?}", market_data_event);
     }
 
     fn process_portfolioinfo(&mut self, portfolio_info_event: PortfolioInfoEvent) {
@@ -99,7 +101,8 @@ impl DataAnalyzer {
         if let Some((latest_timestamp, _)) = self.market_data_history.lock().unwrap().last() {
             asset_history.push((latest_timestamp.clone(), self.local_portfolio.asset));
         }
-        println!("DA: Updated asset history: {:?}", self.local_portfolio);
+        // println!("DA: Updated asset history: {:?}", self.local_portfolio);
+        debug!("Updated asset history: {:?}", self.local_portfolio);
     }
 
     fn plot(
