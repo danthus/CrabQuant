@@ -11,7 +11,7 @@ enum LastSignal{
     IsNone,
 }
 
-pub struct StrategyLimitPrice {
+pub struct MAcross {
     portfolio_local: Portfolio,
     moving_window: MovingWindow,
     price_factor: f64,
@@ -19,7 +19,7 @@ pub struct StrategyLimitPrice {
     last_signal: LastSignal,
 }
 
-impl StrategyLimitPrice{
+impl MAcross{
     /// Creates a new Strategy module
     pub fn new() -> Self {
         let portfolio_local = Portfolio::new(0.0);
@@ -27,7 +27,7 @@ impl StrategyLimitPrice{
         let price_factor: f64 = 1.2;
         let volume_factor: f32 = 1.;
         let last_signal = LastSignal::IsNone;
-        StrategyLimitPrice {
+        MAcross {
             portfolio_local,
             moving_window,
             price_factor,
@@ -37,7 +37,7 @@ impl StrategyLimitPrice{
     }
 }
 
-impl Strategy for StrategyLimitPrice {
+impl Strategy for MAcross {
     fn process(&mut self, market_data_event: MarketDataEvent) -> Option<Event> {
         self.moving_window.update(market_data_event.close as f32);
         

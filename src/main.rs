@@ -15,7 +15,7 @@ use mock_exchange::MockExchange;
 use data_analyzer::DataAnalyzer;
 use strategy_manager::StrategyManager;
 // use strategies::strategy_fire_and_drop::StrategyFireAndDrop;
-use strategies::strategy_limit_price::StrategyLimitPrice;
+use strategies::moving_average_crossover::MAcross;
 use std::thread;
 use events::*;
 
@@ -40,7 +40,7 @@ fn main() {
     let mut event_manager = EventManager::new();
 
     // let strategy_fire_and_drop = StrategyFireAndDrop::new();
-    let strategy_limit_price = StrategyLimitPrice::new();
+    let strategy_limit_price = MAcross::new();
     let mut strategy_manager = StrategyManager::new(vec![1.]);
     strategy_manager.add_strategy(Box::new(strategy_limit_price));
 
