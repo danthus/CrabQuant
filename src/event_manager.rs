@@ -1,10 +1,7 @@
 use crate::events::{Event, MarketDataEvent, PortfolioInfoEvent, OrderPlaceEvent};
 use crossbeam::channel::{unbounded, Receiver, Sender, bounded};
-use std::any::{Any, TypeId};
+use std::any::TypeId;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
-use std::thread;
-use crate::util::Counter;
 use std::time::{Duration, Instant};
 use simplelog::*;
 
@@ -26,8 +23,6 @@ pub struct EventManager {
     lp_receiver: Receiver<Event>,
     hp_sender: Sender<Event>,
     hp_receiver: Receiver<Event>,
-    #[cfg(feature= "order_test")]
-    event_counters: HashMap<EventType, Counter>,
 }
 
 impl EventManager {
@@ -35,19 +30,8 @@ impl EventManager {
         let (hp_sender, hp_receiver) = unbounded();
         let (lp_sender, lp_receiver) = bounded(20);
 
-        #[cfg(feature = "order_test")]
-        let mut event_counters = HashMap::new();
         #[cfg(feature= "random_sleep_test")]
         let mut rng = rand::thread_rng();
-
-        #[cfg(feature = "order_test")]
-        {
-            // Initialize counters for each EventType you are using
-            event_counters.insert(EventType::TypeMarketData, Counter::new());
-            event_counters.insert(EventType::TypeOrderPlace, Counter::new());
-            event_counters.insert(EventType::TypePortfolioInfo, Counter::new());
-            // Add other EventTypes as needed
-        }
 
         EventManager {
             subscriber_book: HashMap::new(),
@@ -59,14 +43,6 @@ impl EventManager {
             event_counters,
         }
     }
-
-    // pub fn subscribe<T: ModuleReceive>(&mut self, event_type: EventType, module: &T) {
-    //     let sender = module.get_sender();
-    //     self.subscriber_book
-    //         .entry(event_type)
-    //         .or_insert_with(Vec::new)
-    //         .push(sender.clone());
-    // }
 
     pub fn subscribe<E: 'static, T: ModuleReceive>(&mut self, module: &T) {
         let type_id = TypeId::of::<E>();
@@ -93,17 +69,6 @@ impl EventManager {
             Event::OrderPlace(_) => TypeId::of::<OrderPlaceEvent>(),
             Event::PortfolioInfo(_) => TypeId::of::<PortfolioInfoEvent>(),
         };
-    
-        #[cfg(feature = "order_test")]
-        {
-            // Event counters based on TypeId
-            if let Some(counter) = self.event_counters.get_mut(&type_id) {
-                let count = counter.next();
-                println!("Dispatching event of type {:?} with count {}", type_id, count);
-            } else {
-                println!("Dispatching event of type {:?}", type_id);
-            }
-        }
 
         // Dispatch to subscribers
         if let Some(subscribers) = self.subscriber_book.get(&type_id) {
@@ -139,18 +104,12 @@ impl EventManager {
             } else {
                 // If no events are available, you may want to sleep or handle idle state
                 // For example:
-                // std::thread::sleep(std::time::Duration::from_millis(1));
-                // If backtesting, return.
-                // println!("All lp events are handled. Backtesting process completed.");
-                // return;
-                // acc += 1;
-                // println!("acc = {}", acc);
                 if start.elapsed() >= timeout {
-                    // println!("!!!!!All lp events are handled. Backtesting process completed.!!!!!!!"); 
+                    // wait until no upcoming event for timeout period
+                    // note that the returning of the event_manager.proceed will terminate the main thread.
                     info!("All data feeded, backtesting completed.");                   
                     break;
                 }
-                // println!("!!!!!All lp events are handled. Backtesting process completed.!!!!!!!");
                 // break;
             }
         }
