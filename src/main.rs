@@ -55,7 +55,10 @@ fn main() {
     // event_manager.subscribe::<PortfolioInfoEvent, Strategy>(&strategy);
     // event_manager.allow_publish("high".to_string(), &mut strategy);
 
-    let mut mock_exchange: MockExchange = MockExchange::new();
+    fn fee_function(trade_cost: f64) -> f64 {
+        trade_cost * 0.001 // 1% fee
+    }
+    let mut mock_exchange: MockExchange = MockExchange::new(fee_function);
     // Subscribe to specific event types for the mock exchange module
     event_manager.subscribe::<MarketDataEvent, MockExchange>(&mock_exchange);
     event_manager.subscribe::<OrderPlaceEvent, MockExchange>(&mock_exchange);
