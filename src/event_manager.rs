@@ -1,10 +1,9 @@
-use crate::shared_structures::{Event, MarketDataEvent, PortfolioInfoEvent, OrderPlaceEvent};
-use crossbeam::channel::{unbounded, Receiver, Sender, bounded};
+use crate::shared_structures::{Event, MarketDataEvent, OrderPlaceEvent, PortfolioInfoEvent};
+use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
+use simplelog::*;
 use std::any::TypeId;
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
-use simplelog::*;
-
 
 pub trait ModuleReceive {
     // For modules to give the rendezvous channel sender to the event_manager.
@@ -17,7 +16,7 @@ pub trait ModulePublish {
     fn use_sender(&mut self, sender: Sender<Event>);
 }
 pub struct EventManager {
-    // sb: 
+    // sb:
     subscriber_book: HashMap<TypeId, Vec<Sender<Event>>>,
     lp_sender: Sender<Event>,
     lp_receiver: Receiver<Event>,
@@ -30,7 +29,7 @@ impl EventManager {
         let (hp_sender, hp_receiver) = unbounded();
         let (lp_sender, lp_receiver) = bounded(20);
 
-        #[cfg(feature= "random_sleep_test")]
+        #[cfg(feature = "random_sleep_test")]
         let mut rng = rand::thread_rng();
 
         EventManager {
@@ -52,13 +51,16 @@ impl EventManager {
             .or_insert_with(Vec::new)
             .push(sender);
     }
-    
+
     pub fn allow_publish<T: ModulePublish>(&mut self, priority: String, module: &mut T) {
         // Allow module to publish to one of the lp/hp channel.
         match priority.as_str() {
             "high" => module.use_sender(self.hp_sender.clone()),
             "low" => module.use_sender(self.lp_sender.clone()),
-            _ => panic!("Invalid priority: expected 'high' or 'low', but got '{}'", priority),
+            _ => panic!(
+                "Invalid priority: expected 'high' or 'low', but got '{}'",
+                priority
+            ),
         }
     }
 
@@ -83,7 +85,6 @@ impl EventManager {
     }
 
     pub fn proceed(&mut self) {
-
         let event = self.lp_receiver.recv().unwrap();
         self.dispatch_event(event);
 
@@ -107,7 +108,7 @@ impl EventManager {
                 if start.elapsed() >= timeout {
                     // wait until no upcoming event for timeout period
                     // note that the returning of the event_manager.proceed will terminate the main thread.
-                    info!("All data feeded, backtesting completed.");                   
+                    info!("All data feeded, backtesting completed.");
                     break;
                 }
                 // break;

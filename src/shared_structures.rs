@@ -1,15 +1,14 @@
 // src/models/mod.rs
+use crate::util::Counter;
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
-use crate::util::Counter;
 use std::sync::Mutex;
 
 lazy_static::lazy_static! {
-    static ref EVENT_ID_COUNTER_MDE: Mutex<Counter> = Mutex::new(Counter::new());
-    static ref EVENT_ID_COUNTER_OPE: Mutex<Counter> = Mutex::new(Counter::new());
-    static ref EVENT_ID_COUNTER_PIE: Mutex<Counter> = Mutex::new(Counter::new());}
+static ref EVENT_ID_COUNTER_MDE: Mutex<Counter> = Mutex::new(Counter::new());
+static ref EVENT_ID_COUNTER_OPE: Mutex<Counter> = Mutex::new(Counter::new());
+static ref EVENT_ID_COUNTER_PIE: Mutex<Counter> = Mutex::new(Counter::new());}
 // Note that the events should only contain immutable simple data. NVM.
-
 
 // Events
 #[derive(Debug, Hash, Eq, PartialEq, Clone)]
@@ -86,26 +85,26 @@ pub struct OrderPlaceEvent {
 }
 
 #[derive(Debug, Clone)]
-pub enum Order{
+pub enum Order {
     FireAndDrop(FireAndDropOrder),
     LimitPrice(LimitPriceOrder),
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum OrderDirection{
+pub enum OrderDirection {
     Buy,
     Sell,
 }
 
 #[derive(Debug, Clone)]
-pub struct FireAndDropOrder{
+pub struct FireAndDropOrder {
     pub symbol: String,
     pub amount: i32,
     pub direction: OrderDirection,
 }
 
 #[derive(Debug, Clone)]
-pub struct LimitPriceOrder{
+pub struct LimitPriceOrder {
     pub symbol: String,
     pub amount: i32,
     pub limit_price: f64,
@@ -114,7 +113,7 @@ pub struct LimitPriceOrder{
 
 impl PartialEq for OrderPlaceEvent {
     fn eq(&self, other: &Self) -> bool {
-        self.id == other.id 
+        self.id == other.id
     }
 }
 
@@ -122,7 +121,7 @@ impl Eq for OrderPlaceEvent {}
 
 impl Hash for OrderPlaceEvent {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.id.hash(state); 
+        self.id.hash(state);
     }
 }
 
@@ -156,14 +155,13 @@ pub struct Portfolio {
     pub positions: HashMap<String, i32>,
 }
 
-
-impl Portfolio{
-    pub fn new(initial_cash:f64 ) -> Self{
-        Portfolio{
-            asset : initial_cash,
-            cash : initial_cash,
-            available_cash : initial_cash,
-            positions : HashMap::new(),
+impl Portfolio {
+    pub fn new(initial_cash: f64) -> Self {
+        Portfolio {
+            asset: initial_cash,
+            cash: initial_cash,
+            available_cash: initial_cash,
+            positions: HashMap::new(),
         }
     }
 }

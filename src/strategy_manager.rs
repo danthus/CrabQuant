@@ -2,7 +2,7 @@ use crate::MarketDataEvent;
 
 use crate::event_manager::{ModulePublish, ModuleReceive};
 use crate::shared_structures::*;
-use crossbeam::channel::{Sender, Receiver, bounded};
+use crossbeam::channel::{bounded, Receiver, Sender};
 use simplelog::*;
 
 pub trait Strategy {
@@ -47,7 +47,7 @@ impl StrategyManager {
         if self.strategies.len() != self.weights.len() {
             panic!("Number of weights should equal number of strategies");
         }
-        let mut events_to_publish:Vec<Event> = Vec::new();
+        let mut events_to_publish: Vec<Event> = Vec::new();
 
         loop {
             let event = self.subscribe_receiver.recv().unwrap();
@@ -80,10 +80,8 @@ impl StrategyManager {
         }
     }
 
-    fn process_marketevent(&mut self, market_data_event: MarketDataEvent, events: &mut Vec<Event>){
-
+    fn process_marketevent(&mut self, market_data_event: MarketDataEvent, events: &mut Vec<Event>) {
         for strategy in &mut self.strategies {
-
             if let Some(order_place_event) = strategy.process(market_data_event.clone()) {
                 // events.push(order_place_event);
                 // self.publish(order_place_event);
@@ -96,9 +94,12 @@ impl StrategyManager {
         }
         for event in events.drain(..) {
             // println!("Strategy: Publishing event: {:?}, \n\tbased on {:?}", event, market_data_event);
-            debug!("Publish order place (market id = {:?}): {:?}", market_data_event.id, event);
+            debug!(
+                "Publish order place (market id = {:?}): {:?}",
+                market_data_event.id, event
+            );
             self.publish(event);
-        } 
+        }
     }
 
     fn publish(&self, event: Event) {
@@ -108,8 +109,6 @@ impl StrategyManager {
             panic!("Publish sender is not initialized!");
         }
     }
-
-
 }
 
 impl ModuleReceive for StrategyManager {

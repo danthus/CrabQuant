@@ -1,5 +1,7 @@
 use crate::event_manager::{ModulePublish, ModuleReceive};
-use crate::shared_structures::{Event, MarketDataEvent, Order, OrderDirection, OrderPlaceEvent, Portfolio};
+use crate::shared_structures::{
+    Event, MarketDataEvent, Order, OrderDirection, OrderPlaceEvent, Portfolio,
+};
 use crate::PortfolioUpdater;
 use crossbeam::channel::{bounded, Receiver, Sender};
 use simplelog::debug;
@@ -199,13 +201,13 @@ impl PortfolioUpdater for MockExchange {
                 let trade_cost = price * amount.abs() as f64;
                 let fee = (self.fee_function)(trade_cost); // Apply fee function
                 let total_cost = trade_cost + fee; // Include fee in total cost
-    
+
                 // Deduct cash and update the position
                 self.portfolio.cash -= total_cost;
-    
+
                 let position_entry = self.portfolio.positions.entry(symbol.clone()).or_insert(0);
                 *position_entry += amount;
-    
+
                 debug!(
                     "Filled Buy Order: Symbol: {}, Amount: {}, Price: {}, Trade Cost: {}, Fee: {}, Total Cost: {}",
                     symbol, amount, price, trade_cost, fee, total_cost
@@ -216,7 +218,7 @@ impl PortfolioUpdater for MockExchange {
                 let trade_value = price * amount.abs() as f64;
                 let fee = (self.fee_function)(trade_value); // Apply fee function
                 let net_value = trade_value - fee; // Deduct fee from total value
-    
+
                 // Ensure the sell order is valid before proceeding
                 match self.portfolio.positions.get(&symbol) {
                     Some(&position_entry) => {
@@ -241,7 +243,7 @@ impl PortfolioUpdater for MockExchange {
                         return; // Exit the function without processing the order
                     }
                 }
-    
+
                 debug!(
                     "Filled Sell Order: Symbol: {}, Amount: {}, Price: {}, Trade Value: {}, Fee: {}, Net Value: {}",
                     symbol, amount, price, trade_value, fee, net_value

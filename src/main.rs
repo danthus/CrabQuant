@@ -1,11 +1,11 @@
+mod data_analyzer;
 mod event_manager;
-mod shared_structures;
 mod market_data_feeder;
 mod mock_exchange;
-mod util;
-mod data_analyzer;
-mod strategy_manager;
+mod shared_structures;
 mod strategies;
+mod strategy_manager;
+mod util;
 
 use crate::event_manager::EventManager;
 
@@ -15,9 +15,9 @@ use mock_exchange::MockExchange;
 use data_analyzer::DataAnalyzer;
 use strategy_manager::StrategyManager;
 // use strategies::strategy_fire_and_drop::StrategyFireAndDrop;
-use strategies::moving_average_crossover::MAcross;
-use std::thread;
 use shared_structures::*;
+use std::thread;
+use strategies::moving_average_crossover::MAcross;
 
 use simplelog::*;
 use std::fs::File;
@@ -27,13 +27,21 @@ fn main() {
         .set_time_level(LevelFilter::Off) // Turn off timestamps
         .build();
 
-    CombinedLogger::init(
-        vec![
-            TermLogger::new(LevelFilter::Info, log_config.clone(), TerminalMode::Mixed, ColorChoice::Auto),
-            WriteLogger::new(LevelFilter::Debug, log_config, File::create("Trading.log").unwrap()),
-        ]
-    ).unwrap();
-    
+    CombinedLogger::init(vec![
+        TermLogger::new(
+            LevelFilter::Info,
+            log_config.clone(),
+            TerminalMode::Mixed,
+            ColorChoice::Auto,
+        ),
+        WriteLogger::new(
+            LevelFilter::Debug,
+            log_config,
+            File::create("Trading.log").unwrap(),
+        ),
+    ])
+    .unwrap();
+
     info!("CrabQuant Starting ...");
 
     // Initialize event manager
@@ -64,7 +72,8 @@ fn main() {
     event_manager.subscribe::<OrderPlaceEvent, MockExchange>(&mock_exchange);
     event_manager.allow_publish("high".to_string(), &mut mock_exchange);
 
-    let mut market_data_feeder = MarketDataFeederLocal::new("TSLA".to_string(), "./data/TSLA_DAY_10Y.csv".to_string());
+    let mut market_data_feeder =
+        MarketDataFeederLocal::new("TSLA".to_string(), "./data/TSLA_DAY_10Y.csv".to_string());
     // Allow the market data feeder to publish low-priority events
     event_manager.allow_publish("low".to_string(), &mut market_data_feeder);
 
@@ -72,7 +81,6 @@ fn main() {
     // Subscribe the data analyzer to all event types it needs
     event_manager.subscribe::<MarketDataEvent, DataAnalyzer>(&data_analyzer);
     event_manager.subscribe::<PortfolioInfoEvent, DataAnalyzer>(&data_analyzer);
-    
 
     // Run modules
     let _mock_exchange_thread = thread::spawn(move || {
@@ -92,8 +100,10 @@ fn main() {
         market_data_feeder.start_feeding();
     });
 
-    info!("Mock Exchange, Strategy, Data Analyzer, Data Feeder initialized, start data feeding ...");
+    info!(
+        "Mock Exchange, Strategy, Data Analyzer, Data Feeder initialized, start data feeding ..."
+    );
     event_manager.proceed();
-    
-    return
+
+    return;
 }
