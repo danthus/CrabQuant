@@ -1,5 +1,3 @@
-use std::time::SystemTime;
-
 // #[cfg(timestamp_test)]
 // fn log_time(label: &str, start_time: std::time::SystemTime) {
 //     let elapsed = start_time.elapsed().expect("Time went backwards");

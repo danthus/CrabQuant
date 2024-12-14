@@ -1,14 +1,11 @@
 use crate::event_manager::ModulePublish;
 use crate::events::*;
 
-use crossbeam::channel::{Receiver, Sender};
+use crossbeam::channel::Sender;
 use csv::ReaderBuilder;
 use simplelog::*;
 use std::fs::File;
 use std::thread;
-
-#[cfg(feature = "order_test")]
-use crate::util::Counter;
 
 pub struct MarketDataFeederLocal {
     publish_sender: Option<Sender<Event>>,
@@ -90,7 +87,7 @@ impl MarketDataFeederLocal {
             );
 
             // Send data through the channel
-            #[cfg(feature = "random_sleep_event")]
+            #[cfg(feature = "random_sleep_test")]
             {
                 let sleep_duration = rng.gen_range(10..500);
                 thread::sleep(Duration::from_millis(sleep_duration));
