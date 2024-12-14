@@ -9,7 +9,7 @@ mod strategies;
 
 use crate::event_manager::EventManager;
 
-use market_data_feeder::MarketDataFeeder;
+use market_data_feeder::MarketDataFeederLocal;
 use mock_exchange::MockExchange;
 // use portfolio_manager::PortfolioManager;
 use data_analyzer::DataAnalyzer;
@@ -61,7 +61,7 @@ fn main() {
     event_manager.subscribe::<OrderPlaceEvent, MockExchange>(&mock_exchange);
     event_manager.allow_publish("high".to_string(), &mut mock_exchange);
 
-    let mut market_data_feeder = MarketDataFeeder::new();
+    let mut market_data_feeder = MarketDataFeederLocal::new("TSLA".to_string(), "./data/TSLA_DAY_10Y.csv".to_string());
     // Allow the market data feeder to publish low-priority events
     event_manager.allow_publish("low".to_string(), &mut market_data_feeder);
 
@@ -86,7 +86,7 @@ fn main() {
 
     // Start feeding data
     let _market_data_feeder_thread = thread::spawn(move || {
-        market_data_feeder.start_feeding("./data/TSLA_DAY_10Y.csv");
+        market_data_feeder.start_feeding();
     });
 
     info!("Mock Exchange, Strategy, Data Analyzer, Data Feeder initialized, start data feeding ...");
