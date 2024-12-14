@@ -9,6 +9,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
+#[derive(Clone)]
 pub struct DataAnalyzer {
     subscribe_sender: Sender<Event>,
     subscribe_receiver: Receiver<Event>,
@@ -16,6 +17,21 @@ pub struct DataAnalyzer {
     asset_history: Arc<Mutex<Vec<(String, f64)>>>,
     cash_history: Arc<Mutex<Vec<(String, f64)>>>,
     local_portfolio: Portfolio,
+}
+
+// Metrics struct
+struct Metrics {
+    total_return: f64,
+    annualized_return: f64,
+    volatility: f64,
+    sharpe_ratio: f64,
+    max_drawdown: f64,
+    alpha: f64,
+    beta: f64,
+    sortino_ratio: f64,
+    information_ratio: f64,
+    tracking_error: f64,
+    longest_drawdown: usize,
 }
 
 impl ModuleReceive for DataAnalyzer {
@@ -32,43 +48,6 @@ impl DataAnalyzer {
         let cash_history = Arc::new(Mutex::new(Vec::new()));
         let local_portfolio = Portfolio::new(0.0);
 
-        // Spawn a new thread for plotting
-        let market_data_history_clone = Arc::clone(&market_data_history);
-        let asset_history_clone = Arc::clone(&asset_history);
-        let cash_history_clone = Arc::clone(&cash_history);
-
-        thread::spawn(move || {
-            let mut last_lengths = (0, 0); // Track lengths of histories
-            loop {
-                // Take a snapshot of data
-                let market_data_snapshot = {
-                    let data = market_data_history_clone.lock().unwrap();
-                    data.clone()
-                };
-                let asset_history_snapshot = {
-                    let data = asset_history_clone.lock().unwrap();
-                    data.clone()
-                };
-                let cash_history_snapshot = {
-                    let data = cash_history_clone.lock().unwrap();
-                    data.clone()
-                };
-
-                // Plot and save the data if there are updates
-                if let Err(err) = DataAnalyzer::plot(
-                    &market_data_snapshot,
-                    &asset_history_snapshot,
-                    &cash_history_snapshot,
-                    &mut last_lengths,
-                    "performance.png",
-                ) {
-                    eprintln!("Error during plotting: {}", err);
-                }
-
-                thread::sleep(Duration::from_secs(1)); // Reduce resource usage
-            }
-        });
-
         DataAnalyzer {
             subscribe_sender,
             subscribe_receiver,
@@ -80,6 +59,45 @@ impl DataAnalyzer {
     }
 
     pub fn run(&mut self) {
+        let data_analyzer_clone = self.clone();
+
+        // Spawn a new thread for plotting
+        // let market_data_history_clone = Arc::clone(&market_data_history);
+        // let asset_history_clone = Arc::clone(&asset_history);
+        // let cash_history_clone = Arc::clone(&cash_history);
+
+        thread::spawn(move || {
+            let mut last_lengths = (0, 0); // Track lengths of histories
+                                           // thread::sleep(Duration::from_millis(100));
+            loop {
+                // Take a snapshot of data
+                let market_data_snapshot = {
+                    let data = data_analyzer_clone.market_data_history.lock().unwrap();
+                    data.clone()
+                };
+                let asset_history_snapshot = {
+                    let data = data_analyzer_clone.asset_history.lock().unwrap();
+                    data.clone()
+                };
+                let cash_history_snapshot = {
+                    let data = data_analyzer_clone.cash_history.lock().unwrap();
+                    data.clone()
+                };
+
+                // Plot and save the data if there are updates
+                if let Err(err) = data_analyzer_clone.plot(
+                    &market_data_snapshot,
+                    &asset_history_snapshot,
+                    &cash_history_snapshot,
+                    &mut last_lengths,
+                    "performance.png",
+                ) {
+                    eprintln!("Error during plotting: {}", err);
+                }
+                thread::sleep(Duration::from_secs(1)); // Reduce resource usage
+            }
+        });
+
         loop {
             let event = self.subscribe_receiver.recv().unwrap();
             match event {
@@ -116,7 +134,136 @@ impl DataAnalyzer {
         debug!("Updated asset history: {:?}", self.local_portfolio);
     }
 
+    fn calculate_metrics(&self) -> Result<Metrics, Box<dyn Error>> {
+        let market_data = self.market_data_history.lock().unwrap();
+        let asset_history = self.asset_history.lock().unwrap();
+        // println!(
+        //     "Market data size: {}, Asset history size: {}",
+        //     market_data.len(),
+        //     asset_history.len()
+        // );
+
+        if market_data.is_empty() || asset_history.is_empty() {
+            return Err("Insufficient data for metrics calculation".into());
+        }
+
+        // Extract returns
+        let returns: Vec<f64> = asset_history
+            .windows(2)
+            .map(|window| (window[1].1 - window[0].1) / window[0].1)
+            .collect();
+
+        let benchmark_returns: Vec<f64> = market_data
+            .windows(2)
+            .map(|window| (window[1].1 - window[0].1) / window[0].1)
+            .collect();
+
+        // Total Return
+        let total_return = (asset_history.last().unwrap().1 / asset_history[0].1) - 1.0;
+
+        // Annualized Return
+        let n = returns.len() as f64;
+        let annualized_return = (1.0 + total_return).powf(252.0 / n) - 1.0;
+
+        // Volatility
+        let volatility = returns.iter().copied().fold(0.0, |acc, x| acc + x.powi(2)) / (n - 1.0);
+
+        // Sharpe Ratio
+        let mean_return = returns.iter().sum::<f64>() / n;
+        let sharpe_ratio = mean_return / volatility;
+
+        // Max Drawdown
+        if asset_history
+            .iter()
+            .any(|&(_, value)| value.is_nan() || value.is_infinite() || value <= 0.0)
+        {
+            return Err("Asset history contains invalid or zero values".into());
+        }
+        let mut peak = asset_history
+            .first()
+            .map(|&(_, value)| value)
+            .unwrap_or(0.0);
+        let mut max_drawdown: f64 = 0.0;
+
+        for value in asset_history.iter() {
+            // println!("Processing value: {}, Current peak: {}", value.1, peak);
+            if value.1 > peak {
+                peak = value.1;
+                // println!("New peak updated to: {}", peak);
+            }
+            if peak > 0.0 {
+                let drawdown = (value.1 / peak) - 1.0;
+                max_drawdown = max_drawdown.min(drawdown);
+                // println!(
+                //     "Drawdown calculated: {}, Max drawdown: {}",
+                //     drawdown, max_drawdown
+                // );
+            }
+        }
+        // println!("Max drawdown finalized: {}", max_drawdown);
+
+        // Sortino Ratio
+        let downside_deviation: f64 = returns
+            .iter()
+            .filter(|&&r| r < 0.0)
+            .map(|r| r.powi(2))
+            .sum::<f64>()
+            / n;
+        let sortino_ratio = mean_return / downside_deviation.sqrt();
+
+        // Alpha and Beta
+        let covariance: f64 = returns
+            .iter()
+            .zip(&benchmark_returns)
+            .map(|(&r_p, &r_b)| r_p * r_b)
+            .sum::<f64>();
+        let variance: f64 = benchmark_returns.iter().map(|&r| r.powi(2)).sum::<f64>();
+        let beta = covariance / variance;
+        let alpha = mean_return - beta * (benchmark_returns.iter().sum::<f64>() / n);
+
+        // Information Ratio
+        let excess_returns: Vec<f64> = returns
+            .iter()
+            .zip(&benchmark_returns)
+            .map(|(&r_p, &r_b)| r_p - r_b)
+            .collect();
+        let tracking_error = excess_returns
+            .iter()
+            .map(|&x| x.powi(2))
+            .sum::<f64>()
+            .sqrt();
+        let information_ratio = mean_return / tracking_error;
+
+        // Longest Drawdown Period
+        let mut drawdown_start = None;
+        let mut longest_drawdown = 0;
+        for (i, value) in asset_history.iter().enumerate() {
+            if value.1 < peak && drawdown_start.is_none() {
+                drawdown_start = Some(i);
+            } else if value.1 >= peak && drawdown_start.is_some() {
+                let length = i - drawdown_start.unwrap();
+                longest_drawdown = longest_drawdown.max(length);
+                drawdown_start = None;
+            }
+        }
+
+        Ok(Metrics {
+            total_return,
+            annualized_return,
+            volatility,
+            sharpe_ratio,
+            max_drawdown,
+            alpha,
+            beta,
+            sortino_ratio,
+            information_ratio,
+            tracking_error,
+            longest_drawdown,
+        })
+    }
+
     fn plot(
+        &self,
         market_data: &[(String, f64)],
         asset_history: &[(String, f64)],
         cash_history: &[(String, f64)],
@@ -138,10 +285,27 @@ impl DataAnalyzer {
             eprintln!("No data points available for plotting.");
             return Ok(());
         }
+        // println!(
+        //     "Plotting triggered: market_data.len()={}, asset_history.len()={}",
+        //     market_data.len(),
+        //     asset_history.len()
+        // );
+
+        // Calculate metrics
+        // let metrics = self.calculate_metrics()?;
+        // println!("metrics calculated: {}", metrics.total_return);
+        let metrics = match self.calculate_metrics() {
+            Ok(metrics) => metrics,
+            Err(err) => {
+                eprintln!("Failed to calculate metrics: {}", err);
+                return Err(err); // Or handle the error as appropriate
+            }
+        };
+        // println!("metrics calculated: {}", metrics.total_return);
 
         let first_market_value = market_data.get(0).map_or(1.0, |(_, value)| *value);
         let first_asset_value = asset_history.get(0).map_or(1.0, |(_, value)| *value);
-        let first_cash_value = cash_history.get(0).map_or(1.0, |(_, value)| *value);
+        // let first_cash_value = cash_history.get(0).map_or(1.0, |(_, value)| *value);
 
         let standardized_market_data: Vec<(String, f64)> = market_data
             .iter()
@@ -192,7 +356,7 @@ impl DataAnalyzer {
             .x_desc("Date")
             .y_desc("Value")
             .axis_desc_style(("sans-serif", 56))
-            .label_style(("sans-serif", 50))
+            .label_style(("sans-serif", 50))    // x & y label
             .x_label_formatter(&|x| {
                 if let Some(index) = x.to_usize() {
                     if index < standardized_market_data.len() {
@@ -251,13 +415,42 @@ impl DataAnalyzer {
         //     .label("Position Value")
         //     .legend(|(x, y)| PathElement::new([(x, y), (x + 20, y)], &GREEN));
 
+        chart.draw_series(std::iter::once(Text::new(
+            format!(
+                "Total Return: {:.2}%
+                Annualized Return: {:.2}%
+                Volatility: {:.4}
+                Sharpe Ratio: {:.2}
+                Max Drawdown: {:.2}%
+                Alpha: {:.4}
+                Beta: {:.4}
+                Sortino Ratio: {:.4}
+                Information Ratio: {:.4}
+                Tracking Error: {:.4}
+                Longest Drawdown Period: {} days",
+                metrics.total_return * 100.0,
+                metrics.annualized_return * 100.0,
+                metrics.volatility,
+                metrics.sharpe_ratio,
+                metrics.max_drawdown * 100.0,
+                metrics.alpha,
+                metrics.beta,
+                metrics.sortino_ratio,
+                metrics.information_ratio,
+                metrics.tracking_error,
+                metrics.longest_drawdown,
+            ),
+            (50_usize, 50.0), // Corrected: x-coordinate is `usize`, y-coordinate is `f64`
+            ("sans-serif", 50).into_font(),
+        )))?;
+
         // Draw the legend
         chart
             .configure_series_labels()
             .position(SeriesLabelPosition::UpperMiddle)
             .background_style(&WHITE.mix(0.2))
             .border_style(&BLACK)
-            .label_font(("sans-serif", 50))
+            .label_font(("sans-serif", 50)) // legend label
             .draw()?;
 
         println!("Plot updated: {}", output_path);
