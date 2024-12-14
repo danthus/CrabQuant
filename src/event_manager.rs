@@ -1,4 +1,4 @@
-use crate::events::{Event, MarketDataEvent, PortfolioInfoEvent, OrderPlaceEvent};
+use crate::shared_structures::{Event, MarketDataEvent, PortfolioInfoEvent, OrderPlaceEvent};
 use crossbeam::channel::{unbounded, Receiver, Sender, bounded};
 use std::any::TypeId;
 use std::collections::HashMap;

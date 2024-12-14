@@ -1,5 +1,5 @@
 use crate::event_manager::{ModulePublish, ModuleReceive};
-use crate::events::{Event, MarketDataEvent, Order, OrderDirection, OrderPlaceEvent, Portfolio};
+use crate::shared_structures::{Event, MarketDataEvent, Order, OrderDirection, OrderPlaceEvent, Portfolio};
 use crate::PortfolioUpdater;
 use crossbeam::channel::{bounded, Receiver, Sender};
 use simplelog::debug;

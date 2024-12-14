@@ -1,7 +1,7 @@
 use crate::MarketDataEvent;
 
 use crate::event_manager::{ModulePublish, ModuleReceive};
-use crate::events::*;
+use crate::shared_structures::*;
 use crossbeam::channel::{Sender, Receiver, bounded};
 use simplelog::*;
 

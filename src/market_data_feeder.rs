@@ -1,5 +1,5 @@
 use crate::event_manager::ModulePublish;
-use crate::events::*;
+use crate::shared_structures::*;
 
 use crossbeam::channel::Sender;
 use csv::ReaderBuilder;

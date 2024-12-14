@@ -1,5 +1,5 @@
 mod event_manager;
-mod events;
+mod shared_structures;
 mod market_data_feeder;
 mod mock_exchange;
 mod util;
@@ -17,7 +17,7 @@ use strategy_manager::StrategyManager;
 // use strategies::strategy_fire_and_drop::StrategyFireAndDrop;
 use strategies::moving_average_crossover::MAcross;
 use std::thread;
-use events::*;
+use shared_structures::*;
 
 use simplelog::*;
 use std::fs::File;

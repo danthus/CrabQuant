@@ -1,5 +1,5 @@
 use crate::event_manager::{ModulePublish, ModuleReceive};
-use crate::{events::*, market_data_feeder};
+use crate::{shared_structures::*, market_data_feeder};
 use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
 use num_traits::cast::ToPrimitive;
 use plotters::prelude::*;
