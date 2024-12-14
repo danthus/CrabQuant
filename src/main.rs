@@ -23,14 +23,14 @@ use simplelog::*;
 use std::fs::File;
 
 fn main() {
-    let config = ConfigBuilder::new()
+    let log_config = ConfigBuilder::new()
         .set_time_level(LevelFilter::Off) // Turn off timestamps
         .build();
 
     CombinedLogger::init(
         vec![
-            TermLogger::new(LevelFilter::Info, config.clone(), TerminalMode::Mixed, ColorChoice::Auto),
-            WriteLogger::new(LevelFilter::Debug, config, File::create("Trading.log").unwrap()),
+            TermLogger::new(LevelFilter::Info, log_config.clone(), TerminalMode::Mixed, ColorChoice::Auto),
+            WriteLogger::new(LevelFilter::Debug, log_config, File::create("Trading.log").unwrap()),
         ]
     ).unwrap();
     
