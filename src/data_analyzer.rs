@@ -177,13 +177,13 @@ impl DataAnalyzer {
         let y_min = all_y_values.clone().fold(f64::INFINITY, f64::min);
         let y_max = all_y_values.fold(f64::NEG_INFINITY, f64::max);
 
-        let root_area = BitMapBackend::new(output_path, (1280, 720)).into_drawing_area();
+        let root_area = BitMapBackend::new(output_path, (3840, 2160)).into_drawing_area();
         root_area.fill(&WHITE)?;
 
         let mut chart = ChartBuilder::on(&root_area)
-            .caption("Market Data and Asset History", ("sans-serif", 18))
-            .x_label_area_size(60)
-            .y_label_area_size(60)
+            .caption("Market Data and Asset History", ("sans-serif", 60))
+            .x_label_area_size(120)
+            .y_label_area_size(150)
             .build_cartesian_2d(0..market_data.len().max(asset_history.len()), y_min..y_max)?;
 
         // Configure the mesh
@@ -191,7 +191,8 @@ impl DataAnalyzer {
             .configure_mesh()
             .x_desc("Date")
             .y_desc("Value")
-            .axis_desc_style(("sans-serif", 18))
+            .axis_desc_style(("sans-serif", 56))
+            .label_style(("sans-serif", 50))
             .x_label_formatter(&|x| {
                 if let Some(index) = x.to_usize() {
                     if index < standardized_market_data.len() {
@@ -253,8 +254,10 @@ impl DataAnalyzer {
         // Draw the legend
         chart
             .configure_series_labels()
-            .background_style(&WHITE.mix(0.8))
+            .position(SeriesLabelPosition::UpperMiddle)
+            .background_style(&WHITE.mix(0.2))
             .border_style(&BLACK)
+            .label_font(("sans-serif", 50))
             .draw()?;
 
         println!("Plot updated: {}", output_path);
