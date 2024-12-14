@@ -25,7 +25,7 @@ impl StrategyLimitPrice{
         let portfolio_local = Portfolio::new(0.0);
         let moving_window = MovingWindow::new(20);
         let price_factor: f64 = 1.2;
-        let volume_factor: f32 = 0.2;
+        let volume_factor: f32 = 1.;
         let last_signal = LastSignal::IsNone;
         StrategyLimitPrice {
             portfolio_local,
@@ -43,10 +43,12 @@ impl Strategy for StrategyLimitPrice {
         
         let ma_short = self.moving_window.average(5);
         let ma_long = self.moving_window.average(10);
-        let quantity = (self.portfolio_local.available_cash / (market_data_event.close * self.price_factor)).floor() as i32;
+        // let quantity = (self.portfolio_local.available_cash / (market_data_event.close * self.price_factor)).floor() as i32;
         
         // ma_short > ma_long buy and last signal is not buy
         if ma_short > ma_long && self.last_signal != LastSignal::IsBuy {
+            let quantity = (self.portfolio_local.available_cash / (market_data_event.close * self.price_factor)).floor() as i32;
+
             let max_volume = (market_data_event.volume as f32 *self.volume_factor).floor() as i32;
             let buy_volume = if quantity > max_volume {max_volume} else {quantity};
             self.last_signal = LastSignal::IsBuy;
@@ -60,22 +62,31 @@ impl Strategy for StrategyLimitPrice {
             else {
                 None
             }
+            
         }
         // ma_short < ma_long sell and last signal is not sell
         else if ma_short < ma_long && self.last_signal != LastSignal::IsSell {
-            self.last_signal = LastSignal::IsSell;
+            self.last_signal = LastSignal::IsSell;            
             if let Some(current_position) = self.portfolio_local.positions.get(&market_data_event.symbol) {
-                if quantity > 0 && quantity < *current_position {
-                    let limit_price_order = LimitPriceOrder{ symbol: market_data_event.symbol, amount: quantity, limit_price:market_data_event.low*0., direction: OrderDirection::Sell };
-                    let order_place_event = Event::new_order_place(Order::LimitPrice(limit_price_order));
+                // if quantity > 0 && quantity < *current_position {
+                //     let fire_and_drop = LimitPriceOrder{ symbol: market_data_event.symbol, amount: quantity, limit_price:market_data_event.low, direction: OrderDirection::Sell };
+                //     let order_place_event = Event::new_order_place(Order::LimitPrice(fire_and_drop));
+                //     Some(order_place_event)
+                // }
+                // else if quantity > *current_position {
+                //     let fire_and_drop = LimitPriceOrder{ symbol: market_data_event.symbol, amount: *current_position, limit_price:market_data_event.low, direction: OrderDirection::Sell };
+                //     let order_place_event = Event::new_order_place(Order::LimitPrice(fire_and_drop));
+                //     Some(order_place_event)
+                // }
+                // else {
+                //     None
+                // }
+                if *current_position > 0 {
+                    let fire_and_drop = LimitPriceOrder{ symbol: market_data_event.symbol, amount: *current_position, limit_price:market_data_event.low*0., direction: OrderDirection::Sell };
+                    let order_place_event = Event::new_order_place(Order::LimitPrice(fire_and_drop));
                     Some(order_place_event)
                 }
-                else if quantity > *current_position {
-                    let limit_price_order = LimitPriceOrder{ symbol: market_data_event.symbol, amount: *current_position, limit_price:market_data_event.low*0., direction: OrderDirection::Sell };
-                    let order_place_event = Event::new_order_place(Order::LimitPrice(limit_price_order));
-                    Some(order_place_event)
-                }
-                else {
+                else{
                     None
                 }
             }
@@ -90,5 +101,6 @@ impl Strategy for StrategyLimitPrice {
 
     fn update(&mut self, portfolio: Portfolio) {
         self.portfolio_local = portfolio.clone();
+        // println!("");
     }
 }
