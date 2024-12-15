@@ -64,7 +64,7 @@ fn main() {
     // event_manager.allow_publish("high".to_string(), &mut strategy);
 
     fn fee_function(trade_cost: f64) -> f64 {
-        trade_cost * 0.001 // 1% fee
+        trade_cost * 0.0 // 0.1% fee
     }
     let mut mock_exchange: MockExchange = MockExchange::new(fee_function);
     // Subscribe to specific event types for the mock exchange module
@@ -73,7 +73,9 @@ fn main() {
     event_manager.allow_publish("high".to_string(), &mut mock_exchange);
 
     let mut market_data_feeder =
-        MarketDataFeederLocal::new("TSLA".to_string(), "./data/TSLA_DAY_10Y.csv".to_string());
+        // MarketDataFeederLocal::new("TSLA".to_string(), "./data/TSLA_DAY_10Y.csv".to_string());
+        MarketDataFeederLocal::new("BTC".to_string(), "./data/BTC_1min_sample.csv".to_string());
+
     // Allow the market data feeder to publish low-priority events
     event_manager.allow_publish("low".to_string(), &mut market_data_feeder);
 

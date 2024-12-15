@@ -40,6 +40,9 @@ impl MarketDataFeederLocal {
         let file = File::open(&self.csv_path).expect("Failed to open CSV file");
         let mut reader = ReaderBuilder::new().has_headers(true).from_reader(file);
 
+        #[cfg(feature = "random_sleep_test")]
+        let mut rng = rand::thread_rng();
+
         for result in reader.records() {
             let record = result.expect("Failed to read record");
             
@@ -67,7 +70,7 @@ impl MarketDataFeederLocal {
                 .expect("Invalid close value");
 
             // Parse the Volume
-            let volume: f64 = record[5]
+            let volume: i32 = record[5]
                 .parse()
                 .expect("Invalid volume value");
 

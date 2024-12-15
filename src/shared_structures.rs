@@ -25,7 +25,7 @@ impl Event {
         close: f64,
         high: f64,
         low: f64,
-        volume: i32,
+        volume: f64,
     ) -> Self {
         let id = EVENT_ID_COUNTER_MDE.lock().unwrap().next();
         Event::MarketData(MarketDataEvent {
@@ -60,7 +60,7 @@ pub struct MarketDataEvent {
     pub close: f64,
     pub high: f64,
     pub low: f64,
-    pub volume: i32,
+    pub volume: f64,
 }
 
 impl PartialEq for MarketDataEvent {

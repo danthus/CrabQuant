@@ -24,7 +24,7 @@ impl MAcross{
     pub fn new() -> Self {
         let portfolio_local = Portfolio::new(0.0);
         let moving_window = MovingWindow::new(20);
-        let price_factor: f64 = 1.2;
+        let price_factor: f64 = 1.;
         let volume_factor: f32 = 1.;
         let last_signal = LastSignal::IsNone;
         MAcross {
@@ -42,7 +42,7 @@ impl Strategy for MAcross {
         self.moving_window.update(market_data_event.close as f32);
         
         let ma_short = self.moving_window.average(5);
-        let ma_long = self.moving_window.average(10);
+        let ma_long = self.moving_window.average(20);
         // let quantity = (self.portfolio_local.available_cash / (market_data_event.close * self.price_factor)).floor() as i32;
         
         // ma_short > ma_long buy and last signal is not buy
