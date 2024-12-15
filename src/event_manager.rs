@@ -88,7 +88,7 @@ impl EventManager {
         let event = self.lp_receiver.recv().unwrap();
         self.dispatch_event(event);
 
-        let timeout = Duration::from_secs(10);
+        let timeout = Duration::from_secs(15);
         let mut start = Instant::now();
 
         loop {

@@ -8,6 +8,7 @@ use std::error::Error;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
+use chrono::{NaiveDateTime, Duration as chrono_Duration};
 
 #[derive(Clone)]
 pub struct DataAnalyzer {
@@ -153,6 +154,8 @@ impl DataAnalyzer {
             .map(|window| (window[1].1 - window[0].1) / window[0].1)
             .collect();
 
+        let n = returns.len() as f64;
+
         let benchmark_returns: Vec<f64> = market_data
             .windows(2)
             .map(|window| (window[1].1 - window[0].1) / window[0].1)
@@ -162,8 +165,20 @@ impl DataAnalyzer {
         let total_return = (asset_history.last().unwrap().1 / asset_history[0].1) - 1.0;
 
         // Annualized Return
-        let n = returns.len() as f64;
-        let annualized_return = (1.0 + total_return).powf(252.0 / n) - 1.0;
+        let (first_timestamp, first_close) = market_data.first().unwrap();
+        let (last_timestamp, last_close) = market_data.last().unwrap();
+
+        let first_datetime = NaiveDateTime::parse_from_str(first_timestamp, "%Y-%m-%d %H:%M:%S")
+        .expect("Invalid timestamp format in first entry");
+        let last_datetime = NaiveDateTime::parse_from_str(last_timestamp, "%Y-%m-%d %H:%M:%S")
+        .expect("Invalid timestamp format in last entry");
+
+        let duration = last_datetime - first_datetime;
+        let total_minutes = duration.num_minutes() as f64;
+        let total_years = total_minutes / (60.0 * 24.0 * 365.0);
+
+        // Calculate the annualized return
+        let annualized_return = ((last_close / first_close).powf(1.0 / total_years) - 1.0);
 
         // Volatility
         let volatility = returns.iter().copied().fold(0.0, |acc, x| acc + x.powi(2)) / (n - 1.0);
@@ -341,7 +356,8 @@ impl DataAnalyzer {
         let y_min = all_y_values.clone().fold(f64::INFINITY, f64::min);
         let y_max = all_y_values.fold(f64::NEG_INFINITY, f64::max);
 
-        let root_area = BitMapBackend::new(output_path, (3840, 2160)).into_drawing_area();
+        // let root_area = BitMapBackend::new(output_path, (3840, 2160)).into_drawing_area();
+        let root_area = BitMapBackend::new(output_path, (1920, 1080)).into_drawing_area();
         root_area.fill(&WHITE)?;
 
         let mut chart = ChartBuilder::on(&root_area)

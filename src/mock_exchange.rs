@@ -36,7 +36,7 @@ impl ModulePublish for MockExchange {
 impl MockExchange {
     pub fn new(fee_function: fn(f64) -> f64) -> Self {
         let (subscribe_sender, subscribe_receiver) = bounded(0);
-        let portfolio = Portfolio::new(1000000.);
+        let portfolio = Portfolio::new(100000.);
         let pending_orders = Vec::new();
         MockExchange {
             subscribe_sender,
