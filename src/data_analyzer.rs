@@ -1,5 +1,5 @@
 use crate::event_manager::{ModulePublish, ModuleReceive};
-use crate::{shared_structures::*, market_data_feeder};
+use crate::{market_data_feeder, shared_structures::*};
 use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
 use num_traits::cast::ToPrimitive;
 use plotters::prelude::*;
@@ -340,23 +340,25 @@ impl DataAnalyzer {
             .chain(standardized_difference.iter().map(|&(_, value)| value));
         let y_min = all_y_values.clone().fold(f64::INFINITY, f64::min);
         let y_max = all_y_values.fold(f64::NEG_INFINITY, f64::max);
-
-        let root_area = BitMapBackend::new(output_path, (3840, 2160)).into_drawing_area();
+        
+        let res_x = 3840;
+        let res_y = 2160;
+        let root_area = BitMapBackend::new(output_path, (res_x, res_y)).into_drawing_area();
         root_area.fill(&WHITE)?;
 
         let mut chart = ChartBuilder::on(&root_area)
-            .caption("Market Data and Asset History", ("sans-serif", 60))
-            .x_label_area_size(120)
-            .y_label_area_size(150)
-            .build_cartesian_2d(0..market_data.len().max(asset_history.len()), y_min..y_max)?;
+            .caption("Market Data and Asset History", ("sans-serif", res_x/52))
+            .x_label_area_size(res_y/16)
+            .y_label_area_size(res_x/22)
+            .build_cartesian_2d(0..market_data.len().max(asset_history.len())+market_data.len()/25, y_min..y_max+1.0)?;
 
         // Configure the mesh
         chart
             .configure_mesh()
             .x_desc("Date")
             .y_desc("Value")
-            .axis_desc_style(("sans-serif", 56))
-            .label_style(("sans-serif", 50))    // x & y label
+            .axis_desc_style(("sans-serif", res_x/58))
+            .label_style(("sans-serif", res_x/71)) // x & y label
             .x_label_formatter(&|x| {
                 if let Some(index) = x.to_usize() {
                     if index < standardized_market_data.len() {
@@ -376,8 +378,8 @@ impl DataAnalyzer {
                     .map(|(i, &(_, close))| (i, close)),
                 &BLUE,
             ))?
-            .label("Market Data")
-            .legend(|(x, y)| PathElement::new([(x, y), (x + 20, y)], &BLUE));
+            .label(" Market Data")
+            .legend(|(x, y)| PathElement::new([(x, y), (x + 30, y)], &BLUE));
 
         // Plot the asset history in red
         chart
@@ -388,8 +390,8 @@ impl DataAnalyzer {
                     .map(|(i, &(_, asset))| (i, asset)),
                 &RED,
             ))?
-            .label("Total Asset Value")
-            .legend(|(x, y)| PathElement::new([(x, y), (x + 20, y)], &RED));
+            .label(" Total Asset Value")
+            .legend(|(x, y)| PathElement::new([(x, y), (x + 30, y)], &RED));
 
         // Plot the asset-cash difference as a color block (area chart)
         chart
@@ -399,10 +401,10 @@ impl DataAnalyzer {
                     .enumerate()
                     .map(|(i, &(_, diff))| (i, diff)),
                 0.0,             // Baseline for the area chart
-                &GREEN.mix(0.2), // Semi-transparent green for the color block
+                &GREEN.mix(0.4), // Semi-transparent green for the color block
             ))?
-            .label("Position Value")
-            .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 20, y + 5)], &GREEN.mix(0.5)));
+            .label(" Position Value")
+            .legend(|(x, y)| Rectangle::new([(x, y - 6), (x + 30, y + 6)], &GREEN));
 
         // chart
         //     .draw_series(LineSeries::new(
@@ -415,42 +417,67 @@ impl DataAnalyzer {
         //     .label("Position Value")
         //     .legend(|(x, y)| PathElement::new([(x, y), (x + 20, y)], &GREEN));
 
-        chart.draw_series(std::iter::once(Text::new(
+        // chart.draw_series(std::iter::once(Text::new(
+        //     format!(
+        //         "Total Return: {:.2}% ,\n,Annualized Return: {:.2}%
+        //         Volatility: {:.4}
+        //         Sharpe Ratio: {:.2}
+        //         Max Drawdown: {:.2}%
+        //         Alpha: {:.4}
+        //         Beta: {:.4}
+        //         Sortino Ratio: {:.4}
+        //         Information Ratio: {:.4}
+        //         Tracking Error: {:.4}
+        //         Longest Drawdown Period: {} days",
+        //         metrics.total_return * 100.0,
+        //         metrics.annualized_return * 100.0,
+        //         metrics.volatility,
+        //         metrics.sharpe_ratio,
+        //         metrics.max_drawdown * 100.0,
+        //         metrics.alpha,
+        //         metrics.beta,
+        //         metrics.sortino_ratio,
+        //         metrics.information_ratio,
+        //         metrics.tracking_error,
+        //         metrics.longest_drawdown,
+        //     ),
+        //     (10, 0.8), // Corrected: x-coordinate is `usize`, y-coordinate is `f64`
+        //     ("sans-serif", 50).into_font(),
+        // )))?;
+        let metrics_text = vec![
+            format!("Total Return: {:.2}%", metrics.total_return * 100.0),
             format!(
-                "Total Return: {:.2}%
-                Annualized Return: {:.2}%
-                Volatility: {:.4}
-                Sharpe Ratio: {:.2}
-                Max Drawdown: {:.2}%
-                Alpha: {:.4}
-                Beta: {:.4}
-                Sortino Ratio: {:.4}
-                Information Ratio: {:.4}
-                Tracking Error: {:.4}
-                Longest Drawdown Period: {} days",
-                metrics.total_return * 100.0,
-                metrics.annualized_return * 100.0,
-                metrics.volatility,
-                metrics.sharpe_ratio,
-                metrics.max_drawdown * 100.0,
-                metrics.alpha,
-                metrics.beta,
-                metrics.sortino_ratio,
-                metrics.information_ratio,
-                metrics.tracking_error,
-                metrics.longest_drawdown,
+                "Annualized Return: {:.2}%",
+                metrics.annualized_return * 100.0
             ),
-            (50_usize, 50.0), // Corrected: x-coordinate is `usize`, y-coordinate is `f64`
-            ("sans-serif", 50).into_font(),
-        )))?;
+            format!("Volatility: {:.4}", metrics.volatility),
+            format!("Sharpe Ratio: {:.2}", metrics.sharpe_ratio),
+            format!("Max Drawdown: {:.2}%", metrics.max_drawdown * 100.0),
+            format!("Alpha: {:.4}", metrics.alpha),
+            format!("Beta: {:.4}", metrics.beta),
+            format!("Sortino Ratio: {:.4}", metrics.sortino_ratio),
+            format!("Information Ratio: {:.4}", metrics.information_ratio),
+            format!("Tracking Error: {:.4}", metrics.tracking_error),
+            format!("Longest Drawdown Period: {} days", metrics.longest_drawdown),
+        ];
+        let start_x = standardized_market_data.len()/50; // X-coordinate
+        let mut start_y = y_max+1.0-(y_max-y_min)/30.0; // Initial Y-coordinate
+        for line in metrics_text {
+            chart.draw_series(std::iter::once(Text::new(
+                line,
+                (start_x, start_y),
+                ("sans-serif", res_x/77).into_font(),
+            )))?;
+            start_y -= (y_max+1.0-y_min)/42.0; // Increment Y-coordinate for the next line
+        }
 
         // Draw the legend
         chart
             .configure_series_labels()
-            .position(SeriesLabelPosition::UpperMiddle)
+            .position(SeriesLabelPosition::Coordinate((res_x/2-res_x/14).to_i32().unwrap(), 50))
             .background_style(&WHITE.mix(0.2))
             .border_style(&BLACK)
-            .label_font(("sans-serif", 50)) // legend label
+            .label_font(("sans-serif", res_x/77)) // legend label
             .draw()?;
 
         println!("Plot updated: {}", output_path);
