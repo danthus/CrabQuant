@@ -6,17 +6,25 @@ use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
 pub trait ModuleReceive {
-    // For modules to give the rendezvous channel sender to the event_manager.
-    // The event_manager will clone the sender for subscription.
+    /*
+    Trait that allows a module to receive events from event manager.
+    The event_manager will clone the sender for subscription.
+     */
     fn get_sender(&self) -> Sender<Event>;
 }
 
 pub trait ModulePublish {
-    // To allow modules to obtain senders
+    /*
+    Trait that allows a module to publish events to event manager.
+    The module will clone the sender to publish.
+     */
     fn use_sender(&mut self, sender: Sender<Event>);
 }
 pub struct EventManager {
-    // sb:
+    /*
+    The event_manager will maintain a subscriber_book, and dispatch
+    an event to all modules that subscribe to the event type.
+    */
     subscriber_book: HashMap<TypeId, Vec<Sender<Event>>>,
     lp_sender: Sender<Event>,
     lp_receiver: Receiver<Event>,
@@ -38,12 +46,14 @@ impl EventManager {
             lp_receiver,
             hp_sender,
             hp_receiver,
-            #[cfg(feature = "order_test")]
-            event_counters,
         }
     }
 
     pub fn subscribe<E: 'static, T: ModuleReceive>(&mut self, module: &T) {
+        /*
+        The function will allow a module with ModuleReveive bound to subscribe
+        certain type of events. 
+        */
         let type_id = TypeId::of::<E>();
         let sender = module.get_sender();
         self.subscriber_book
@@ -53,7 +63,11 @@ impl EventManager {
     }
 
     pub fn allow_publish<T: ModulePublish>(&mut self, priority: String, module: &mut T) {
-        // Allow module to publish to one of the lp/hp channel.
+        /*
+        The function will allow a module with ModulePublish bound to publish
+        events with a 2-level priority. High priority events will be prioritized to be
+        published. 
+        */
         match priority.as_str() {
             "high" => module.use_sender(self.hp_sender.clone()),
             "low" => module.use_sender(self.lp_sender.clone()),
@@ -65,7 +79,11 @@ impl EventManager {
     }
 
     fn dispatch_event(&mut self, event: Event) {
-        // Use TypeId of the event for dynamic dispatch
+        /*
+        This function dispatches events to all its subscribers
+        */
+
+        // Match event type. If an custom type is introduced also match it here.
         let type_id = match &event {
             Event::MarketData(_) => TypeId::of::<MarketDataEvent>(),
             Event::OrderPlace(_) => TypeId::of::<OrderPlaceEvent>(),
@@ -80,11 +98,13 @@ impl EventManager {
                 }
             }
         } else {
+            // An event is unused. 
             eprintln!("No subscribers found for event type: {:?}", type_id);
         }
     }
 
     pub fn proceed(&mut self) {
+        // 
         let event = self.lp_receiver.recv().unwrap();
         self.dispatch_event(event);
 

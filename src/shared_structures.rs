@@ -1,4 +1,3 @@
-// src/models/mod.rs
 use crate::util::Counter;
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
@@ -8,7 +7,6 @@ lazy_static::lazy_static! {
 static ref EVENT_ID_COUNTER_MDE: Mutex<Counter> = Mutex::new(Counter::new());
 static ref EVENT_ID_COUNTER_OPE: Mutex<Counter> = Mutex::new(Counter::new());
 static ref EVENT_ID_COUNTER_PIE: Mutex<Counter> = Mutex::new(Counter::new());}
-// Note that the events should only contain immutable simple data. NVM.
 
 // Events
 #[derive(Debug, Hash, Eq, PartialEq, Clone)]

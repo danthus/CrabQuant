@@ -22,10 +22,12 @@ pub struct StrategyManager {
 }
 
 impl StrategyManager {
-    pub fn new(weights: Vec<f64>) -> Self {
+    pub fn new() -> Self {
         let (subscribe_sender, subscribe_receiver) = bounded(0);
         let portfolio_local = Portfolio::new(0.0);
 
+        // Currently we don't support multi-strategy yet. 
+        let weights = vec![1.];
         StrategyManager {
             subscribe_sender,
             subscribe_receiver,

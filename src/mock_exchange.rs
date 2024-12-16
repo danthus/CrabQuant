@@ -7,13 +7,23 @@ use crossbeam::channel::{bounded, Receiver, Sender};
 use simplelog::debug;
 
 pub struct MockExchange {
-    // subscribe_sender is for event_manager to use only.
-    // s_sender and s_receiver belongs to a rendezvous channel
-    // use s_sender inside module will introduce potential deadlock
+    /*
+    Subscribe_sender is for event_manager to use only.
+    s_sender and s_receiver belongs to a rendezvous channel
+    The rendezvous channel will ensure a topological order to process
+    the event. If a module does not require topological order to execute,
+    it can be configured with more capacity.
+    Warn: Use s_sender inside module may introduce potential deadlock
+     */
     subscribe_sender: Sender<Event>,
     subscribe_receiver: Receiver<Event>,
     // Use publish_sender to send events to event manager
     publish_sender: Option<Sender<Event>>,
+    /*
+    To ensure the consistency on the portfolio, the most updated 
+    portfolio is only kept my the mockexchange. Other modules
+    will receive a local copy of which.
+    */
     portfolio: Portfolio,
     pending_orders: Vec<Order>,
     fee_function: fn(f64) -> f64,
@@ -149,7 +159,6 @@ impl MockExchange {
         self.update_asset(market_data_event);
 
         let portfolio_info_event = Event::new_portfolio_info(self.portfolio.clone());
-        // println!("MEX: Publishing: {:?}", portfolio_info_event);
         debug!("Publishing portfolio: {:?}", portfolio_info_event);
         self.publish(portfolio_info_event);
     }

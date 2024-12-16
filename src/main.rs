@@ -11,10 +11,8 @@ use crate::event_manager::EventManager;
 
 use market_data_feeder::MarketDataFeederLocal;
 use mock_exchange::MockExchange;
-// use portfolio_manager::PortfolioManager;
 use data_analyzer::DataAnalyzer;
 use strategy_manager::StrategyManager;
-// use strategies::strategy_fire_and_drop::StrategyFireAndDrop;
 use shared_structures::*;
 use std::thread;
 use strategies::moving_average_crossover::MAcross;
@@ -47,24 +45,17 @@ fn main() {
     // Initialize event manager
     let mut event_manager = EventManager::new();
 
-    // let strategy_fire_and_drop = StrategyFireAndDrop::new();
-    let strategy_limit_price = MAcross::new();
-    let mut strategy_manager = StrategyManager::new(vec![1.]);
-    strategy_manager.add_strategy(Box::new(strategy_limit_price));
+    let strategy_ma_cross = MAcross::new(5, 10);
+    let mut strategy_manager = StrategyManager::new();
+    strategy_manager.add_strategy(Box::new(strategy_ma_cross));
 
     event_manager.subscribe::<MarketDataEvent, StrategyManager>(&strategy_manager);
     event_manager.subscribe::<PortfolioInfoEvent, StrategyManager>(&strategy_manager);
     event_manager.allow_publish("high".to_string(), &mut strategy_manager);
 
-    // // Initialize Modules
-    // let mut strategy = Strategy::new();
-    // // Subscribe to specific event types for the strategy module
-    // event_manager.subscribe::<MarketDataEvent, Strategy>(&strategy);
-    // event_manager.subscribe::<PortfolioInfoEvent, Strategy>(&strategy);
-    // event_manager.allow_publish("high".to_string(), &mut strategy);
-
     fn fee_function(trade_cost: f64) -> f64 {
-        trade_cost * 0.001 // 1% fee
+        // 0.1% fee, will be appied on both sides (buy and sell)
+        trade_cost * 0.001 
     }
     let mut mock_exchange: MockExchange = MockExchange::new(fee_function);
     // Subscribe to specific event types for the mock exchange module
