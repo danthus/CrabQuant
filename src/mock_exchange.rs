@@ -145,7 +145,6 @@ impl MockExchange {
                         }
                     }
                 }
-                _ => println!("MEX: Unsupported order type"),
             }
             // Set the return to to true if to keep the unprocessed order for the next market data feed
             // Currently as no cancle order mechanism is implemented we will just drop it anyway

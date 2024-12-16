@@ -26,7 +26,7 @@ impl MovingWindow {
         }
     }
 
-    pub fn std(&self, window_size: usize) -> f32 {
+    pub fn _std(&self, window_size: usize) -> f32 {
         let avg = self.average(window_size);
 
         if window_size <= self.vector.len() {

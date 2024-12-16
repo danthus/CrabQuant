@@ -49,6 +49,7 @@ impl Event {
     }
 }
 // MarketDataEvent
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct MarketDataEvent {
     pub id: u64,
@@ -84,7 +85,7 @@ pub struct OrderPlaceEvent {
 
 #[derive(Debug, Clone)]
 pub enum Order {
-    FireAndDrop(FireAndDropOrder),
+    // FireAndDrop(FireAndDropOrder),
     LimitPrice(LimitPriceOrder),
 }
 
@@ -94,12 +95,12 @@ pub enum OrderDirection {
     Sell,
 }
 
-#[derive(Debug, Clone)]
-pub struct FireAndDropOrder {
-    pub symbol: String,
-    pub amount: i32,
-    pub direction: OrderDirection,
-}
+// #[derive(Debug, Clone)]
+// pub struct FireAndDropOrder {
+//     pub symbol: String,
+//     pub amount: i32,
+//     pub direction: OrderDirection,
+// }
 
 #[derive(Debug, Clone)]
 pub struct LimitPriceOrder {
