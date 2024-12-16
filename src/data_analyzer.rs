@@ -1,6 +1,6 @@
-use crate::event_manager::{ModulePublish, ModuleReceive};
-use crate::{market_data_feeder, shared_structures::*};
-use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
+use crate::event_manager::ModuleReceive;
+use crate::shared_structures::*;
+use crossbeam::channel::{unbounded, Receiver, Sender};
 use num_traits::cast::ToPrimitive;
 use plotters::prelude::*;
 use simplelog::*;
@@ -184,23 +184,15 @@ impl DataAnalyzer {
             .map(|&(_, value)| value)
             .unwrap_or(0.0);
         let mut max_drawdown: f64 = 0.0;
-
-        for value in asset_history.iter() {
-            // println!("Processing value: {}, Current peak: {}", value.1, peak);
-            if value.1 > peak {
-                peak = value.1;
-                // println!("New peak updated to: {}", peak);
+        for &(_, value) in asset_history.iter() {
+            if value > peak {
+                peak = value;
             }
             if peak > 0.0 {
-                let drawdown = (value.1 / peak) - 1.0;
+                let drawdown = (value / peak) - 1.0;
                 max_drawdown = max_drawdown.min(drawdown);
-                // println!(
-                //     "Drawdown calculated: {}, Max drawdown: {}",
-                //     drawdown, max_drawdown
-                // );
             }
         }
-        // println!("Max drawdown finalized: {}", max_drawdown);
 
         // Sortino Ratio
         let downside_deviation: f64 = returns
@@ -235,15 +227,31 @@ impl DataAnalyzer {
         let information_ratio = mean_return / tracking_error;
 
         // Longest Drawdown Period
+        let mut peak: f64 = asset_history
+            .first()
+            .map(|&(_, value)| value)
+            .unwrap_or(0.0);
         let mut drawdown_start = None;
         let mut longest_drawdown = 0;
-        for (i, value) in asset_history.iter().enumerate() {
-            if value.1 < peak && drawdown_start.is_none() {
-                drawdown_start = Some(i);
-            } else if value.1 >= peak && drawdown_start.is_some() {
+        for (i, &(_, value)) in asset_history.iter().enumerate() {
+            // If drawdown ended or at the last value, calculate the drawdown length
+            if drawdown_start.is_some() && (value >= peak || i == asset_history.len() - 1) {
+                println!("i: {}, drawdown_start: {}", i, drawdown_start.unwrap());
+                println!("peak: {}", peak);
                 let length = i - drawdown_start.unwrap();
                 longest_drawdown = longest_drawdown.max(length);
+                println!("longest_drawdown: {}, length: {}", longest_drawdown, length);
+                drawdown_start = None; // Reset drawdown_start after calculating length
+            }
+            if value > peak {
+                // Update peak and reset drawdown tracking
+                peak = value;
                 drawdown_start = None;
+            } else if value < peak {
+                // Enter drawdown
+                if drawdown_start.is_none() {
+                    drawdown_start = Some(i);
+                }
             }
         }
 
@@ -340,25 +348,28 @@ impl DataAnalyzer {
             .chain(standardized_difference.iter().map(|&(_, value)| value));
         let y_min = all_y_values.clone().fold(f64::INFINITY, f64::min);
         let y_max = all_y_values.fold(f64::NEG_INFINITY, f64::max);
-        
+
         let res_x = 3840;
         let res_y = 2160;
         let root_area = BitMapBackend::new(output_path, (res_x, res_y)).into_drawing_area();
         root_area.fill(&WHITE)?;
 
         let mut chart = ChartBuilder::on(&root_area)
-            .caption("Market Data and Asset History", ("sans-serif", res_x/52))
-            .x_label_area_size(res_y/16)
-            .y_label_area_size(res_x/22)
-            .build_cartesian_2d(0..market_data.len().max(asset_history.len())+market_data.len()/25, y_min..y_max+1.0)?;
+            .caption("Market Data and Asset History", ("sans-serif", res_x / 52))
+            .x_label_area_size(res_y / 16)
+            .y_label_area_size(res_x / 22)
+            .build_cartesian_2d(
+                0..market_data.len().max(asset_history.len()) + market_data.len() / 25,
+                y_min..y_max + 1.0,
+            )?;
 
         // Configure the mesh
         chart
             .configure_mesh()
             .x_desc("Date")
             .y_desc("Value")
-            .axis_desc_style(("sans-serif", res_x/58))
-            .label_style(("sans-serif", res_x/71)) // x & y label
+            .axis_desc_style(("sans-serif", res_x / 58))
+            .label_style(("sans-serif", res_x / 71)) // x & y label
             .x_label_formatter(&|x| {
                 if let Some(index) = x.to_usize() {
                     if index < standardized_market_data.len() {
@@ -460,24 +471,27 @@ impl DataAnalyzer {
             format!("Tracking Error: {:.4}", metrics.tracking_error),
             format!("Longest Drawdown Period: {} days", metrics.longest_drawdown),
         ];
-        let start_x = standardized_market_data.len()/50; // X-coordinate
-        let mut start_y = y_max+1.0-(y_max-y_min)/30.0; // Initial Y-coordinate
+        let start_x = standardized_market_data.len() / 50; // X-coordinate
+        let mut start_y = y_max + 1.0 - (y_max - y_min) / 30.0; // Initial Y-coordinate
         for line in metrics_text {
             chart.draw_series(std::iter::once(Text::new(
                 line,
                 (start_x, start_y),
-                ("sans-serif", res_x/77).into_font(),
+                ("sans-serif", res_x / 77).into_font(),
             )))?;
-            start_y -= (y_max+1.0-y_min)/42.0; // Increment Y-coordinate for the next line
+            start_y -= (y_max + 1.0 - y_min) / 42.0; // Increment Y-coordinate for the next line
         }
 
         // Draw the legend
         chart
             .configure_series_labels()
-            .position(SeriesLabelPosition::Coordinate((res_x/2-res_x/14).to_i32().unwrap(), 50))
+            .position(SeriesLabelPosition::Coordinate(
+                (res_x / 2 - res_x / 14).to_i32().unwrap(),
+                50,
+            ))
             .background_style(&WHITE.mix(0.2))
             .border_style(&BLACK)
-            .label_font(("sans-serif", res_x/77)) // legend label
+            .label_font(("sans-serif", res_x / 77)) // legend label
             .draw()?;
 
         println!("Plot updated: {}", output_path);
