@@ -45,31 +45,42 @@ fn main() {
     // Initialize event manager
     let mut event_manager = EventManager::new();
 
+    // Initilize the strategy and add to strategy_manager
     let strategy_ma_cross = MAcross::new(5, 10);
     let mut strategy_manager = StrategyManager::new();
     strategy_manager.add_strategy(Box::new(strategy_ma_cross));
 
+    // Let strategy_manager subscribe to MarketDataEvent and PortfolioInfoEvent.
     event_manager.subscribe::<MarketDataEvent, StrategyManager>(&strategy_manager);
     event_manager.subscribe::<PortfolioInfoEvent, StrategyManager>(&strategy_manager);
+    // Allow strategy_manager to publish events.
     event_manager.allow_publish("high".to_string(), &mut strategy_manager);
 
+    // Initialize the mock_exchange for stock.
+    /*
+    Custom fee in the fee_function.
+    It will be applied to every transactions (buy and sell).
+    */
     fn fee_function(trade_cost: f64) -> f64 {
-        // 0.1% fee, will be appied on both sides (buy and sell)
-        trade_cost * 0.001 
+        // 0.1% percentage and 0 fixed fee
+        trade_cost * 0.001 + 0.0
     }
     let mut mock_exchange: MockExchange = MockExchange::new(fee_function);
-    // Subscribe to specific event types for the mock exchange module
+    // Let event_manager subscribe to MarketDataEvent and OrderPlaceEvent.
     event_manager.subscribe::<MarketDataEvent, MockExchange>(&mock_exchange);
     event_manager.subscribe::<OrderPlaceEvent, MockExchange>(&mock_exchange);
+    // Allow event_manager to publish events.
     event_manager.allow_publish("high".to_string(), &mut mock_exchange);
 
+    // Initialize market_data_feeder.
     let mut market_data_feeder =
         MarketDataFeederLocal::new("TSLA".to_string(), "./data/TSLA_DAY_10Y.csv".to_string());
     // Allow the market data feeder to publish low-priority events
     event_manager.allow_publish("low".to_string(), &mut market_data_feeder);
 
+    // Initialize a data_analyzer
     let mut data_analyzer = DataAnalyzer::new();
-    // Subscribe the data analyzer to all event types it needs
+    // Let the data analyzer subscribe to all event types it needs
     event_manager.subscribe::<MarketDataEvent, DataAnalyzer>(&data_analyzer);
     event_manager.subscribe::<PortfolioInfoEvent, DataAnalyzer>(&data_analyzer);
 
