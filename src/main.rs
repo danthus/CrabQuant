@@ -74,7 +74,7 @@ fn main() {
 
     // Initialize market_data_feeder.
     let mut market_data_feeder =
-        MarketDataFeederLocal::new("TSLA".to_string(), "./data/TSLA_DAY_10Y.csv".to_string());
+        MarketDataFeederLocal::new("TSLA".to_string(), "./data/TSLA_1min_2W.csv".to_string());
     // Allow the market data feeder to publish low-priority events
     event_manager.allow_publish("low".to_string(), &mut market_data_feeder);
 

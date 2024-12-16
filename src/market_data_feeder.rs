@@ -45,35 +45,34 @@ impl MarketDataFeederLocal {
 
         for result in reader.records() {
             let record = result.expect("Failed to read record");
-            // Parse the timestamp (Date)
+
+            // Parse the timestamp
             let timestamp = record[0].to_string();
 
-            // Parse the Close/Last price (removing the '$' sign)
-            let close: f64 = record[1]
-                .trim_start_matches('$')
+            // Parse the Open price
+            let open: f64 = record[1]
+                .parse()
+                .expect("Invalid open value");
+
+            // Parse the High price
+            let high: f64 = record[2]
+                .parse()
+                .expect("Invalid high value");
+
+            // Parse the Low price
+            let low: f64 = record[3]
+                .parse()
+                .expect("Invalid low value");
+
+            // Parse the Close price
+            let close: f64 = record[4]
                 .parse()
                 .expect("Invalid close value");
 
             // Parse the Volume
-            let volume: i32 = record[2].parse().expect("Invalid volume value");
-
-            // Parse the Open price (removing the '$' sign)
-            let open: f64 = record[3]
-                .trim_start_matches('$')
+            let volume: i32 = record[5]
                 .parse()
-                .expect("Invalid open value");
-
-            // Parse the High price (removing the '$' sign)
-            let high: f64 = record[4]
-                .trim_start_matches('$')
-                .parse()
-                .expect("Invalid high value");
-
-            // Parse the Low price (removing the '$' sign)
-            let low: f64 = record[5]
-                .trim_start_matches('$')
-                .parse()
-                .expect("Invalid low value");
+                .expect("Invalid volume value");
 
             // Create a MarketDataEvent
             let market_data_event = Event::new_market_data(
@@ -85,7 +84,7 @@ impl MarketDataFeederLocal {
                 low,
                 volume,
             );
-
+            
             // Send data through the channel
             #[cfg(feature = "random_sleep_test")]
             {
