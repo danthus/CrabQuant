@@ -63,7 +63,7 @@ impl Strategy for MAcross {
                 None
             }
             
-        }
+        } 
         // ma_short < ma_long sell and last signal is not sell
         else if ma_short < ma_long && self.last_signal != LastSignal::IsSell {
             self.last_signal = LastSignal::IsSell;            
