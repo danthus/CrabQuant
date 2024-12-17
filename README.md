@@ -189,7 +189,7 @@ The workload of the project is then divided into the following components, by ho
 | MockExchange         | B, C, D            |
 | SampleStrategyModule | C                  |
 | MarketDataFeeder     | C                  |
-| AnalyticEngine       | F, G, H            |
+| AnalyticEngine       | C, F, G            |
 | LogModule            | H                  |
 
 Each team member contributed significantly to the project. The table below generally describes the components assigned to each team member. However, it’s not a complete contribution of each team member, there are many situations where debugging, integrating, providing suggestions, and structural modifications are done collaboratively, which can not be measured clearly.
