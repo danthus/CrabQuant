@@ -85,17 +85,11 @@ impl StrategyManager {
     fn process_marketevent(&mut self, market_data_event: MarketDataEvent, events: &mut Vec<Event>) {
         for strategy in &mut self.strategies {
             if let Some(order_place_event) = strategy.process(market_data_event.clone()) {
-                // events.push(order_place_event);
-                // self.publish(order_place_event);
                 events.push(order_place_event);
             }
 
-            // if let Some(order_event) = strategy.on_market_data(event.clone()) {
-            //     self.event_sender.send(Event::OrderPlaceEvent(order_event)).unwrap();
-            // }
         }
         for event in events.drain(..) {
-            // println!("Strategy: Publishing event: {:?}, \n\tbased on {:?}", event, market_data_event);
             debug!(
                 "Publish order place (market id = {:?}): {:?}",
                 market_data_event.id, event

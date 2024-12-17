@@ -63,7 +63,7 @@ fn main() {
     */
     fn fee_function(trade_cost: f64) -> f64 {
         // 0.1% percentage and 0 fixed fee
-        trade_cost * 0.001 + 0.0
+        trade_cost * 0.001+ 0.0
     }
     let mut mock_exchange: MockExchange = MockExchange::new(fee_function);
     // Let event_manager subscribe to MarketDataEvent and OrderPlaceEvent.
@@ -74,7 +74,7 @@ fn main() {
 
     // Initialize market_data_feeder.
     let mut market_data_feeder =
-        MarketDataFeederLocal::new("TSLA".to_string(), "./data/TSLA_DAY_10Y.csv".to_string());
+        MarketDataFeederLocal::new("TSLA".to_string(), "./data/TSLA_1min_2W.csv".to_string());
     // Allow the market data feeder to publish low-priority events
     event_manager.allow_publish("low".to_string(), &mut market_data_feeder);
 
