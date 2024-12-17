@@ -21,8 +21,9 @@ pub struct DataAnalyzer {
 
 // Metrics struct
 struct Metrics {
-    total_return: f64,
-    annualized_return: f64,
+    market_return: f64,
+    portfolio_return: f64,
+    annualized_portfolio_return: f64,
     volatility: f64,
     sharpe_ratio: f64,
     max_drawdown: f64,
@@ -90,7 +91,7 @@ impl DataAnalyzer {
                     &asset_history_snapshot,
                     &cash_history_snapshot,
                     &mut last_lengths,
-                    "performance.png",
+                    "sample_output.png",
                 ) {
                     eprintln!("Error during plotting: {}", err);
                 }
@@ -158,19 +159,31 @@ impl DataAnalyzer {
             .map(|window| (window[1].1 - window[0].1) / window[0].1)
             .collect();
 
+        // Calculate market return
+        let market_return = benchmark_returns.iter().fold(1.0, |acc, r| acc * (1.0 + r)) - 1.0;
+
         // Total Return
-        let total_return = (asset_history.last().unwrap().1 / asset_history[0].1) - 1.0;
+        let portfolio_return = (asset_history.last().unwrap().1 / asset_history[0].1) - 1.0;
 
         // Annualized Return
         let n = returns.len() as f64;
-        let annualized_return = (1.0 + total_return).powf(252.0 / n) - 1.0;
+        let annualized_market_return = (1.0 + market_return).powf(252.0 / n) - 1.0;
+        let annualized_portfolio_return = (1.0 + portfolio_return).powf(252.0 / n) - 1.0;
 
         // Volatility
-        let volatility = returns.iter().copied().fold(0.0, |acc, x| acc + x.powi(2)) / (n - 1.0);
+        let mean_return = returns.iter().sum::<f64>() / n;
+        let variance = returns
+            .iter()
+            .map(|&r| (r - mean_return).powi(2))
+            .sum::<f64>()
+            / (n - 1.0);
+        let volatility = variance.sqrt();
 
         // Sharpe Ratio
-        let mean_return = returns.iter().sum::<f64>() / n;
-        let sharpe_ratio = mean_return / volatility;
+        let annualized_mean_return = mean_return * 252.0;
+        let annualized_excess_return = annualized_mean_return - 0.05;
+        let annualized_volatility = volatility * (252.0_f64).sqrt();
+        let sharpe_ratio = annualized_excess_return / annualized_volatility;
 
         // Max Drawdown
         if asset_history
@@ -195,13 +208,19 @@ impl DataAnalyzer {
         }
 
         // Sortino Ratio
-        let downside_deviation: f64 = returns
-            .iter()
-            .filter(|&&r| r < 0.0)
-            .map(|r| r.powi(2))
-            .sum::<f64>()
-            / n;
-        let sortino_ratio = mean_return / downside_deviation.sqrt();
+        let downside_returns: Vec<f64> = returns.iter().copied().filter(|&r| r < 0.0).collect();
+        let downside_deviation = if !downside_returns.is_empty() {
+            (downside_returns.iter().map(|r| r.powi(2)).sum::<f64>()
+                / downside_returns.len() as f64)
+                .sqrt()
+        } else {
+            0.0 // Avoid division by zero if no negative returns exist
+        };
+        let sortino_ratio = if downside_deviation > 0.0 {
+            annualized_excess_return / (downside_deviation * (252.0_f64).sqrt())
+        } else {
+            f64::INFINITY // Avoid division by zero
+        };
 
         // Alpha and Beta
         let covariance: f64 = returns
@@ -211,20 +230,27 @@ impl DataAnalyzer {
             .sum::<f64>();
         let variance: f64 = benchmark_returns.iter().map(|&r| r.powi(2)).sum::<f64>();
         let beta = covariance / variance;
-        let alpha = mean_return - beta * (benchmark_returns.iter().sum::<f64>() / n);
+        let risk_free_rate = 0.05;
+        let alpha = annualized_portfolio_return
+            - risk_free_rate
+            - beta * (annualized_market_return - risk_free_rate);
 
-        // Information Ratio
+        // Tracking Ratio
         let excess_returns: Vec<f64> = returns
             .iter()
             .zip(&benchmark_returns)
             .map(|(&r_p, &r_b)| r_p - r_b)
             .collect();
-        let tracking_error = excess_returns
+        let mean_excess_return = excess_returns.iter().sum::<f64>() / excess_returns.len() as f64;
+        let excess_return_variance = excess_returns
             .iter()
-            .map(|&x| x.powi(2))
+            .map(|&r| (r - mean_excess_return).powi(2))
             .sum::<f64>()
-            .sqrt();
-        let information_ratio = mean_return / tracking_error;
+            / (excess_returns.len() as f64 - 1.0);
+        let tracking_error = excess_return_variance.sqrt();
+
+        // Information Ratio
+        let information_ratio = mean_excess_return / tracking_error;
 
         // Longest Drawdown Period
         let mut peak: f64 = asset_history
@@ -236,11 +262,11 @@ impl DataAnalyzer {
         for (i, &(_, value)) in asset_history.iter().enumerate() {
             // If drawdown ended or at the last value, calculate the drawdown length
             if drawdown_start.is_some() && (value >= peak || i == asset_history.len() - 1) {
-                println!("i: {}, drawdown_start: {}", i, drawdown_start.unwrap());
-                println!("peak: {}", peak);
+                // println!("i: {}, drawdown_start: {}", i, drawdown_start.unwrap());
+                // println!("peak: {}", peak);
                 let length = i - drawdown_start.unwrap();
                 longest_drawdown = longest_drawdown.max(length);
-                println!("longest_drawdown: {}, length: {}", longest_drawdown, length);
+                // println!("longest_drawdown: {}, length: {}", longest_drawdown, length);
                 drawdown_start = None; // Reset drawdown_start after calculating length
             }
             if value > peak {
@@ -256,8 +282,9 @@ impl DataAnalyzer {
         }
 
         Ok(Metrics {
-            total_return,
-            annualized_return,
+            market_return,
+            portfolio_return,
+            annualized_portfolio_return,
             volatility,
             sharpe_ratio,
             max_drawdown,
@@ -301,7 +328,7 @@ impl DataAnalyzer {
 
         // Calculate metrics
         // let metrics = self.calculate_metrics()?;
-        // println!("metrics calculated: {}", metrics.total_return);
+        // println!("metrics calculated: {}", metrics.portfolio_return);
         let metrics = match self.calculate_metrics() {
             Ok(metrics) => metrics,
             Err(err) => {
@@ -309,7 +336,7 @@ impl DataAnalyzer {
                 return Err(err); // Or handle the error as appropriate
             }
         };
-        // println!("metrics calculated: {}", metrics.total_return);
+        // println!("metrics calculated: {}", metrics.portfolio_return);
 
         let first_market_value = market_data.get(0).map_or(1.0, |(_, value)| *value);
         let first_asset_value = asset_history.get(0).map_or(1.0, |(_, value)| *value);
@@ -428,38 +455,12 @@ impl DataAnalyzer {
         //     .label("Position Value")
         //     .legend(|(x, y)| PathElement::new([(x, y), (x + 20, y)], &GREEN));
 
-        // chart.draw_series(std::iter::once(Text::new(
-        //     format!(
-        //         "Total Return: {:.2}% ,\n,Annualized Return: {:.2}%
-        //         Volatility: {:.4}
-        //         Sharpe Ratio: {:.2}
-        //         Max Drawdown: {:.2}%
-        //         Alpha: {:.4}
-        //         Beta: {:.4}
-        //         Sortino Ratio: {:.4}
-        //         Information Ratio: {:.4}
-        //         Tracking Error: {:.4}
-        //         Longest Drawdown Period: {} days",
-        //         metrics.total_return * 100.0,
-        //         metrics.annualized_return * 100.0,
-        //         metrics.volatility,
-        //         metrics.sharpe_ratio,
-        //         metrics.max_drawdown * 100.0,
-        //         metrics.alpha,
-        //         metrics.beta,
-        //         metrics.sortino_ratio,
-        //         metrics.information_ratio,
-        //         metrics.tracking_error,
-        //         metrics.longest_drawdown,
-        //     ),
-        //     (10, 0.8), // Corrected: x-coordinate is `usize`, y-coordinate is `f64`
-        //     ("sans-serif", 50).into_font(),
-        // )))?;
         let metrics_text = vec![
-            format!("Total Return: {:.2}%", metrics.total_return * 100.0),
+            format!("Market Return: {:.2}%", metrics.market_return * 100.0),
+            format!("Portfolio Return: {:.2}%", metrics.portfolio_return * 100.0),
             format!(
-                "Annualized Return: {:.2}%",
-                metrics.annualized_return * 100.0
+                "Annualized Portfolio Return: {:.2}%",
+                metrics.annualized_portfolio_return * 100.0
             ),
             format!("Volatility: {:.4}", metrics.volatility),
             format!("Sharpe Ratio: {:.2}", metrics.sharpe_ratio),
