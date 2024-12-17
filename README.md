@@ -82,7 +82,7 @@ To adjust the fee:
 To test on other prepared data:  
 ```Rust  
    let mut market_data_feeder =  
-       MarketDataFeederLocal::new("TSLA".to_string(), "./data/TSLA_1min_2W.csv".to_string());  
+       MarketDataFeederLocal::new("AAPL".to_string(), "./data/AAPL_DAY_10Y.csv".to_string());  
 ```
 
 ## 
@@ -93,7 +93,7 @@ The candle data should include the following fields: timestamp, open, high, low,
 Also in ./src/main.rs, change the symbol name and the directory of the data file:  
 ```Rust  
    let mut market_data_feeder =  
-       MarketDataFeederLocal::new("TSLA".to_string(), "./data/TSLA_1min_2W.csv".to_string());  
+       MarketDataFeederLocal::new("TSLA".to_string(), "./data/TSLA_DAY_10Y.csv".to_string());  
 ```  
 **To add new strategy**  
 First, new strategies must implement two traits: process and update. The process trait takes a market data event as an input and outputs an optional order place event, which means the strategy may or may not send an order for every market data. The update trait is to update the local portfolio when a new portfolio event is received, every strategy should have very similar update traits. 
@@ -213,3 +213,4 @@ For the delivery, we used a simple strategy for testing, which is also a templat
 The project idea is very interesting to us, we have learnt and used many Rust features and got deeper into the backtesting and quant-trading area. At the beginning of the term, we set scope to single thread only as we were concerned about implementing a multithreaded application/framework with a new language in about a month. However as the learning and developing progresses a multithreaded design becomes clearer and more natural. The actual transition turns out to be clean and fluent. During the coding, we have brainstormed many interesting ideas on top of CrabQuant, such as using LLM and reinforcement learning or causality inference for each trading. Such experiments will significantly benefit from the efficient and responsive framework. Currently, the v4 branch is the best we can deliver in the span of the project, which would only allow stock trading on a cash account. Another branch BTC_transition is in progress to make the framework compatible with cryptos and margin tradings, but the implementation remains experimental. We will spend time in the future to improve CrabQuant as personal interests.
 
 ## **Video Demo**
+https://www.youtube.com/watch?v=CE6V6F3eB6A
