@@ -19,7 +19,7 @@ In this project, we aim to develop a foundational backtesting framework using Ru
 In general, our objective is to design and build a new rust-based backtesting framework, assisting users to test their own trading strategies on specific dataset. The framework should also include a basic analytic and visualization tool for a descriptive and comparable view on return and risk of their promoted strategies. An example output is shown in the following figure (produced using Python).
 
 ![image1](./resources/image/MACROSS_5_20_sample.png) 
-<div align="center"> Fig 1, Sample backtesting result plot. </div>
+<div align="center"> Fig 1, Sample Backtesting Result Plot </div>
 <br>
 Specifically, the primary objective of the project is modularity. While Rust offers the greatest potential for enhancing an algo-trading framework in both performance and reliability, our focus remains on modularity due to limited resources and the fact that Rust is new to all team members. By prioritizing modularity as our design principle, we aim for the utmost decoupling of modules, allowing the framework to be adaptable for future upgrades—such as asynchronous support, concurrency, and data serializing/deserializing—and enabling users to focus on developing trading strategies. Guided by this principle, we chose an event-driven architecture in which each module functions like a microservice, communicating solely through events. This architecture not only achieves the modularity we aim for but also frees users from dealing with the implementation details of other modules.  
 Some of the key features of our backtesting framework include the following:
@@ -41,7 +41,7 @@ A. Performant Event-driven backtesting:
    CrabQuant employs an event-driven architecture, delivering flexibility and realism while maintaining efficiency through the use of crossbeam lightweight and efficient channels.
    
    ![image2](./resources/image/event_driven_architecture.png) 
-<div align="center"> Fig 2, our event-driven architecture. </div>
+<div align="center"> Fig 2, Our Event-Driven Architecture </div> <br>
    The above diagram explains how the event-driven architecture works. Modules implemented with ModulePublish trait bound will publish events to the event_manager, and each event will be dispatched to Modules implemented with ModuleReceive trait bound and subscribing to such event type. The connections are implemented with channels. Note that by introducing the event manager, an event can be consumed by multiple receiving modules while preserving the FIFO order of the events.  
    The basic modules for the minimal example are implemented as in following diagram.  
    
@@ -183,12 +183,14 @@ Because of the excellent package management and simple building offered by Cargo
 
 The workload of the project is then divided into the following components, by how each is naturally decoupled with others in the architecture. Their corresponding features are also listed in the table.
 
-* EventManager: Feature A  
-* MockExchange: Feature B, C  
-* SampleStrategyModule: Feature D, E  
-* MarketDataFeeder  
-* AnalyticEngine: Feature F, G and H.  
-* Log module
+| Component            | Features           |
+|----------------------|--------------------|
+| EventManager         | A, C               |
+| MockExchange         | B, C, D            |
+| SampleStrategyModule | C                  |
+| MarketDataFeeder     | C                  |
+| AnalyticEngine       | F, G, H            |
+| LogModule            | H                  |
 
 Each team member contributed significantly to the project. The table below generally describes the components assigned to each team member. However, it’s not a complete contribution of each team member, there are many situations where debugging, integrating, providing suggestions, and structural modifications are done collaboratively, which can not be measured clearly.
 
@@ -196,7 +198,7 @@ Each team member contributed significantly to the project. The table below gener
 | :---- | :---- |
 | Hanzhen Xu | EventManager, MockExchange, MarketDataFeeder |
 | Haoran Zhou | SampleStrategy, Log module |
-| Yue Chen | AnalyticEngine |
+| Yue Chen | AnalyticEngine, Visualization |
 
 ## **Lessons learned and concluding remarks**
 
