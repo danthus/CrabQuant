@@ -19,7 +19,6 @@ pub struct DataAnalyzer {
     local_portfolio: Portfolio,
 }
 
-// Metrics struct
 struct Metrics {
     market_return: f64,
     portfolio_return: f64,
@@ -63,13 +62,8 @@ impl DataAnalyzer {
         let data_analyzer_clone = self.clone();
 
         // Spawn a new thread for plotting
-        // let market_data_history_clone = Arc::clone(&market_data_history);
-        // let asset_history_clone = Arc::clone(&asset_history);
-        // let cash_history_clone = Arc::clone(&cash_history);
-
         thread::spawn(move || {
             let mut last_lengths = (0, 0); // Track lengths of histories
-                                           // thread::sleep(Duration::from_millis(100));
             loop {
                 // Take a snapshot of data
                 let market_data_snapshot = {
@@ -400,7 +394,8 @@ impl DataAnalyzer {
             .x_label_formatter(&|x| {
                 if let Some(index) = x.to_usize() {
                     if index < standardized_market_data.len() {
-                        return standardized_market_data[index].0.clone();
+                        let label = &standardized_market_data[index].0;
+                        return label.chars().take(10).collect();
                     }
                 }
                 "".to_string()
