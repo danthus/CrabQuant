@@ -18,7 +18,7 @@ In this project, we aim to develop a foundational backtesting framework using Ru
 
 In general, our objective is to design and build a new rust-based backtesting framework, assisting users to test their own trading strategies on specific dataset. The framework should also include a basic analytic and visualization tool for a descriptive and comparable view on return and risk of their promoted strategies. An example output is shown in the following figure (produced using Python).
 
-![image1](resources/image/MACROSS_5_20_sample.png) 
+![image1](./resources/image/MACROSS_5_20_sample.png) 
 <div align="center"> Fig 1, Sample backtesting result plot. </div>
 <br>
 Specifically, the primary objective of the project is modularity. While Rust offers the greatest potential for enhancing an algo-trading framework in both performance and reliability, our focus remains on modularity due to limited resources and the fact that Rust is new to all team members. By prioritizing modularity as our design principle, we aim for the utmost decoupling of modules, allowing the framework to be adaptable for future upgrades—such as asynchronous support, concurrency, and data serializing/deserializing—and enabling users to focus on developing trading strategies. Guided by this principle, we chose an event-driven architecture in which each module functions like a microservice, communicating solely through events. This architecture not only achieves the modularity we aim for but also frees users from dealing with the implementation details of other modules.  
@@ -40,11 +40,11 @@ Some of the key features of our backtesting framework include the following:
 1. Performant Event-driven backtesting:  
    	Most algorithmic trading and backtesting frameworks are either event-driven or vectorized. An event-driven architecture closely emulates the real trading environment, providing enhanced flexibility and enabling a seamless transition from the backtesting environment to live trading. In contrast, a vectorized architecture offers advantages in efficiency and speed but sacrifices flexibility and introduces an additional layer of uncertainty when transitioning to a real trading environment.  
    CrabQuant employs an event-driven architecture, delivering flexibility and realism while maintaining efficiency through the use of crossbeam lightweight and efficient channels.
-   ![image2](resources/image/event_driven_architecture.png) 
+   ![image2](./resources/image/event_driven_architecture.png) 
 <div align="center"> Fig 2, our event-driven architecture. </div>
    The above diagram explains how the event-driven architecture works. Modules implemented with ModulePublish trait bound will publish events to the event_manager, and each event will be dispatched to Modules implemented with ModuleReceive trait bound and subscribing to such event type. The connections are implemented with channels. Note that by introducing the event manager, an event can be consumed by multiple receiving modules while preserving the FIFO order of the events.  
-   The basic modules for the minimal example are implemented as in following diagram:
-   ![image2](resources/image/crabquant_basic_workflow_diagram.png) 
+   The basic modules for the minimal example are implemented as in following diagram.
+   ![image3](./resources/image/crabquant_basic_workflow_diagram.png) 
 <div align="center"> Fig 3, CrabQuant Workflow of Modules </div>
 2. Seamlessly future data prevention:  
    	Many inconsistencies in trading strategy testing arise from mistakenly using “future data,” such as generating a signal based on the current timestamp’s closing price and executing it at the same timestamp. In most existing frameworks, users must manually ensure that such errors do not occur when implementing their strategies. Our framework eliminates this issue seamlessly. By utilizing the blocking property of a rendezvous channel, the CrabQuant conserves a relaxed topological order of modules to prevent the mock exchange from executing signals based on the same market data which strategy module generates the signal based on.  
