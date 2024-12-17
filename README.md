@@ -3,6 +3,7 @@
 # **Performant Software Systems with Rust**
 
 # **Final Report**
+**(Based on Branch v4)**
 
 **Hanzhen Xu | 1004475285 | hanzhen.xu@mail.utoronto.ca**  
 **Haoran Zhou | 1003970713 | hr.zhou@mail.utoronto.ca**  
@@ -36,8 +37,8 @@ A. Performant Event-driven backtesting:
    
    ![image2](./resources/image/event_driven_architecture.png) 
 <div align="center"> Fig 2, Our Event-Driven Architecture </div> <br>
-&nbsp; &nbsp; &nbsp; &nbsp; The above diagram explains how the event-driven architecture works. Modules implemented with ModulePublish trait bound will publish events to the event_manager, and each event will be dispatched to Modules implemented with ModuleReceive trait bound and subscribing to such event type. The connections are implemented with channels. Note that by introducing the event manager, an event can be consumed by multiple receiving modules while preserving the FIFO order of the events.  
-&nbsp; &nbsp; &nbsp; &nbsp; The basic modules for the minimal example are implemented as in following diagram. <br>
+&nbsp; &nbsp; &nbsp; &nbsp; The above diagram explains how the event-driven architecture works. Modules implemented with ModulePublish trait bound will publish events to the event_manager, and each event will be dispatched to Modules implemented with ModuleReceive trait bound and subscribing to such event type. The connections are implemented with channels. Note that by introducing the event manager, an event can be consumed by multiple receiving modules while preserving the FIFO order of the events.  <br>
+&nbsp; &nbsp; &nbsp; &nbsp; The basic modules for the minimal example are implemented as in the following diagram. <br>
 <br>
 
    ![image3](resources/image/crabquant_basic_workflow_diagram.png)  
@@ -203,15 +204,12 @@ Each team member contributed significantly to the project. The table below gener
 ## **Lessons learned and concluding remarks**
 
 * Design structure is crucial for optimal performance and scalability.   
-* Knowledge of backtesting system  
-* 
+* Knowledge of trading and backtesting system  
 
-Through the process of developing CrabQuant, our team has revised the system structure many times and created 7 different versions. The majority of the time has been spent on improving structure designs, yet the current structure may still not be the best design. The major versions include an initial single-threaded version, then a multi-thread version with manual memory control, and finally our current channel based implementation. 
+Through the process of developing CrabQuant, our team has revised the system structure many times and created 7 different versions. The majority of the time has been spent on improving structure designs, yet the current structure could still be further improved. The major versions include an initial single-threaded version, then a multi-thread version with manual memory control, and finally our current channel based implementation. 
 
 For the delivery, we used a simple strategy for testing, which is also a template allowing users to design more strategies by themselves. 
 
-The project idea is very interesting to us, we have learnt and used many Rust features and got deeper into the backtesting and quant-trading area. At the beginning of the term, we set scope to single thread only as we were concerned about implementing a multithreaded application/framework with a new language in about a month. However as the learning and developing progresses a multithreaded design becomes more and more clear and natural. The actual transition turns out to be clean and fluent. During the coding, we have brainstormed many interesting ideas on top of CrabQuant, such as using LLM and reinforcement learning or causality inference for each trading. Such experiments will significantly benefit from the efficient and responsive framework. Currently, the v4 branch is the best we can deliver in the span of the project, which would only allow stock trading on a cash account. Another branch BTC_transition is in progress to make the framework compatible with cryptos and margin tradings, but the implementation remains experimental. We will spend time in the future to improve CrabQuant as personal interests.
-
-For future development, we will modify the structure to blaaaa blaaa blaaa, like actix_web
+The project idea is very interesting to us, we have learnt and used many Rust features and got deeper into the backtesting and quant-trading area. At the beginning of the term, we set scope to single thread only as we were concerned about implementing a multithreaded application/framework with a new language in about a month. However as the learning and developing progresses a multithreaded design becomes clearer and more natural. The actual transition turns out to be clean and fluent. During the coding, we have brainstormed many interesting ideas on top of CrabQuant, such as using LLM and reinforcement learning or causality inference for each trading. Such experiments will significantly benefit from the efficient and responsive framework. Currently, the v4 branch is the best we can deliver in the span of the project, which would only allow stock trading on a cash account. Another branch BTC_transition is in progress to make the framework compatible with cryptos and margin tradings, but the implementation remains experimental. We will spend time in the future to improve CrabQuant as personal interests.
 
 ## **Video Demo**
