@@ -55,7 +55,7 @@ impl MAcross{
     pub fn new(short: usize, long: usize) -> Self {
         let portfolio_local = Portfolio::new(0.0);
         let moving_window = MovingWindow::new(long);
-        let price_factor: f64 = 1.2;
+        let price_factor: f64 = 1.05;
         let volume_factor: f32 = 1.;
         let last_signal = LastSignal::IsNone;
         MAcross {

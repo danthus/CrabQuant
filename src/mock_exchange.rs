@@ -209,13 +209,22 @@ impl PortfolioUpdater for MockExchange {
                 let trade_cost = price * amount.abs() as f64;
                 let fee = (self.fee_function)(trade_cost); // Apply fee function
                 let total_cost = trade_cost + fee; // Include fee in total cost
-
+            
+                // Check if there is sufficient cash to fill the order
+                if self.portfolio.cash < total_cost {
+                    debug!(
+                        "Insufficient cash to fill Buy Order: Symbol: {}, Amount: {}, Price: {}, Total Cost: {}, Available Cash: {}. Order revoked.",
+                        symbol, amount, price, total_cost, self.portfolio.cash
+                    );
+                    return; // Exit without processing the order
+                }
+            
                 // Deduct cash and update the position
                 self.portfolio.cash -= total_cost;
-
+            
                 let position_entry = self.portfolio.positions.entry(symbol.clone()).or_insert(0);
                 *position_entry += amount;
-
+            
                 debug!(
                     "Filled Buy Order: Symbol: {}, Amount: {}, Price: {}, Trade Cost: {}, Fee: {}, Total Cost: {}",
                     symbol, amount, price, trade_cost, fee, total_cost
