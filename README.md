@@ -37,8 +37,9 @@ A. Performant Event-driven backtesting:
    ![image2](./resources/image/event_driven_architecture.png) 
 <div align="center"> Fig 2, Our Event-Driven Architecture </div> <br>
 &nbsp; &nbsp; &nbsp; &nbsp; The above diagram explains how the event-driven architecture works. Modules implemented with ModulePublish trait bound will publish events to the event_manager, and each event will be dispatched to Modules implemented with ModuleReceive trait bound and subscribing to such event type. The connections are implemented with channels. Note that by introducing the event manager, an event can be consumed by multiple receiving modules while preserving the FIFO order of the events.  
-&nbsp; &nbsp; &nbsp; &nbsp; The basic modules for the minimal example are implemented as in following diagram.  
-   
+&nbsp; &nbsp; &nbsp; &nbsp; The basic modules for the minimal example are implemented as in following diagram. <br>
+<br>
+
    ![image3](resources/image/crabquant_basic_workflow_diagram.png)  
 <div align="center"> Fig 3, CrabQuant Workflow of Modules </div> <br>
 B. Seamlessly future data prevention:  <br>
@@ -49,6 +50,7 @@ D. Customizable fees settings. <br>
 E. Visual output/report of backtesting results, and comparison to baseline. <br>
 F. Assessment on return and risk on strategy. <br>
 G. Detailed logging. <br>
+<br>
 
    ![image4](resources/image/sample_output.png)  
 <div align="center"> Fig 4, CrabQuant Sample Output </div> <br>
@@ -62,7 +64,7 @@ CrabQuant is a backtesting framework for developers. The decoupled design allows
 
 The CrabQuant comes with a sample Moving Average Crossover strategy in ./strategies, which also serves as a template for simple strategies. Please follow the Reproducibility Guide to run the example. By default, it uses a single sided MA-cross strategy, with a short window with size 5 and a long window with size 10, on a prepared stock day trading data on TSLA for a 10 Year period, (located at ./data/TSLA_DAY_10Y.csv). By default, a fee is applied to each transaction at 0.1% and no fixed fees.  
 A resultant graph with metrics will be stored in ./sample_output.png.  
-To adjust the window sizes or test the sample strategy on other sample data, modify the parameters in the section in ./main.rs.  
+To adjust the window sizes or test the sample strategy on other sample data, modify the parameters in the section in ./src/main.rs.  
 To adjust the window sizes:  
 ```Rust  
    let strategy_ma_cross = MAcross::new(5, 10);  
@@ -87,7 +89,7 @@ To test on other prepared data:
 **To add new data**  
 Add csv data into ./data directory.  
 The candle data should include the following fields: timestamp, open, high, low, close, volume. Standardize the data before use if necessary.  
-Also in ./main.rs, change the symbol name and the directory of the data file:  
+Also in ./src/main.rs, change the symbol name and the directory of the data file:  
 ```Rust  
    let mut market_data_feeder =  
        MarketDataFeederLocal::new("TSLA".to_string(), "./data/TSLA_1min_2W.csv".to_string());  
@@ -119,7 +121,7 @@ let mut strategy_manager = StrategyManager::new();
 strategy_manager.add_strategy(Box::new(new_strategy::new()));  
 ```  
 **To add new modules and event types**  
-For more complex strategies or transit the strategy to live trading, users may want to add or modify the other modules as needed. In such cases, also adjust subscription relationships in ./main.rs for the new strategy.   
+For more complex strategies or transit the strategy to live trading, users may want to add or modify the other modules as needed. In such cases, also adjust subscription relationships in ./src/main.rs for the new strategy.   
 To add a new event type, add it in the Event enum in ./shared_structures.rs, then define the structure for the event type.  
 ```Rust
 // Events  
@@ -160,7 +162,7 @@ impl ModuleReceive for CustomModule {
 }
 ```
 
-Subscribe in ./main.rs
+Subscribe in ./src/main.rs
 ```Rust
 let mut custom_module: CustomModule = CustomModule::new(fee_function);  
 event_manager.subscribe::<CustomEventA, CustomModule>(&custom_module);  
