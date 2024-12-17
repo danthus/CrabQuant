@@ -63,7 +63,7 @@ impl DataAnalyzer {
 
         // Spawn a new thread for plotting
         thread::spawn(move || {
-            let mut last_lengths = (0, 0); // Track lengths of histories
+            let mut last_lengths = (0, 0); // Track lengths of market_data_history and asset_history
             loop {
                 // Take a snapshot of data
                 let market_data_snapshot = {
@@ -112,7 +112,6 @@ impl DataAnalyzer {
     fn process_marketevent(&mut self, market_data_event: MarketDataEvent) {
         let mut market_data_history = self.market_data_history.lock().unwrap();
         market_data_history.push((market_data_event.timestamp.clone(), market_data_event.close));
-        // println!("DA: Updated market data history: {:?}", market_data_event);
         debug!("Updated market data history: {:?}", market_data_event);
     }
 
@@ -125,19 +124,12 @@ impl DataAnalyzer {
             asset_history.push((latest_timestamp.clone(), self.local_portfolio.asset));
             cash_history.push((latest_timestamp.clone(), self.local_portfolio.cash));
         }
-        // println!("DA: Updated asset history: {:?}", self.local_portfolio);
         debug!("Updated asset history: {:?}", self.local_portfolio);
     }
 
     fn calculate_metrics(&self) -> Result<Metrics, Box<dyn Error>> {
         let market_data = self.market_data_history.lock().unwrap();
         let asset_history = self.asset_history.lock().unwrap();
-        // println!(
-        //     "Market data size: {}, Asset history size: {}",
-        //     market_data.len(),
-        //     asset_history.len()
-        // );
-
         if market_data.is_empty() || asset_history.is_empty() {
             return Err("Insufficient data for metrics calculation".into());
         }
@@ -256,11 +248,8 @@ impl DataAnalyzer {
         for (i, &(_, value)) in asset_history.iter().enumerate() {
             // If drawdown ended or at the last value, calculate the drawdown length
             if drawdown_start.is_some() && (value >= peak || i == asset_history.len() - 1) {
-                // println!("i: {}, drawdown_start: {}", i, drawdown_start.unwrap());
-                // println!("peak: {}", peak);
                 let length = i - drawdown_start.unwrap();
                 longest_drawdown = longest_drawdown.max(length);
-                // println!("longest_drawdown: {}, length: {}", longest_drawdown, length);
                 drawdown_start = None; // Reset drawdown_start after calculating length
             }
             if value > peak {
@@ -301,7 +290,6 @@ impl DataAnalyzer {
     ) -> Result<(), Box<dyn Error>> {
         // Check if there are updates
         if market_data.len() == last_lengths.0 && asset_history.len() == last_lengths.1 {
-            // No updates, skip plotting
             println!("No updates in data, skipping plot.");
             return Ok(());
         }
@@ -314,15 +302,8 @@ impl DataAnalyzer {
             eprintln!("No data points available for plotting.");
             return Ok(());
         }
-        // println!(
-        //     "Plotting triggered: market_data.len()={}, asset_history.len()={}",
-        //     market_data.len(),
-        //     asset_history.len()
-        // );
 
         // Calculate metrics
-        // let metrics = self.calculate_metrics()?;
-        // println!("metrics calculated: {}", metrics.portfolio_return);
         let metrics = match self.calculate_metrics() {
             Ok(metrics) => metrics,
             Err(err) => {
@@ -330,11 +311,9 @@ impl DataAnalyzer {
                 return Err(err); // Or handle the error as appropriate
             }
         };
-        // println!("metrics calculated: {}", metrics.portfolio_return);
 
         let first_market_value = market_data.get(0).map_or(1.0, |(_, value)| *value);
         let first_asset_value = asset_history.get(0).map_or(1.0, |(_, value)| *value);
-        // let first_cash_value = cash_history.get(0).map_or(1.0, |(_, value)| *value);
 
         let standardized_market_data: Vec<(String, f64)> = market_data
             .iter()
@@ -346,19 +325,18 @@ impl DataAnalyzer {
             .map(|(timestamp, value)| (timestamp.clone(), value / first_asset_value))
             .collect();
 
-        // Calculate (asset - cash) and standardize
+        // Calculate (asset - cash), which is the position value, and standardize
         let standardized_difference: Vec<(String, f64)> = asset_history
             .iter()
             .map(|(timestamp, asset_value)| {
-                // Find corresponding cash value by timestamp
                 let cash_value = cash_history
                     .iter()
                     .find(|(cash_timestamp, _)| cash_timestamp == timestamp)
                     .map(|(_, value)| *value)
-                    .unwrap_or(0.0); // Default to 0.0 if no matching timestamp
+                    .unwrap_or(0.0);
 
-                let difference = asset_value - cash_value; // Calculate asset - cash
-                (timestamp.clone(), difference / first_asset_value) // Standardize by first asset value
+                let difference = asset_value - cash_value;
+                (timestamp.clone(), difference / first_asset_value)
             })
             .collect();
 
@@ -433,22 +411,11 @@ impl DataAnalyzer {
                     .iter()
                     .enumerate()
                     .map(|(i, &(_, diff))| (i, diff)),
-                0.0,             // Baseline for the area chart
+                0.0,
                 &GREEN.mix(0.4), // Semi-transparent green for the color block
             ))?
             .label(" Position Value")
             .legend(|(x, y)| Rectangle::new([(x, y - 6), (x + 30, y + 6)], &GREEN));
-
-        // chart
-        //     .draw_series(LineSeries::new(
-        //         standardized_difference
-        //             .iter()
-        //             .enumerate()
-        //             .map(|(i, &(_, diff))| (i, diff)),
-        //         &GREEN,
-        //     ))?
-        //     .label("Position Value")
-        //     .legend(|(x, y)| PathElement::new([(x, y), (x + 20, y)], &GREEN));
 
         let metrics_text = vec![
             format!("Market Return: {:.2}%", metrics.market_return * 100.0),
@@ -491,7 +458,6 @@ impl DataAnalyzer {
             .draw()?;
 
         println!("Plot updated: {}", output_path);
-
         Ok(())
     }
 }
