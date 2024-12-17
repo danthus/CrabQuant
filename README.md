@@ -50,6 +50,10 @@ E. Visual output/report of backtesting results, and comparison to baseline. <br>
 F. Assessment on return and risk on strategy. <br>
 G. Detailed logging. <br>
 
+   ![image4](resources/image/sample_output.png)  
+<div align="center"> Fig 4, CrabQuant Sample Output </div> <br>
+
+
 ## **Developer’s Guide**
 
 CrabQuant is a backtesting framework for developers. The decoupled design allows developers to add more modules easily. 
