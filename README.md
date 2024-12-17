@@ -149,19 +149,21 @@ impl ModulePublish for CustomModule {
 To allow a custom module to receive certain type of events, e.g. CustomEventA and CustomEventB:  
 Impl receive
 
-1. ```impl ModuleReceive for CustomModule {  ```
-2.    fn get_sender(&self) -> Sender<Event> {  
-3.        self.subscribe_sender.clone()  
-4.    }  
-5. }
+```Rust
+impl ModuleReceive for CustomModule { 
+    fn get_sender(&self) -> Sender<Event> {  
+        self.subscribe_sender.clone()  
+    }  
+}
+```
 
 Subscribe in ./main.rs
-
-6.    let mut custom_module: CustomModule = CustomModule::new(fee_function);  
-7.    event_manager.subscribe::<CustomEventA, CustomModule>(&custom_module);  
-8.    event_manager.subscribe::<CustomEventB, CustomModule>(&custom_module);  
-9.    event_manager.allow_publish("high".to_string(), &mut custom_module);  
-10. 
+```Rust
+let mut custom_module: CustomModule = CustomModule::new(fee_function);  
+event_manager.subscribe::<CustomEventA, CustomModule>(&custom_module);  
+event_manager.subscribe::<CustomEventB, CustomModule>(&custom_module);  
+event_manager.allow_publish("high".to_string(), &mut custom_module);  
+```
 
 ## 
 
