@@ -10,8 +10,11 @@
 
 ## **Motivation**
 
-Accurate, efficient, and reproducible backtesting is fundamental to the research and development of quantitative trading strategies. As the critical first step in validating a strategy's effectiveness, backtesting allows traders to simulate performance on historical data, offering essential insights before any capital is put at risk in live markets.  
+Accurate, efficient, and reproducible backtesting is fundamental to the research and development of quantitative trading strategies. As the critical first step in validating a strategy's effectiveness, backtesting allows traders to simulate performance on historical data, offering essential insights before any capital is put at risk in live markets.
+<br>
+
 Currently, backtesting frameworks are predominantly Python-based. Python offers advantages in accessibility, ease of use, and a wide range of libraries suited to financial data analysis and model building. For lower-frequency strategies where data volumes are manageable, Python is an ideal tool. However, for higher-frequency strategies, data volumes increase significantly, and it may take several hours or even overnight to complete a single backtest, even for relatively simple strategies. These performance limitations not only slow down the work of individual quantitative analysts, but many quantitative funds also need to maintain separate Python-based backtesting and research environments alongside their actual algorithmic trading deployments in higher-performance languages. This separation introduces additional complexity, uncertainty, and potential inconsistencies between the two environments.  
+<br>
 In this project, we aim to develop a foundational backtesting framework using Rust. This framework will facilitate more efficient backtesting on large high-frequency datasets, enabling the later development of “live trading” modules that promise consistency between testing and trading environments, and benefit from Rust’s efficiency and reliability. The performance and memory safety characteristics of Rust language offer distinct advantages for high-frequency and data-intensive applications, potentially enabling a unified model for both backtesting and live trading in a high-performance setting.
 
 ## **Objective**
@@ -22,35 +25,26 @@ In general, our objective is to design and build a new rust-based backtesting fr
 <div align="center"> Fig 1, Sample Backtesting Result Plot </div>
 <br>
 Specifically, the primary objective of the project is modularity. While Rust offers the greatest potential for enhancing an algo-trading framework in both performance and reliability, our focus remains on modularity due to limited resources and the fact that Rust is new to all team members. By prioritizing modularity as our design principle, we aim for the utmost decoupling of modules, allowing the framework to be adaptable for future upgrades—such as asynchronous support, concurrency, and data serializing/deserializing—and enabling users to focus on developing trading strategies. Guided by this principle, we chose an event-driven architecture in which each module functions like a microservice, communicating solely through events. This architecture not only achieves the modularity we aim for but also frees users from dealing with the implementation details of other modules.  
-Some of the key features of our backtesting framework include the following:
-
-A. Event-driven architecture.  
-B. Future data prevention.  
-C. Multithreading.    
-D. Customizable fees and slippage settings.  
-E. Visual output/report of backtesting results, and comparison to baseline.  
-F. Assessment on return and risk on strategy.  
-G. Detailed logging.
 
 ## **Features**
 
 Some of the key features of our backtesting framework include the following:
 
 A. Performant Event-driven backtesting:  
-   	Most algorithmic trading and backtesting frameworks are either event-driven or vectorized. An event-driven architecture closely emulates the real trading environment, providing enhanced flexibility and enabling a seamless transition from the backtesting environment to live trading. In contrast, a vectorized architecture offers advantages in efficiency and speed but sacrifices flexibility and introduces an additional layer of uncertainty when transitioning to a real trading environment.  
-   CrabQuant employs an event-driven architecture, delivering flexibility and realism while maintaining efficiency through the use of crossbeam lightweight and efficient channels.
+&nbsp; &nbsp; &nbsp; &nbsp; Most algorithmic trading and backtesting frameworks are either event-driven or vectorized. An event-driven architecture closely emulates the real trading environment, providing enhanced flexibility and enabling a seamless transition from the backtesting environment to live trading. In contrast, a vectorized architecture offers advantages in efficiency and speed but sacrifices flexibility and introduces an additional layer of uncertainty when transitioning to a real trading environment.  
+&nbsp; &nbsp; &nbsp; &nbsp; CrabQuant employs an event-driven architecture, delivering flexibility and realism while maintaining efficiency through the use of crossbeam lightweight and efficient channels.
    
    ![image2](./resources/image/event_driven_architecture.png) 
 <div align="center"> Fig 2, Our Event-Driven Architecture </div> <br>
-   The above diagram explains how the event-driven architecture works. Modules implemented with ModulePublish trait bound will publish events to the event_manager, and each event will be dispatched to Modules implemented with ModuleReceive trait bound and subscribing to such event type. The connections are implemented with channels. Note that by introducing the event manager, an event can be consumed by multiple receiving modules while preserving the FIFO order of the events.  
-   The basic modules for the minimal example are implemented as in following diagram.  
+&nbsp; &nbsp; &nbsp; &nbsp; The above diagram explains how the event-driven architecture works. Modules implemented with ModulePublish trait bound will publish events to the event_manager, and each event will be dispatched to Modules implemented with ModuleReceive trait bound and subscribing to such event type. The connections are implemented with channels. Note that by introducing the event manager, an event can be consumed by multiple receiving modules while preserving the FIFO order of the events.  
+&nbsp; &nbsp; &nbsp; &nbsp; The basic modules for the minimal example are implemented as in following diagram.  
    
    ![image3](resources/image/crabquant_basic_workflow_diagram.png)  
 <div align="center"> Fig 3, CrabQuant Workflow of Modules </div> <br>
 B. Seamlessly future data prevention:  <br>
-   	Many inconsistencies in trading strategy testing arise from mistakenly using “future data,” such as generating a signal based on the current timestamp’s closing price and executing it at the same timestamp. In most existing frameworks, users must manually ensure that such errors do not occur when implementing their strategies. Our framework eliminates this issue seamlessly. By utilizing the blocking property of a rendezvous channel, the CrabQuant conserves a relaxed topological order of modules to prevent the mock exchange from executing signals based on the same market data which strategy module generates the signal based on.  <br>
+&nbsp; &nbsp; &nbsp; &nbsp; Many inconsistencies in trading strategy testing arise from mistakenly using “future data,” such as generating a signal based on the current timestamp’s closing price and executing it at the same timestamp. In most existing frameworks, users must manually ensure that such errors do not occur when implementing their strategies. Our framework eliminates this issue seamlessly. By utilizing the blocking property of a rendezvous channel, the CrabQuant conserves a relaxed topological order of modules to prevent the mock exchange from executing signals based on the same market data which strategy module generates the signal based on.  <br>
 C. Multithread support: <br>
-   	Each module will run on its own thread and communicate through the event manager.  <br>
+&nbsp; &nbsp; &nbsp; &nbsp; Each module will run on its own thread and communicate through the event manager.  <br>
 D. Customizable fees settings. <br>
 E. Visual output/report of backtesting results, and comparison to baseline. <br>
 F. Assessment on return and risk on strategy. <br>
