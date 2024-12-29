@@ -1,4 +1,4 @@
-use crate::shared_structures::{Event, MarketDataEvent, OrderPlaceEvent, PortfolioInfoEvent};
+use crate::shared_structures::*;
 use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
 use simplelog::*;
 use std::any::TypeId;
@@ -88,6 +88,7 @@ impl EventManager {
             Event::MarketData(_) => TypeId::of::<MarketDataEvent>(),
             Event::OrderPlace(_) => TypeId::of::<OrderPlaceEvent>(),
             Event::PortfolioInfo(_) => TypeId::of::<PortfolioInfoEvent>(),
+            Event::ShutDown(_) => TypeId::of::<ShutDownEvent>(),
         };
 
         // Dispatch to subscribers
@@ -108,7 +109,7 @@ impl EventManager {
         let event = self.lp_receiver.recv().unwrap();
         self.dispatch_event(event);
 
-        let timeout = Duration::from_secs(10);
+        let timeout = Duration::from_secs(3);
         let mut start = Instant::now();
 
         loop {
@@ -128,7 +129,9 @@ impl EventManager {
                 if start.elapsed() >= timeout {
                     // wait until no upcoming event for timeout period
                     // note that the returning of the event_manager.proceed will terminate the main thread.
-                    info!("All data feeded, backtesting completed.");
+                    info!("All data feeded, CrabQuant shutting up...");
+                    let shut_down_event = Event::new_shut_down();
+                    self.dispatch_event(shut_down_event);
                     break;
                 }
                 // break;

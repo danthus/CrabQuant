@@ -14,6 +14,7 @@ pub enum Event {
     MarketData(MarketDataEvent),
     OrderPlace(OrderPlaceEvent),
     PortfolioInfo(PortfolioInfoEvent),
+    ShutDown(ShutDownEvent),
 }
 impl Event {
     pub fn new_market_data(
@@ -47,7 +48,32 @@ impl Event {
         let id = EVENT_ID_COUNTER_PIE.lock().unwrap().next();
         Event::PortfolioInfo(PortfolioInfoEvent { id, portfolio })
     }
+
+    pub fn new_shut_down() -> Self {
+        let id = 1;
+        Event::ShutDown(ShutDownEvent { id })
+    }
 }
+// ShutDownEvent
+#[derive(Debug, Clone)]
+pub struct ShutDownEvent {
+    pub id: u64,
+}
+
+impl PartialEq for ShutDownEvent {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id // Events are equal if their `id` is the same
+    }
+}
+
+impl Eq for ShutDownEvent {}
+
+impl Hash for ShutDownEvent {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id.hash(state); // Use the `id` field to compute the hash
+    }
+}
+
 // MarketDataEvent
 #[allow(dead_code)]
 #[derive(Debug, Clone)]

@@ -59,39 +59,6 @@ impl DataAnalyzer {
     }
 
     pub fn run(&mut self) {
-        let data_analyzer_clone = self.clone();
-
-        // Spawn a new thread for plotting
-        thread::spawn(move || {
-            let mut last_lengths = (0, 0); // Track lengths of market_data_history and asset_history
-            loop {
-                // Take a snapshot of data
-                let market_data_snapshot = {
-                    let data = data_analyzer_clone.market_data_history.lock().unwrap();
-                    data.clone()
-                };
-                let asset_history_snapshot = {
-                    let data = data_analyzer_clone.asset_history.lock().unwrap();
-                    data.clone()
-                };
-                let cash_history_snapshot = {
-                    let data = data_analyzer_clone.cash_history.lock().unwrap();
-                    data.clone()
-                };
-
-                // Plot and save the data if there are updates
-                if let Err(err) = data_analyzer_clone.plot(
-                    &market_data_snapshot,
-                    &asset_history_snapshot,
-                    &cash_history_snapshot,
-                    &mut last_lengths,
-                    "sample_output.png",
-                ) {
-                    eprintln!("Error during plotting: {}", err);
-                }
-                thread::sleep(Duration::from_secs(1)); // Reduce resource usage
-            }
-        });
 
         loop {
             let event = self.subscribe_receiver.recv().unwrap();
@@ -102,10 +69,42 @@ impl DataAnalyzer {
                 Event::PortfolioInfo(portfolio_info_event) => {
                     self.process_portfolioinfo(portfolio_info_event);
                 }
+                Event::ShutDown(shut_down_event) => {
+                    self.shut_down(shut_down_event);
+                    break;
+                }
                 _ => {
                     println!("DataAnalyzer: Unsupported event: {:?}", event);
                 }
             }
+        }
+    }
+
+    fn shut_down(&mut self, _: ShutDownEvent){
+        let market_data_snapshot = {
+            let data = self.market_data_history.lock().unwrap();
+            data.clone()
+        };
+        let asset_history_snapshot = {
+            let data = self.asset_history.lock().unwrap();
+            data.clone()
+        };
+        let cash_history_snapshot = {
+            let data = self.cash_history.lock().unwrap();
+            data.clone()
+        };
+
+        // Plot before drop
+        if let Err(err) = self.plot(
+            &market_data_snapshot,
+            &asset_history_snapshot,
+            &cash_history_snapshot,
+            &mut (0, 0), // Pass dummy values as last_lengths, since it's irrelevant here
+            "sample_output.png",
+        ) {
+            eprintln!("Error during plotting in drop: {}", err);
+        } else {
+            debug!("Shut down.")
         }
     }
 
@@ -457,7 +456,7 @@ impl DataAnalyzer {
             .label_font(("sans-serif", res_x / 77)) // legend label
             .draw()?;
 
-        println!("Plot updated: {}", output_path);
+        info!("Plot saved: {}", output_path);
         Ok(())
     }
 }

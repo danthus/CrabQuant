@@ -83,6 +83,7 @@ fn main() {
     // Let the data analyzer subscribe to all event types it needs
     event_manager.subscribe::<MarketDataEvent, DataAnalyzer>(&data_analyzer);
     event_manager.subscribe::<PortfolioInfoEvent, DataAnalyzer>(&data_analyzer);
+    event_manager.subscribe::<ShutDownEvent, DataAnalyzer>(&data_analyzer);
 
     // Run modules
     let _mock_exchange_thread = thread::spawn(move || {
@@ -106,6 +107,6 @@ fn main() {
         "Mock Exchange, Strategy, Data Analyzer, Data Feeder initialized, start data feeding ..."
     );
     event_manager.proceed();
-
+    _data_analyzer_thread.join().unwrap();
     return;
 }
